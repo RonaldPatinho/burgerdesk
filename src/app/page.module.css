@@ -21,6 +21,8 @@
 
 .intro {
   display: flex;
+  width: 100%;
+  min-width: 0;
   flex-direction: column;
   align-items: flex-start;
   text-align: left;
@@ -28,6 +30,7 @@
 }
 
 .intro h1 {
+  width: 100%;
   max-width: 320px;
   font-size: 40px;
   line-height: 48px;
@@ -37,6 +40,7 @@
 }
 
 .intro p {
+  width: 100%;
   max-width: 440px;
   font-size: 18px;
   line-height: 32px;
@@ -50,6 +54,7 @@
 
 .ctas {
   display: flex;
+  flex-wrap: wrap;
   flex-direction: row;
   width: 100%;
   max-width: 440px;
@@ -68,6 +73,7 @@
   transition: 0.2s;
   cursor: pointer;
   width: fit-content;
+  max-width: 100%;
 }
 
 a.primary {
@@ -105,6 +111,14 @@ a.secondary {
     font-size: 32px;
     line-height: 40px;
     letter-spacing: -1.92px;
+  }
+
+  .ctas {
+    flex-direction: column;
+  }
+
+  .ctas a {
+    width: 100%;
   }
 }
 
