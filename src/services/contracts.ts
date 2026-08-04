@@ -14,6 +14,10 @@ import type {
   Promotion,
   StoreLocation,
 } from "../domain/models";
+import type {
+  RegistrationInput,
+  SignInInput,
+} from "../domain/auth";
 
 export interface ProductQuery {
   categoryId?: CategoryId;
@@ -28,20 +32,6 @@ export interface CatalogService {
   listFeaturedProducts(): Promise<readonly Product[]>;
   listPromotions(): Promise<readonly Promotion[]>;
   listStores(): Promise<readonly StoreLocation[]>;
-}
-
-export interface SignInInput {
-  email: string;
-  password: string;
-  rememberEmail: boolean;
-}
-
-export interface RegistrationInput {
-  fullName: string;
-  email: string;
-  phone: string;
-  password: string;
-  termsAccepted: boolean;
 }
 
 export interface SessionService {

@@ -6,6 +6,7 @@ import {
 import styles from "./Field.module.css";
 
 type FieldMessageTone = "hint" | "error" | "success";
+type FieldSize = "default" | "compact";
 
 export interface FieldMessageProps {
   id?: string;
@@ -32,6 +33,7 @@ export interface FieldProps
   hint?: string;
   error?: string;
   leadingIcon?: ReactNode;
+  size?: FieldSize;
 }
 
 export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
@@ -41,6 +43,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     hint,
     error,
     leadingIcon,
+    size = "default",
     className,
     "aria-describedby": ariaDescribedBy,
     ...props
@@ -55,7 +58,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
   const classes = [styles.input, className].filter(Boolean).join(" ");
 
   return (
-    <div className={styles.field}>
+    <div className={styles.field} data-size={size}>
       <label className={styles.label} htmlFor={id}>
         {label}
       </label>

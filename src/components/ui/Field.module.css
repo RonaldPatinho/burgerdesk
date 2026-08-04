@@ -32,6 +32,18 @@
   border-color: var(--color-danger);
 }
 
+.field[data-size="compact"] .control {
+  min-height: var(--touch-target-min);
+}
+
+.field[data-size="compact"] .input {
+  padding-block: var(--space-1);
+}
+
+.field[data-size="compact"] {
+  gap: var(--space-1);
+}
+
 .input {
   min-width: 0;
   width: 100%;
