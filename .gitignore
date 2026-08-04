@@ -40,6 +40,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# AI agent instructions
+# Local AI and coding-agent configuration
+/.agents/
+/.codex/
 /AGENTS.md
 /CLAUDE.md
+
+# Local project documentation
+/docs/
