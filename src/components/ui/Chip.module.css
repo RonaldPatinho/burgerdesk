@@ -1,0 +1,33 @@
+.chip {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding: 0.625rem var(--space-5);
+  color: var(--color-text);
+  background: var(--color-surface);
+  line-height: 1.2;
+  white-space: nowrap;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.chip[data-selected="true"] {
+  color: var(--color-surface);
+  border-color: var(--color-text);
+  background: var(--color-text);
+}
+
+.chip:disabled {
+  opacity: 0.55;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .chip:not(:disabled):hover {
+    border-color: var(--color-text);
+  }
+}

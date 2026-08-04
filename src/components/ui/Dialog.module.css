@@ -1,0 +1,76 @@
+.dialog {
+  width: min(calc(100% - 2rem), 34rem);
+  max-height: calc(100dvh - 2rem);
+  margin: auto;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 0;
+  color: var(--color-text);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-dialog);
+  overflow: auto;
+  z-index: var(--layer-dialog);
+}
+
+.dialog::backdrop {
+  background: rgb(26 26 26 / 58%);
+  backdrop-filter: blur(0.125rem);
+}
+
+.panel {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5);
+}
+
+.header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-4);
+  border-bottom: 0.125rem solid var(--color-border);
+  padding-bottom: var(--space-4);
+}
+
+.heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-tight);
+}
+
+.description {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+  color: color-mix(in srgb, var(--color-text) 72%, transparent);
+}
+
+.body {
+  min-width: 0;
+  line-height: var(--line-height-relaxed);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-3);
+  border-top: 0.125rem solid var(--color-border);
+  padding-top: var(--space-4);
+}
+
+.actions > * {
+  flex: 1 1 0;
+}
+
+@media (max-width: 359px) {
+  .dialog {
+    width: min(calc(100% - 1rem), 34rem);
+    max-height: calc(100dvh - 1rem);
+  }
+
+  .panel {
+    padding: var(--space-4);
+  }
+}

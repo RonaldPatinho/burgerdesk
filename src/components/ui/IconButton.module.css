@@ -1,0 +1,55 @@
+.button {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: inline-grid;
+  place-items: center;
+  border: 0.125rem solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    transform 160ms ease;
+}
+
+.button span,
+.button svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.button[data-variant="filled"] {
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.button[data-variant="surface"] {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.button[data-variant="danger"] {
+  color: var(--color-surface);
+  background: var(--color-danger);
+}
+
+.button[data-variant="ghost"] {
+  color: var(--color-text);
+}
+
+.button:disabled {
+  opacity: 0.55;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:not(:disabled):hover {
+    transform: translateY(-0.0625rem);
+  }
+
+  .button[data-variant="surface"]:not(:disabled):hover,
+  .button[data-variant="ghost"]:not(:disabled):hover {
+    background: var(--color-surface-cream);
+  }
+}

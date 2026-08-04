@@ -1,0 +1,90 @@
+.button {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 0.125rem solid transparent;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem 1.25rem;
+  background: transparent;
+  font-size: var(--font-size-md);
+  line-height: 1.2;
+  text-align: center;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    color 160ms ease,
+    transform 160ms ease;
+}
+
+.button[data-size="compact"] {
+  padding-inline: var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+}
+
+.button[data-full-width="true"] {
+  width: 100%;
+}
+
+.button[data-variant="primary"] {
+  color: var(--color-text);
+  background: var(--color-brand-primary);
+}
+
+.button[data-variant="secondary"] {
+  color: var(--color-text);
+  border-color: var(--color-border);
+  background: var(--color-surface);
+}
+
+.button[data-variant="danger"] {
+  color: var(--color-surface);
+  background: var(--color-danger);
+}
+
+.button[data-variant="ghost"] {
+  color: var(--color-text);
+}
+
+.button:disabled {
+  opacity: 0.55;
+}
+
+.icon,
+.icon > svg,
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+}
+
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .button:not(:disabled):hover {
+    transform: translateY(-0.0625rem);
+  }
+
+  .button[data-variant="primary"]:not(:disabled):hover {
+    background: var(--color-brand-secondary);
+  }
+
+  .button[data-variant="danger"]:not(:disabled):hover {
+    background: var(--color-danger);
+  }
+
+  .button[data-variant="secondary"]:not(:disabled):hover,
+  .button[data-variant="ghost"]:not(:disabled):hover {
+    background: var(--color-surface-cream);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}

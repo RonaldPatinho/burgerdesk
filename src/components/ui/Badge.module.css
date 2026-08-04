@@ -1,0 +1,35 @@
+.badge {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-sm);
+  line-height: 1.2;
+}
+
+.badge[data-tone="promotion"],
+.badge[data-tone="danger"] {
+  color: var(--color-danger);
+  background: var(--color-surface);
+}
+
+.badge[data-tone="danger"] {
+  border: 0.125rem solid var(--color-danger);
+}
+
+.badge[data-tone="success"] {
+  color: var(--color-text);
+  background: var(--color-surface-cream);
+}
+
+.icon,
+.icon > svg {
+  width: 1rem;
+  height: 1rem;
+  flex: 0 0 auto;
+}

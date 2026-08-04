@@ -1,0 +1,20 @@
+.link {
+  position: fixed;
+  inset-block-start: var(--space-3);
+  inset-inline-start: var(--space-3);
+  z-index: var(--layer-overlay);
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-text);
+  transform: translateY(calc(-100% - var(--space-5)));
+  transition: transform 160ms ease;
+}
+
+.link:focus-visible {
+  outline-color: var(--color-surface);
+  transform: translateY(0);
+}

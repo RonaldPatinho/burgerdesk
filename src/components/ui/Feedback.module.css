@@ -1,0 +1,57 @@
+.feedback {
+  width: 100%;
+  display: grid;
+  justify-items: center;
+  gap: var(--space-4);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-5);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.feedback[data-variant="error"] {
+  border-color: var(--color-danger);
+}
+
+.icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-brand-primary);
+}
+
+.feedback[data-variant="error"] .icon {
+  color: var(--color-danger);
+}
+
+.feedback[data-variant="success"] .icon {
+  color: var(--color-text);
+}
+
+.feedback[data-variant="loading"] .icon {
+  animation: spin 800ms linear infinite;
+}
+
+.copy {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.title {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-tight);
+}
+
+.description {
+  line-height: var(--line-height-relaxed);
+}
+
+.action {
+  width: 100%;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}

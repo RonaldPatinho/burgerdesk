@@ -1,0 +1,72 @@
+.checkbox {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  position: relative;
+  cursor: pointer;
+}
+
+.checkbox[data-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.control {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: transparent;
+  background: var(--color-surface);
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.control svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.input:checked + .control {
+  color: var(--color-surface);
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+}
+
+.input:focus-visible + .control {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.copy {
+  min-height: var(--touch-target-min);
+  display: grid;
+  align-content: center;
+  gap: var(--space-1);
+  line-height: var(--line-height-base);
+}
+
+.description {
+  font-size: var(--font-size-xs);
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+
+@media (forced-colors: active) {
+  .input:checked + .control {
+    color: CanvasText;
+    background: Canvas;
+  }
+}
