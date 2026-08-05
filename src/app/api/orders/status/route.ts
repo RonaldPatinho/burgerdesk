@@ -7,6 +7,7 @@ import {
   CheckoutFlowError,
   getCheckoutOrderStatus,
 } from "@/server/checkout/service";
+import { getAuthenticatedClientSession } from "@/server/auth/session";
 
 export const runtime = "nodejs";
 
@@ -31,7 +32,13 @@ export async function POST(request: Request): Promise<Response> {
     } catch {
       return jsonResponse(400, "La consulta no contiene JSON valido.");
     }
-    const input = parseCheckoutStatusRequest(parsed);
+    const parsedInput = parseCheckoutStatusRequest(parsed);
+    const authenticatedSession = await getAuthenticatedClientSession();
+    const input = {
+      ...parsedInput,
+      clientSessionId:
+        authenticatedSession?.sessionId ?? parsedInput.clientSessionId,
+    };
     const result = await getCheckoutOrderStatus(
       input,
       mysqlCheckoutOrderPersistence,

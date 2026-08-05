@@ -4,7 +4,7 @@ import { AccessScreen } from "../../components/auth/AccessScreen";
 
 export const metadata: Metadata = {
   title: "Acceso",
-  description: "Acceso y registro provisional para clientes de BurgerDesk.",
+  description: "Acceso y registro para clientes de BurgerDesk.",
 };
 
 export default function AccessPage() {

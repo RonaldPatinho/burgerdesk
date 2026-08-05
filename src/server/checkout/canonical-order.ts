@@ -144,6 +144,7 @@ export function buildCanonicalCheckout(
     creationIdempotencyKey: `checkout-order:${idempotencyScope}`,
     clientSessionId: input.clientSession.sessionId,
     clientId: input.clientSession.clientId,
+    userId: input.clientSession.userId ?? null,
     storeId: pickupStore.id,
     kitchenNote: cart.kitchenNote,
     subtotalCop: pricing.subtotalCop,

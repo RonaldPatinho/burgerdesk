@@ -26,6 +26,7 @@ export interface CheckoutRequestInput {
   clientSession: {
     sessionId: string;
     clientId: string | null;
+    userId?: string | null;
   };
   cart: {
     items: readonly CheckoutCartItemInput[];

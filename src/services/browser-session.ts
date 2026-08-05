@@ -28,6 +28,18 @@ export interface LocalStorageSessionOptions {
   createId?: () => string;
   now?: () => string;
   wait?: () => Promise<void>;
+  requestAuth?: (
+    action: "signin" | "register",
+    input: SignInInput | RegistrationInput,
+  ) => Promise<ClientSession>;
+  requestLogout?: () => Promise<void>;
+}
+
+export class BrowserSessionError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "BrowserSessionError";
+  }
 }
 
 function getBrowserStorage(): SessionStoragePort {
@@ -55,12 +67,16 @@ export class LocalStorageSessionService implements SessionService {
   private readonly createId: () => string;
   private readonly now: () => string;
   private readonly wait: () => Promise<void>;
+  private readonly requestAuth?: LocalStorageSessionOptions["requestAuth"];
+  private readonly requestLogout?: LocalStorageSessionOptions["requestLogout"];
 
   constructor(options: LocalStorageSessionOptions = {}) {
     this.getStorage = options.getStorage ?? getBrowserStorage;
     this.createId = options.createId ?? createBrowserId;
     this.now = options.now ?? (() => new Date().toISOString());
     this.wait = options.wait ?? waitForSimulation;
+    this.requestAuth = options.requestAuth;
+    this.requestLogout = options.requestLogout;
   }
 
   async getSession(): Promise<ClientSession | null> {
@@ -91,14 +107,14 @@ export class LocalStorageSessionService implements SessionService {
       throw new Error("Los datos de acceso no son válidos.");
     }
 
-    await this.wait();
-
-    const session: ClientSession = {
-      kind: "client",
-      sessionId: this.createId(),
-      clientId: provisionalClient.id,
-      startedAt: this.now(),
-    };
+    const session = this.requestAuth
+      ? await this.requestAuth("signin", input)
+      : {
+          kind: "client" as const,
+          sessionId: this.createId(),
+          clientId: provisionalClient.id,
+          startedAt: this.now(),
+        };
 
     this.saveSession(session);
     return session;
@@ -109,14 +125,14 @@ export class LocalStorageSessionService implements SessionService {
       throw new Error("Los datos de registro no son válidos.");
     }
 
-    await this.wait();
-
-    const session: ClientSession = {
-      kind: "client",
-      sessionId: this.createId(),
-      clientId: `client-local-${this.createId()}`,
-      startedAt: this.now(),
-    };
+    const session = this.requestAuth
+      ? await this.requestAuth("register", input)
+      : {
+          kind: "client" as const,
+          sessionId: this.createId(),
+          clientId: `client-local-${this.createId()}`,
+          startedAt: this.now(),
+        };
 
     this.saveSession(session);
     return session;
@@ -144,6 +160,9 @@ export class LocalStorageSessionService implements SessionService {
   }
 
   async signOut(): Promise<void> {
+    if (this.requestLogout) {
+      await this.requestLogout();
+    }
     this.getStorage().removeItem(clientStorageKeys.session);
   }
 
@@ -157,4 +176,64 @@ export class LocalStorageSessionService implements SessionService {
   }
 }
 
-export const browserSessionService = new LocalStorageSessionService();
+async function readServerResponse(response: Response): Promise<unknown> {
+  try {
+    return (await response.json()) as unknown;
+  } catch {
+    return null;
+  }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function browserRequestAuth(
+  action: "signin" | "register",
+  input: SignInInput | RegistrationInput,
+): Promise<ClientSession> {
+  const response = await fetch(
+    action === "signin" ? "/api/auth/login" : "/api/auth/register",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(
+        action === "signin"
+          ? { email: input.email, password: input.password }
+          : {
+              fullName: input.fullName,
+              email: input.email,
+              password: input.password,
+            },
+      ),
+    },
+  );
+  const value = await readServerResponse(response);
+  if (!response.ok) {
+    throw new BrowserSessionError(
+      isRecord(value) && typeof value.message === "string"
+        ? value.message
+        : "No fue posible completar el acceso.",
+    );
+  }
+  const result = validateStoredSession({
+    version: CLIENT_STORAGE_VERSION,
+    session: isRecord(value) ? value.session : null,
+  });
+  if (!result.success || result.data.session === null) {
+    throw new BrowserSessionError("El servidor devolvió una sesión inválida.");
+  }
+  return result.data.session;
+}
+
+async function browserRequestLogout(): Promise<void> {
+  const response = await fetch("/api/auth/logout", { method: "POST" });
+  if (!response.ok) {
+    throw new BrowserSessionError("No fue posible cerrar la sesión.");
+  }
+}
+
+export const browserSessionService = new LocalStorageSessionService({
+  requestAuth: browserRequestAuth,
+  requestLogout: browserRequestLogout,
+});

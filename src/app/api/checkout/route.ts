@@ -15,6 +15,7 @@ import {
 } from "@/server/checkout/stripe-checkout";
 import { OrderPersistenceError } from "@/server/orders/mysql-order-repository";
 import { StripeConfigurationError } from "@/server/stripe/client";
+import { getAuthenticatedClientSession } from "@/server/auth/session";
 
 export const runtime = "nodejs";
 
@@ -57,7 +58,22 @@ async function readJsonBody(request: Request): Promise<unknown> {
 
 export async function POST(request: Request): Promise<Response> {
   try {
-    const input = parseCheckoutRequest(await readJsonBody(request));
+    const parsedInput = parseCheckoutRequest(await readJsonBody(request));
+    const authenticatedSession = await getAuthenticatedClientSession();
+    const input = {
+      ...parsedInput,
+      clientSession: authenticatedSession
+        ? {
+            sessionId: authenticatedSession.sessionId,
+            clientId: authenticatedSession.userId,
+            userId: authenticatedSession.userId,
+          }
+        : {
+            sessionId: parsedInput.clientSession.sessionId,
+            clientId: null,
+            userId: null,
+          },
+    };
     const result = await createCheckout(input, {
       persistence: mysqlCheckoutOrderPersistence,
       stripe: createStripeCheckoutGateway(),

@@ -38,9 +38,14 @@ export interface AddCartItemResult {
   quantityAdjusted: boolean;
 }
 
+export interface AddCartItemsResult {
+  quantityAdjustmentCount: number;
+}
+
 interface ClientCartValue extends CartState {
   cartCount: number;
   addItem(item: CartItem): Promise<AddCartItemResult>;
+  addItems(items: readonly CartItem[]): Promise<AddCartItemsResult>;
   setItemQuantity(itemId: string, quantity: number): Promise<void>;
   removeItem(itemId: string): Promise<void>;
   setKitchenNote(kitchenNote: string): Promise<void>;
@@ -152,6 +157,25 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
     };
   }, []);
 
+  const addItems = useCallback(async (items: readonly CartItem[]) => {
+    const previousCart = cartRef.current;
+    const result = mergeCartItems(
+      previousCart,
+      items,
+      MAX_QUANTITY_PER_CART_LINE,
+    );
+    cartRef.current = result.cart;
+    dispatch({ type: "changed", cart: result.cart });
+    try {
+      await browserCartRepository.saveCart(result.cart);
+    } catch (error: unknown) {
+      cartRef.current = previousCart;
+      dispatch({ type: "failed", cart: previousCart });
+      throw error;
+    }
+    return { quantityAdjustmentCount: result.quantityAdjustments.length };
+  }, []);
+
   const setItemQuantity = useCallback(
     async (itemId: string, quantity: number) => {
       await persistChange((cart) =>
@@ -201,6 +225,7 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
       ...state,
       cartCount: countItems(state.cart),
       addItem,
+      addItems,
       setItemQuantity,
       removeItem,
       setKitchenNote,
@@ -209,6 +234,7 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
     }),
     [
       addItem,
+      addItems,
       clearCart,
       loadCart,
       removeItem,

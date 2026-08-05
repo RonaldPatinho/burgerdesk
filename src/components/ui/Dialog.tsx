@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import {
   type MouseEvent,
+  type KeyboardEvent,
   type ReactNode,
   type SyntheticEvent,
   useEffect,
@@ -21,6 +22,7 @@ export interface DialogProps {
   actions?: ReactNode;
   closeLabel?: string;
   initialFocusSelector?: string;
+  density?: "default" | "compact";
 }
 
 export function Dialog({
@@ -32,6 +34,7 @@ export function Dialog({
   actions,
   closeLabel = "Cerrar diálogo",
   initialFocusSelector,
+  density = "default",
 }: DialogProps) {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const restoreFocusRef = useRef<HTMLElement | null>(null);
@@ -83,14 +86,41 @@ export function Dialog({
     if (event.target === event.currentTarget) onClose();
   }
 
+  function handleKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
+    if (event.key !== "Tab") return;
+    const dialog = event.currentTarget;
+    const focusable = [...dialog.querySelectorAll<HTMLElement>(
+      "button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex='-1'])",
+    )].filter((element) => !element.hasAttribute("hidden"));
+    const first = focusable[0];
+    const last = focusable.at(-1);
+    if (!first || !last) {
+      event.preventDefault();
+      dialog.focus();
+      return;
+    }
+    if (event.shiftKey && (document.activeElement === first || document.activeElement === dialog)) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    } else if (!dialog.contains(document.activeElement)) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
   return (
     <dialog
       ref={dialogRef}
       className={styles.dialog}
+      data-density={density}
       aria-labelledby={titleId}
       aria-describedby={description ? descriptionId : undefined}
       onCancel={handleCancel}
       onClick={handleBackdropClick}
+      onKeyDown={handleKeyDown}
     >
       <div className={styles.panel}>
         <header className={styles.header}>

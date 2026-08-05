@@ -33,6 +33,7 @@ interface OrderRow extends RowDataPacket {
   request_fingerprint_sha256: string;
   client_session_id: string;
   client_id: string | null;
+  user_id: string | null;
   store_id: string;
   payment_method: ServerPaymentMethod;
   order_status: InternalOrderStatus;
@@ -162,6 +163,9 @@ function assertRecalculatedOrder(draft: RecalculatedOrderDraft): void {
   if (draft.clientId !== null) {
     assertIdentifier(draft.clientId, "clientId", 191);
   }
+  if (draft.userId !== null && draft.userId !== undefined) {
+    assertIdentifier(draft.userId, "userId", 36);
+  }
   assertIdentifier(draft.storeId, "storeId", 64);
   if (draft.paymentMethod === "stripe") {
     assertIdentifier(
@@ -205,6 +209,7 @@ function createOrderFingerprint(draft: RecalculatedOrderDraft): string {
   return sha256({
     clientSessionId: draft.clientSessionId,
     clientId: draft.clientId,
+    userId: draft.userId ?? null,
     storeId: draft.storeId,
     paymentMethod: draft.paymentMethod,
     kitchenNote: draft.kitchenNote,
@@ -308,6 +313,7 @@ async function loadOrderById(
     id: orderRow.id,
     clientSessionId: orderRow.client_session_id,
     clientId: orderRow.client_id,
+    userId: orderRow.user_id,
     storeId: orderRow.store_id,
     paymentMethod: orderRow.payment_method,
     orderStatus: orderRow.order_status,
@@ -395,16 +401,17 @@ async function createOrderInTransaction(
   await connection.execute<ResultSetHeader>(
     `INSERT INTO orders (
       id, creation_idempotency_key, request_fingerprint_sha256,
-      client_session_id, client_id, store_id, payment_method,
+      client_session_id, client_id, user_id, store_id, payment_method,
       order_status, payment_status, currency, subtotal_cop,
       service_fee_cop, total_cop, kitchen_note, confirmed_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'COP', ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'COP', ?, ?, ?, ?, ?)`,
     [
       orderId,
       draft.creationIdempotencyKey,
       fingerprint,
       draft.clientSessionId,
       draft.clientId,
+      draft.userId ?? null,
       draft.storeId,
       draft.paymentMethod,
       isStripe ? "pendiente_de_pago" : "confirmado",

@@ -16,7 +16,6 @@ import {
   useState,
 } from "react";
 
-import { provisionalClient } from "../../data/provisional";
 import {
   type AuthFieldErrors,
   type AuthFieldName,
@@ -26,7 +25,10 @@ import {
   validateRegistration,
   validateSignIn,
 } from "../../domain/auth";
-import { browserSessionService } from "../../services/browser-session";
+import {
+  BrowserSessionError,
+  browserSessionService,
+} from "../../services/browser-session";
 import { Button, Checkbox, Dialog, Field } from "../ui";
 import styles from "./AccessScreen.module.css";
 
@@ -164,12 +166,14 @@ export function AccessScreen() {
     try {
       await browserSessionService.signIn(input);
       finishSuccessfulAction(
-        "Sesión provisional iniciada",
+        "Sesión iniciada",
         "Te llevaremos al inicio de BurgerDesk.",
       );
-    } catch {
+    } catch (error: unknown) {
       finishFailedAction(
-        "El navegador no permitió guardar la sesión local. Revisa sus permisos e inténtalo nuevamente.",
+        error instanceof BrowserSessionError
+          ? error.message
+          : "No fue posible iniciar sesión. Inténtalo nuevamente.",
       );
     }
   }
@@ -202,12 +206,14 @@ export function AccessScreen() {
     try {
       await browserSessionService.register(input);
       finishSuccessfulAction(
-        "Cuenta provisional creada",
-        "Tu sesión local está lista. Te llevaremos al inicio.",
+        "Cuenta creada",
+        "Tu sesión está lista. Te llevaremos al inicio.",
       );
-    } catch {
+    } catch (error: unknown) {
       finishFailedAction(
-        "El navegador no permitió guardar la sesión local. Revisa sus permisos e inténtalo nuevamente.",
+        error instanceof BrowserSessionError
+          ? error.message
+          : "No fue posible crear la cuenta. Inténtalo nuevamente.",
       );
     }
   }
@@ -312,7 +318,7 @@ export function AccessScreen() {
           </div>
           <p>
             Guarda pedidos y consulta tu historial.
-            <span>Demostración local: no uses una contraseña real.</span>
+            <span>Tu sesión y tus pedidos quedan protegidos.</span>
           </p>
         </section>
 
@@ -382,7 +388,6 @@ export function AccessScreen() {
               name="fullName"
               label="Nombre completo"
               autoComplete="name"
-              defaultValue={provisionalClient.fullName}
               error={errors.fullName}
               leadingIcon={<UserRound />}
               disabled={formDisabled}
@@ -398,7 +403,6 @@ export function AccessScreen() {
               inputMode="email"
               label="Correo electrónico"
               autoComplete="email"
-              defaultValue={provisionalClient.email}
               error={errors.email}
               disabled={formDisabled}
               maxLength={254}
@@ -559,7 +563,6 @@ export function AccessScreen() {
               inputMode="email"
               label="Correo electrónico"
               autoComplete="email"
-              defaultValue={provisionalClient.email}
               error={resetError}
               disabled={resetPending}
               maxLength={254}

@@ -44,6 +44,7 @@ interface RecalculatedOrderDraftBase {
   creationIdempotencyKey: string;
   clientSessionId: string;
   clientId: string | null;
+  userId?: string | null;
   storeId: string;
   kitchenNote: string;
   subtotalCop: number;
@@ -96,6 +97,7 @@ export interface PersistedOrder {
   id: string;
   clientSessionId: string;
   clientId: string | null;
+  userId?: string | null;
   storeId: string;
   paymentMethod: ServerPaymentMethod;
   orderStatus: InternalOrderStatus;
