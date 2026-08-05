@@ -2,7 +2,6 @@ import type {
   Cart,
   Category,
   ClientProfile,
-  MerchantPaymentDetails,
   Order,
   OrderLine,
   Product,
@@ -208,13 +207,6 @@ export const provisionalClient = {
   reportedOrderCount: 12,
 } as const satisfies ClientProfile;
 
-export const merchantPaymentDetails = {
-  displayName: "Banco Desk",
-  accountLastFour: "2840",
-  phone: "+57 300 284 0000",
-  taxId: "900 284 071",
-} as const satisfies MerchantPaymentDetails;
-
 export const referenceCart = {
   items: [
     {
@@ -317,9 +309,8 @@ export const orders = [
     kitchenNote: "",
     serviceFeeCop: SERVICE_FEE_COP,
     payment: {
-      method: "card",
+      method: "stripe",
       status: "validated",
-      lastFour: "4242",
     },
     fulfillment: {
       kind: "pickup",
@@ -350,9 +341,8 @@ export const orders = [
     kitchenNote: "",
     serviceFeeCop: SERVICE_FEE_COP,
     payment: {
-      method: "card",
+      method: "stripe",
       status: "validated",
-      lastFour: "4242",
     },
     fulfillment: {
       kind: "pickup",
@@ -398,7 +388,6 @@ export const provisionalData = {
   promotions,
   stores,
   client: provisionalClient,
-  merchantPaymentDetails,
   referenceCart,
   orders,
   policies: {

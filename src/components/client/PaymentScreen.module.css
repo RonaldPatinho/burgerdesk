@@ -1,0 +1,316 @@
+.page {
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--color-surface-muted);
+}
+
+.main {
+  width: 100%;
+  max-width: 26.875rem;
+  min-height: calc(100dvh - 4rem);
+  margin-inline: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-4) 6rem;
+  background: var(--color-surface);
+}
+
+.heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.heading p {
+  color: var(--color-brand-primary);
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.heading h1 {
+  font-size: var(--font-size-2xl);
+  line-height: var(--line-height-tight);
+}
+
+.heading span {
+  font-size: var(--font-size-sm);
+}
+
+.methods {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  border: 0;
+}
+
+.methods legend,
+.cashDialog legend {
+  width: 100%;
+  margin-bottom: var(--space-2);
+  font-size: var(--font-size-lg);
+}
+
+.method {
+  min-width: 0;
+  min-height: 7.25rem;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  position: relative;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  background: var(--color-surface);
+  text-align: center;
+  cursor: pointer;
+}
+
+.method[data-selected="true"] {
+  border-color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
+}
+
+.method input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.method:has(input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.methodIcon {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.methodIcon svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.method > span:last-child {
+  min-width: 0;
+  display: grid;
+  gap: 0.15rem;
+}
+
+.method small {
+  font-size: 0.6875rem;
+  line-height: 1.3;
+}
+
+.stripeNotice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  color: var(--color-surface);
+  background: var(--color-text);
+  font-size: var(--font-size-xs);
+}
+
+.stripeNotice svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: var(--color-brand-secondary);
+}
+
+.summary {
+  display: grid;
+  gap: var(--space-3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.summaryHeader p,
+.summaryHeader span {
+  color: var(--color-brand-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.summaryHeader h2 {
+  font-size: var(--font-size-xl);
+}
+
+.summary ul,
+.summary dl {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+}
+
+.summary li,
+.summary dl > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--font-size-sm);
+}
+
+.summary li span {
+  min-width: 0;
+}
+
+.summary li strong,
+.summary dd {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.summary dl {
+  border-top: 0.0625rem solid rgb(255 255 255 / 28%);
+  padding-top: var(--space-3);
+}
+
+.totalRow {
+  margin-top: var(--space-1);
+  color: var(--color-brand-secondary);
+  font-size: var(--font-size-xl) !important;
+}
+
+.pickup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-xs);
+}
+
+.pickup svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex: 0 0 auto;
+  color: var(--color-brand-primary);
+}
+
+.error,
+.sessionNotice,
+.cashInfo {
+  border: 0.125rem solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+  font-size: var(--font-size-sm);
+}
+
+.sessionNotice a {
+  color: var(--color-danger);
+  text-decoration: underline;
+}
+
+.feedbackLink {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.cashDialog {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.cashTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.cashTotal strong {
+  color: var(--color-brand-secondary);
+  font-size: var(--font-size-xl);
+}
+
+.cashDialog fieldset {
+  display: grid;
+  gap: var(--space-2);
+  border: 0;
+}
+
+.cashDialog fieldset label {
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.cashDialog input[type="radio"] {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  accent-color: var(--color-brand-primary);
+}
+
+.changeField {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.changeField input {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+}
+
+.cashInfo {
+  border-color: var(--color-brand-secondary);
+  background: var(--color-surface-cream);
+}
+
+@media (max-width: 359px) {
+  .main {
+    padding-inline: var(--space-3);
+  }
+
+  .methods {
+    gap: var(--space-2);
+  }
+
+  .method {
+    padding-inline: var(--space-2);
+  }
+}
+
+@media (min-width: 26.876rem) {
+  .main {
+    box-shadow: var(--shadow-raised);
+  }
+}

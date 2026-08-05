@@ -44,6 +44,7 @@ interface ClientCartValue extends CartState {
   setItemQuantity(itemId: string, quantity: number): Promise<void>;
   removeItem(itemId: string): Promise<void>;
   setKitchenNote(kitchenNote: string): Promise<void>;
+  clearCart(): Promise<void>;
   reload(): Promise<void>;
 }
 
@@ -181,6 +182,20 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
     [persistChange],
   );
 
+  const clearCart = useCallback(async () => {
+    const previousCart = cartRef.current;
+    cartRef.current = emptyCart;
+    dispatch({ type: "changed", cart: emptyCart });
+
+    try {
+      await browserCartRepository.clearCart();
+    } catch (error: unknown) {
+      cartRef.current = previousCart;
+      dispatch({ type: "failed", cart: previousCart });
+      throw error;
+    }
+  }, []);
+
   const value = useMemo<ClientCartValue>(
     () => ({
       ...state,
@@ -189,10 +204,12 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
       setItemQuantity,
       removeItem,
       setKitchenNote,
+      clearCart,
       reload: loadCart,
     }),
     [
       addItem,
+      clearCart,
       loadCart,
       removeItem,
       setItemQuantity,

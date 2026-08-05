@@ -108,7 +108,7 @@ function isClientSession(value: unknown): value is ClientSession {
 }
 
 const orderStatuses = ["received", "preparing", "ready", "delivered"] as const;
-const paymentMethods = ["card", "nequi", "cash"] as const;
+const paymentMethods = ["stripe", "cash"] as const;
 const paymentStatuses = ["pending", "validated"] as const;
 
 function isOrderOption(value: unknown): boolean {
@@ -146,12 +146,8 @@ function isPaymentSummary(value: unknown): boolean {
     return false;
   }
 
-  if (value.method === "card") {
-    return typeof value.lastFour === "string" && /^\d{4}$/.test(value.lastFour);
-  }
-
-  if (value.method === "nequi") {
-    return isNonEmptyString(value.reference);
+  if (value.method === "stripe") {
+    return true;
   }
 
   return (

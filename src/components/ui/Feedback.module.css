@@ -14,6 +14,11 @@
   border-color: var(--color-danger);
 }
 
+.feedback[data-variant="warning"] {
+  border-color: var(--color-brand-secondary);
+  background: var(--color-surface-cream);
+}
+
 .icon {
   width: 2.5rem;
   height: 2.5rem;
@@ -22,6 +27,10 @@
 
 .feedback[data-variant="error"] .icon {
   color: var(--color-danger);
+}
+
+.feedback[data-variant="warning"] .icon {
+  color: var(--color-brand-primary);
 }
 
 .feedback[data-variant="success"] .icon {

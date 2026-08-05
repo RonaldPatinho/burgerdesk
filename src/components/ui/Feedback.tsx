@@ -7,7 +7,7 @@ import {
 import { type ReactNode } from "react";
 import styles from "./Feedback.module.css";
 
-type FeedbackVariant = "loading" | "empty" | "error" | "success";
+type FeedbackVariant = "loading" | "empty" | "error" | "success" | "warning";
 
 export interface FeedbackProps {
   variant: FeedbackVariant;
@@ -21,6 +21,7 @@ const icons: Record<FeedbackVariant, typeof CircleAlert> = {
   empty: Inbox,
   error: CircleAlert,
   success: CircleCheck,
+  warning: CircleAlert,
 };
 
 export function Feedback({
@@ -35,7 +36,7 @@ export function Feedback({
     <section
       className={styles.feedback}
       data-variant={variant}
-      role={variant === "error" ? "alert" : "status"}
+      role={variant === "error" || variant === "warning" ? "alert" : "status"}
       aria-live={variant === "error" ? "assertive" : "polite"}
       aria-busy={variant === "loading" || undefined}
     >

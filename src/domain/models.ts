@@ -146,19 +146,13 @@ export interface PricedCart extends PricingSummary {
   lines: readonly PricedCartLine[];
 }
 
-export type PaymentMethod = "card" | "nequi" | "cash";
+export type PaymentMethod = "stripe" | "cash";
 export type PaymentStatus = "pending" | "validated";
 
 export type PaymentSummary =
   | {
-      method: "card";
+      method: "stripe";
       status: PaymentStatus;
-      lastFour: string;
-    }
-  | {
-      method: "nequi";
-      status: PaymentStatus;
-      reference: string;
     }
   | {
       method: "cash";
@@ -212,21 +206,9 @@ export interface Order {
   deliveredAt?: IsoDateTime;
 }
 
-export interface CardPaymentInput {
-  method: "card";
-  cardNumber: string;
-  expiry: string;
-  securityCode: string;
-  cardholderName: string;
+export interface StripePaymentInput {
+  method: "stripe";
   termsAccepted: boolean;
-}
-
-export interface NequiPaymentInput {
-  method: "nequi";
-  bank: string;
-  phone: string;
-  reference: string;
-  exactAmountConfirmed: boolean;
 }
 
 export interface CashPaymentInput {
@@ -236,13 +218,5 @@ export interface CashPaymentInput {
 }
 
 export type PaymentInput =
-  | CardPaymentInput
-  | NequiPaymentInput
+  | StripePaymentInput
   | CashPaymentInput;
-
-export interface MerchantPaymentDetails {
-  displayName: string;
-  accountLastFour: string;
-  phone: string;
-  taxId: string;
-}

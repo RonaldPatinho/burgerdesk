@@ -10,6 +10,7 @@ import {
   attachStripeCheckoutSession,
   createInternalOrder,
   createRetryPaymentAttempt,
+  getInternalOrderByCheckoutSessionId,
   getInternalOrderById,
   OrderPersistenceError,
   processStripeWebhookEvent,
@@ -171,6 +172,10 @@ test("el webhook confirma una sola vez y nunca degrada un pedido pagado", async 
     paymentAttemptId: attempt.id,
     stripeCheckoutSessionId: checkoutSessionId,
   });
+  assert.equal(
+    (await getInternalOrderByCheckoutSessionId(checkoutSessionId))?.id,
+    created.order.id,
+  );
 
   const paidEvent = webhookEvent({
     eventId: "paid",

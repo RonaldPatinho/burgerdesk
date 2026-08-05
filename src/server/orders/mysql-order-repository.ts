@@ -531,6 +531,29 @@ export async function getInternalOrderById(
   }
 }
 
+export async function getInternalOrderByCheckoutSessionId(
+  stripeCheckoutSessionId: string,
+): Promise<PersistedOrder | null> {
+  assertIdentifier(
+    stripeCheckoutSessionId,
+    "stripeCheckoutSessionId",
+    255,
+  );
+  const connection = await getMySqlPool().getConnection();
+  try {
+    const [rows] = await connection.execute<
+      (RowDataPacket & { order_id: string })[]
+    >(
+      "SELECT order_id FROM payment_attempts WHERE stripe_checkout_session_id = ?",
+      [stripeCheckoutSessionId],
+    );
+    const orderId = rows[0]?.order_id;
+    return orderId ? loadOrderById(connection, orderId) : null;
+  } finally {
+    connection.release();
+  }
+}
+
 export async function createRetryPaymentAttempt(
   orderId: string,
   requestIdempotencyKey: string,
