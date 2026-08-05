@@ -300,6 +300,7 @@ test("volver por exito sin webhook mantiene el pedido pendiente", async () => {
   );
   assert.equal(status.state, "pending");
   assert.equal(status.cartCanBeCleared, false);
+  assert.equal(status.tracking, null);
 });
 
 test("solo el estado pagado del servidor autoriza vaciar el carrito", async () => {
@@ -319,6 +320,13 @@ test("solo el estado pagado del servidor autoriza vaciar el carrito", async () =
   );
   assert.equal(status.state, "confirmed");
   assert.equal(status.cartCanBeCleared, true);
+  assert.equal(status.tracking?.currentStatus, "preparing");
+  assert.deepEqual(
+    status.tracking?.steps.map((step) => step.state),
+    ["completed", "current", "upcoming", "upcoming"],
+  );
+  assert.equal(status.tracking?.steps[0]?.occurredAt, now);
+  assert.equal(status.tracking?.steps[0]?.description, "Pago validado.");
 });
 
 test("efectivo confirma el pedido sin crear sesion Stripe", async () => {
@@ -340,6 +348,10 @@ test("efectivo confirma el pedido sin crear sesion Stripe", async () => {
   );
   assert.equal(status.state, "confirmed");
   assert.equal(status.order.paymentStatus, "pendiente_en_efectivo");
+  assert.equal(
+    status.tracking?.steps[0]?.description,
+    "Pago en efectivo al retirar.",
+  );
 });
 
 test("una expiracion conserva el pedido y el reintento crea solo otro intento", async () => {
@@ -359,6 +371,7 @@ test("una expiracion conserva el pedido y el reintento crea solo otro intento", 
   );
   assert.equal(expired.state, "expired");
   assert.equal(expired.cartCanBeCleared, false);
+  assert.equal(expired.tracking, null);
 
   const retryInput = request("request-retry-12345");
   retryInput.retryOrderId = first.orderId;

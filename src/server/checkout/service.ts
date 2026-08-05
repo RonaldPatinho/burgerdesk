@@ -12,6 +12,7 @@ import type {
   CheckoutOrderPersistence,
   CheckoutOrderState,
   CheckoutOrderStatusResult,
+  CheckoutOrderTracking,
   CheckoutRequestInput,
   HostedCheckoutSession,
   StripeCheckoutGateway,
@@ -229,6 +230,54 @@ function getOrderState(order: PersistedOrder): CheckoutOrderState {
   return "pending";
 }
 
+function getOrderTracking(
+  order: PersistedOrder,
+  state: CheckoutOrderState,
+): CheckoutOrderTracking | null {
+  if (state !== "confirmed") return null;
+
+  const receivedAt = order.confirmedAt ?? order.createdAt;
+  const paymentDescription =
+    order.paymentMethod === "stripe"
+      ? "Pago validado."
+      : "Pago en efectivo al retirar.";
+
+  return {
+    currentStatus: "preparing",
+    currentLabel: "Preparando",
+    steps: [
+      {
+        status: "received",
+        label: "Pedido recibido",
+        description: paymentDescription,
+        state: "completed",
+        occurredAt: receivedAt,
+      },
+      {
+        status: "preparing",
+        label: "En preparación",
+        description: "La cocina trabaja en tu orden.",
+        state: "current",
+        occurredAt: null,
+      },
+      {
+        status: "ready",
+        label: "Listo para retirar",
+        description: "Recibirás una notificación.",
+        state: "upcoming",
+        occurredAt: null,
+      },
+      {
+        status: "delivered",
+        label: "Entregado",
+        description: "Muestra el código al retirar.",
+        state: "upcoming",
+        occurredAt: null,
+      },
+    ],
+  };
+}
+
 export async function getCheckoutOrderStatus(
   input: {
     clientSessionId: string;
@@ -253,6 +302,7 @@ export async function getCheckoutOrderStatus(
   return {
     state,
     cartCanBeCleared: state === "confirmed",
+    tracking: getOrderTracking(order, state),
     order: {
       id: order.id,
       paymentMethod: order.paymentMethod,

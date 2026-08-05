@@ -1,7 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { Clock3, MapPin, ReceiptText } from "lucide-react";
+import {
+  Check,
+  Clock3,
+  Info,
+  MapPin,
+  ReceiptText,
+} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -33,6 +39,57 @@ type LoadState =
   | { kind: "loaded"; result: CheckoutOrderStatusResult }
   | { kind: "error"; message: string };
 
+type ConfirmationView = "confirmation" | "tracking";
+
+const trackingStatuses = [
+  "received",
+  "preparing",
+  "ready",
+  "delivered",
+] as const;
+
+const trackingStepStates = ["completed", "current", "upcoming"] as const;
+
+function isStringInList<TValue extends string>(
+  value: unknown,
+  values: readonly TValue[],
+): value is TValue {
+  return typeof value === "string" && values.some((item) => item === value);
+}
+
+function isTrackingResult(
+  value: unknown,
+): value is NonNullable<CheckoutOrderStatusResult["tracking"]> {
+  if (
+    typeof value !== "object" ||
+    value === null ||
+    !("currentStatus" in value) ||
+    !isStringInList(value.currentStatus, trackingStatuses) ||
+    !("currentLabel" in value) ||
+    typeof value.currentLabel !== "string" ||
+    !("steps" in value) ||
+    !Array.isArray(value.steps)
+  ) {
+    return false;
+  }
+
+  return value.steps.every(
+    (step) =>
+      typeof step === "object" &&
+      step !== null &&
+      "status" in step &&
+      isStringInList(step.status, trackingStatuses) &&
+      "label" in step &&
+      typeof step.label === "string" &&
+      "description" in step &&
+      typeof step.description === "string" &&
+      "state" in step &&
+      isStringInList(step.state, trackingStepStates) &&
+      "occurredAt" in step &&
+      (step.occurredAt === null || typeof step.occurredAt === "string"),
+  );
+}
+
 function isStatusResult(value: unknown): value is CheckoutOrderStatusResult {
   return (
     typeof value === "object" &&
@@ -44,12 +101,31 @@ function isStatusResult(value: unknown): value is CheckoutOrderStatusResult {
       value.state === "failed") &&
     "cartCanBeCleared" in value &&
     typeof value.cartCanBeCleared === "boolean" &&
+    "tracking" in value &&
+    (value.state === "confirmed"
+      ? isTrackingResult(value.tracking)
+      : value.tracking === null) &&
     "order" in value &&
     typeof value.order === "object" &&
     value.order !== null &&
     "id" in value.order &&
     typeof value.order.id === "string"
   );
+}
+
+function formatOrderTime(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "Hora confirmada";
+
+  return new Intl.DateTimeFormat("es-CO", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function shortOrderIdentifier(orderId: string): string {
+  return orderId.replaceAll("-", "").slice(0, 8).toUpperCase();
 }
 
 function responseMessage(value: unknown): string {
@@ -69,6 +145,7 @@ export function OrderConfirmationScreen({
   const { cart, status: cartStatus, clearCart } = useClientCart();
   const [session, setSession] = useState<ClientSession | null | undefined>();
   const [loadState, setLoadState] = useState<LoadState>({ kind: "loading" });
+  const [view, setView] = useState<ConfirmationView>("confirmation");
   const [cartResolution, setCartResolution] = useState<
     "cleared" | "preserved" | "error" | null
   >(null);
@@ -180,15 +257,22 @@ export function OrderConfirmationScreen({
   }, [cart, cartStatus, clearCart, loadState]);
 
   const focusState =
-    loadState.kind === "loaded" ? loadState.result.state : loadState.kind;
+    loadState.kind === "loaded"
+      ? `${loadState.result.state}-${view}`
+      : loadState.kind;
 
   useEffect(() => {
-    mainRef.current?.focus();
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    mainRef.current?.focus({ preventScroll: true });
   }, [focusState]);
 
   const loaded = loadState.kind === "loaded" ? loadState.result : null;
   const pending = loaded?.state === "pending";
   const confirmed = loaded?.state === "confirmed";
+  const tracking = confirmed ? loaded?.tracking : null;
+  const productCount = loaded
+    ? loaded.order.lines.reduce((total, line) => total + line.quantity, 0)
+    : 0;
 
   return (
     <div className={styles.page}>
@@ -197,6 +281,7 @@ export function OrderConfirmationScreen({
         ref={mainRef}
         id="contenido-principal"
         className={styles.main}
+        data-view={confirmed ? view : undefined}
         tabIndex={-1}
       >
         {loadState.kind === "loading" || session === undefined ? (
@@ -253,7 +338,7 @@ export function OrderConfirmationScreen({
           />
         ) : null}
 
-        {confirmed && loaded ? (
+        {confirmed && loaded && view === "confirmation" ? (
           <>
             <header className={styles.confirmedHeading}>
               <span className={styles.successIcon} aria-hidden="true">✓</span>
@@ -269,7 +354,14 @@ export function OrderConfirmationScreen({
               <ReceiptText aria-hidden="true" />
               <div>
                 <p id="codigo-pedido">Código de pedido</p>
-                <strong>{loaded.order.id}</strong>
+                <strong>
+                  <span aria-hidden="true">
+                    #{shortOrderIdentifier(loaded.order.id)}
+                  </span>
+                  <span className={styles.visuallyHidden}>
+                    Identificador completo: {loaded.order.id}
+                  </span>
+                </strong>
               </div>
             </section>
 
@@ -328,7 +420,11 @@ export function OrderConfirmationScreen({
               </p>
             ) : null}
 
-            <button className={styles.trackingButton} type="button" disabled>
+            <button
+              className={styles.trackingButton}
+              type="button"
+              onClick={() => setView("tracking")}
+            >
               Ver estado del pedido
             </button>
             <Link className={styles.secondaryLink} href="/">
@@ -339,6 +435,98 @@ export function OrderConfirmationScreen({
               <strong>¡Gracias por elegir BurgerDesk!</strong>
               <span>Te avisaremos cuando tu pedido esté listo.</span>
             </aside>
+          </>
+        ) : null}
+
+        {confirmed && loaded && tracking && view === "tracking" ? (
+          <>
+            <header className={styles.trackingHeading}>
+              <h1>Estado del pedido</h1>
+              <p>Seguimiento actualizado de tu orden.</p>
+            </header>
+
+            <section
+              className={styles.trackingOrderCard}
+              aria-labelledby="pedido-en-seguimiento"
+            >
+              <p
+                id="pedido-en-seguimiento"
+                className={styles.trackingOrderIdentity}
+                aria-label={`Pedido ${loaded.order.id}`}
+              >
+                Pedido{" "}
+                <strong aria-hidden="true">
+                  #{shortOrderIdentifier(loaded.order.id)}
+                </strong>
+              </p>
+              <strong className={styles.trackingTotal}>
+                {formatCop(loaded.order.totalCop)}
+              </strong>
+              <p className={styles.trackingMeta}>
+                {productCount} {productCount === 1 ? "producto" : "productos"}
+                {" · Retiro en local"}
+              </p>
+              <p className={styles.statusBadge} role="status">
+                <span aria-hidden="true" />
+                {tracking.currentLabel}
+              </p>
+            </section>
+
+            <section className={styles.progress} aria-labelledby="progreso-pedido">
+              <h2 id="progreso-pedido">Progreso del pedido</h2>
+              <ol className={styles.timeline}>
+                {tracking.steps.map((step) => (
+                  <li
+                    key={step.status}
+                    className={styles.timelineStep}
+                    data-state={step.state}
+                    aria-current={step.state === "current" ? "step" : undefined}
+                  >
+                    <span className={styles.timelineMarker} aria-hidden="true">
+                      {step.state === "upcoming" ? (
+                        <Clock3 />
+                      ) : (
+                        <Check />
+                      )}
+                    </span>
+                    <div>
+                      <h3>{step.label}</h3>
+                      <p>
+                        {step.occurredAt ? (
+                          <>
+                            <time dateTime={step.occurredAt}>
+                              {formatOrderTime(step.occurredAt)}
+                            </time>
+                            {" · "}
+                          </>
+                        ) : null}
+                        {step.description}
+                      </p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <aside className={styles.trackingNotice}>
+              <div className={styles.trackingNoticeHeading}>
+                <Info aria-hidden="true" />
+                <h2>Información</h2>
+              </div>
+              <p>
+                Consulta esta pantalla para verificar el avance. El estado
+                siempre aparece con texto e icono.
+              </p>
+            </aside>
+
+            <div className={styles.trackingActions}>
+              <Link className={styles.secondaryLink} href="/menu">
+                Volver al menú
+              </Link>
+              <Link className={styles.primaryLink} href="/menu">
+                Nuevo pedido
+              </Link>
+            </div>
           </>
         ) : null}
       </main>

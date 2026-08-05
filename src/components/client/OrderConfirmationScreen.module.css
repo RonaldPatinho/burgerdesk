@@ -20,6 +20,21 @@
   outline: 0;
 }
 
+.main[data-view="tracking"] {
+  gap: var(--space-3);
+  padding-top: var(--space-2);
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 0.0625rem;
+  height: 0.0625rem;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
 .confirmedHeading {
   display: grid;
   justify-items: center;
@@ -210,6 +225,195 @@
   background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
 }
 
+.trackingHeading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.trackingHeading h1 {
+  font-size: var(--font-size-xl);
+  line-height: var(--line-height-tight);
+}
+
+.trackingHeading p {
+  font-size: var(--font-size-sm);
+}
+
+.trackingOrderCard {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.trackingOrderIdentity {
+  min-width: 0;
+  color: var(--color-brand-secondary);
+  font-size: var(--font-size-xs);
+  text-transform: uppercase;
+}
+
+.trackingOrderIdentity strong {
+  color: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+.trackingTotal {
+  align-self: end;
+  text-align: right;
+}
+
+.trackingMeta {
+  align-self: center;
+  font-size: var(--font-size-xs);
+}
+
+.statusBadge {
+  min-height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  justify-self: end;
+  border-radius: var(--radius-pill);
+  padding: var(--space-1) var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-xs);
+}
+
+.statusBadge span {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+}
+
+.progress {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.progress h2 {
+  font-size: var(--font-size-lg);
+}
+
+.timeline {
+  display: grid;
+  gap: 0;
+  list-style: none;
+}
+
+.timelineStep {
+  position: relative;
+  min-width: 0;
+  min-height: 4.25rem;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr);
+  gap: var(--space-3);
+}
+
+.timelineStep:last-child {
+  min-height: 2.75rem;
+}
+
+.timelineStep:not(:last-child)::after {
+  position: absolute;
+  top: 2.25rem;
+  bottom: -0.25rem;
+  left: 1.3125rem;
+  width: 0.125rem;
+  background: var(--color-border);
+  content: "";
+}
+
+.timelineStep[data-state="completed"]:not(:last-child)::after {
+  background: var(--color-brand-primary);
+}
+
+.timelineMarker {
+  z-index: 1;
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-brand-primary);
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.timelineStep[data-state="upcoming"] .timelineMarker {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.timelineMarker svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.timelineStep > div {
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--space-1);
+  padding-top: var(--space-1);
+}
+
+.timelineStep h3 {
+  font-size: var(--font-size-sm);
+}
+
+.timelineStep p {
+  color: color-mix(in srgb, var(--color-text) 72%, var(--color-surface));
+  font-size: var(--font-size-xs);
+}
+
+.trackingNotice {
+  display: grid;
+  gap: var(--space-3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-cream);
+}
+
+.trackingNoticeHeading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.trackingNoticeHeading svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-danger);
+}
+
+.trackingNotice p {
+  font-size: var(--font-size-xs);
+}
+
+.trackingNotice h2 {
+  font-size: var(--font-size-lg);
+}
+
+.trackingActions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.trackingActions > * {
+  min-width: 0;
+  padding-inline: var(--space-2);
+}
+
 @media (max-width: 359px) {
   .main {
     padding-inline: var(--space-3);
@@ -218,6 +422,11 @@
   .details {
     gap: var(--space-2);
   }
+
+  .trackingOrderCard {
+    padding: var(--space-3);
+  }
+
 }
 
 @media (min-width: 26.876rem) {

@@ -1,5 +1,6 @@
 import type {
   Cart,
+  OrderStatus,
   ProductId,
   ProductOptionId,
 } from "../../domain/models";
@@ -100,9 +101,29 @@ export type CheckoutOrderState =
   | "expired"
   | "failed";
 
+export type CheckoutOrderTrackingStepState =
+  | "completed"
+  | "current"
+  | "upcoming";
+
+export interface CheckoutOrderTrackingStep {
+  status: OrderStatus;
+  label: string;
+  description: string;
+  state: CheckoutOrderTrackingStepState;
+  occurredAt: string | null;
+}
+
+export interface CheckoutOrderTracking {
+  currentStatus: OrderStatus;
+  currentLabel: string;
+  steps: readonly CheckoutOrderTrackingStep[];
+}
+
 export interface CheckoutOrderStatusResult {
   state: CheckoutOrderState;
   cartCanBeCleared: boolean;
+  tracking: CheckoutOrderTracking | null;
   order: {
     id: string;
     paymentMethod: CheckoutPaymentMethod;
