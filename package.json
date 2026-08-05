@@ -6,13 +6,18 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --env-file-if-exists=.env.local --test --experimental-transform-types --loader ./scripts/typescript-test-loader.mjs \"src/**/*.test.ts\"",
+    "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-database.mjs",
+    "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
+    "mysql2": "^3.23.2",
     "next": "16.3.0",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "stripe": "^22.4.0"
   },
   "devDependencies": {
     "@types/node": "^20",
