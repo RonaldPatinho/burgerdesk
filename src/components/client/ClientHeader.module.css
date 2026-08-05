@@ -1,0 +1,99 @@
+.header {
+  width: 100%;
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.inner {
+  min-height: 4rem;
+  width: 100%;
+  max-width: 26.875rem;
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+}
+
+.brand {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: var(--radius-sm);
+}
+
+.logoFrame {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  padding: 0.1875rem;
+  background: var(--color-surface);
+}
+
+.wordmark {
+  font-size: 1.375rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.profileLink,
+.cartLink {
+  position: relative;
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-lg);
+  color: var(--color-text);
+}
+
+.profileLink {
+  background: var(--color-brand-secondary);
+}
+
+.cartLink {
+  background: var(--color-brand-primary);
+}
+
+.profileLink svg,
+.cartLink svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.cartCount {
+  position: absolute;
+  top: -0.35rem;
+  right: -0.25rem;
+  min-width: 1.3rem;
+  height: 1.3rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  padding-inline: 0.2rem;
+  color: var(--color-surface);
+  background: var(--color-danger);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 359px) {
+  .inner {
+    padding-inline: var(--space-3);
+  }
+
+  .wordmark {
+    font-size: var(--font-size-lg);
+  }
+}

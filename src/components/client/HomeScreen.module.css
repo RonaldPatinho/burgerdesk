@@ -1,0 +1,208 @@
+.page {
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--color-surface-muted);
+}
+
+.main {
+  width: 100%;
+  max-width: 26.875rem;
+  min-height: calc(100dvh - 4rem);
+  margin-inline: auto;
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  padding: var(--space-4) var(--space-4) 6rem;
+  background: var(--color-surface);
+}
+
+.hero {
+  min-height: 11rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(7.75rem, 0.92fr);
+  align-items: stretch;
+  gap: var(--space-2);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.heroCopy {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: var(--space-1);
+}
+
+.eyebrow {
+  color: var(--color-brand-secondary);
+  font-size: 0.625rem;
+}
+
+.heroCopy h1 {
+  font-size: clamp(1.125rem, 5vw, 1.375rem);
+  line-height: var(--line-height-tight);
+}
+
+.heroDescription {
+  font-size: 0.625rem;
+}
+
+.heroAction,
+.feedbackLink {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
+  background: var(--color-brand-primary);
+}
+
+.heroAction svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.promotionImage {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-cream);
+}
+
+.promotionImage img {
+  object-fit: contain;
+  padding: var(--space-6) 0 0;
+  transform: scale(1.08);
+}
+
+.promotionLabel {
+  position: absolute;
+  z-index: 1;
+  top: var(--space-3);
+  right: var(--space-3);
+  left: var(--space-3);
+  min-height: 1.75rem;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  padding-inline: var(--space-2);
+  color: var(--color-danger);
+  background: var(--color-surface);
+  font-size: var(--font-size-xs);
+  text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.categories,
+.featured,
+.sectionHeading {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.sectionHeading {
+  gap: var(--space-1);
+}
+
+.sectionHeading h2,
+.featuredHeading h2 {
+  font-size: clamp(1.375rem, 6vw, 1.75rem);
+  line-height: var(--line-height-tight);
+}
+
+.sectionHeading p {
+  font-size: var(--font-size-xs);
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.categoryCard {
+  min-width: 0;
+  min-height: 3.625rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-1);
+  font-size: var(--font-size-xs);
+  text-align: center;
+}
+
+.categoryIcon {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
+}
+
+.categoryIcon svg {
+  width: 1.125rem;
+  height: 1.125rem;
+}
+
+.featuredHeading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.featuredHeading a {
+  min-height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.productGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+@media (max-width: 359px) {
+  .main {
+    padding-inline: var(--space-3);
+  }
+
+  .hero {
+    grid-template-columns: minmax(0, 1fr) minmax(6.5rem, 0.8fr);
+    padding: var(--space-3);
+  }
+
+  .heroAction {
+    padding-inline: var(--space-3);
+    font-size: var(--font-size-sm);
+  }
+
+  .categoryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 26.876rem) {
+  .main {
+    box-shadow: var(--shadow-raised);
+  }
+}

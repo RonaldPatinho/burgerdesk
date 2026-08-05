@@ -1,0 +1,62 @@
+.nav {
+  position: fixed;
+  z-index: var(--layer-sticky);
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: min(100%, 26.875rem);
+  margin-inline: auto;
+  border-top: 0.0625rem solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--color-surface);
+}
+
+.inner {
+  min-height: 4.5rem;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  padding: var(--space-1) var(--space-2);
+}
+
+.item {
+  position: relative;
+  min-width: 0;
+  min-height: 4rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-lg);
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.item[data-active="true"] {
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.activeDot {
+  position: absolute;
+  bottom: -0.45rem;
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+}
+
+@media (max-width: 359px) {
+  .inner {
+    padding-inline: var(--space-1);
+  }
+
+  .item {
+    font-size: 0.6875rem;
+  }
+}

@@ -1,0 +1,25 @@
+ src/app/(client)/layout.tsx                        |  10 [32m+[m
+ src/app/(client)/menu/[productoId]/loading.tsx     |  18 [32m++[m
+ src/app/(client)/menu/[productoId]/not-found.tsx   |  24 [32m++[m
+ src/app/(client)/menu/[productoId]/page.tsx        |  47 [32m++++[m
+ .../menu/[productoId]/route-state.module.css       |  27 [32m+++[m
+ src/app/(client)/menu/page.tsx                     |  16 [32m++[m
+ src/app/(client)/page.tsx                          |  23 [32m++[m
+ src/app/page.module.css                            | 131 [31m-----------[m
+ src/app/page.tsx                                   |  69 [31m------[m
+ src/components/client/ClientBottomNav.module.css   |  62 [32m++++++[m
+ src/components/client/ClientBottomNav.tsx          |  44 [32m++++[m
+ src/components/client/ClientCartProvider.tsx       | 150 [32m+++++++++++++[m
+ src/components/client/ClientHeader.module.css      |  99 [32m+++++++++[m
+ src/components/client/ClientHeader.tsx             |  60 [32m+++++[m
+ src/components/client/HomeScreen.module.css        | 208 [32m+++++++++++++++++[m
+ src/components/client/HomeScreen.tsx               | 136 [32m++++++++++++[m
+ src/components/client/MenuScreen.module.css        | 132 [32m+++++++++++[m
+ src/components/client/MenuScreen.tsx               | 161 [32m++++++++++++++[m
+ src/components/client/ProductCard.module.css       | 110 [32m+++++++++[m
+ src/components/client/ProductCard.tsx              |  62 [32m++++++[m
+ .../client/ProductDetailScreen.module.css          | 246 [32m+++++++++++++++++++++[m
+ src/components/client/ProductDetailScreen.tsx      | 237 [32m++++++++++++++++++++[m
+ src/services/browser-cart.test.ts                  | 131 [32m+++++++++++[m
+ src/services/browser-cart.ts                       |  97 [32m++++++++[m
+ 24 files changed, 2100 insertions(+), 200 deletions(-)
