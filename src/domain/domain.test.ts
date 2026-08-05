@@ -14,7 +14,13 @@ import {
   provisionalCatalogService,
   provisionalClientService,
 } from "../services/provisional";
-import { buildReorderCart, mergeCartItems } from "./cart";
+import {
+  buildReorderCart,
+  mergeCartItems,
+  removeCartItem,
+  updateCartItemQuantity,
+  updateCartKitchenNote,
+} from "./cart";
 import { formatCop } from "./currency";
 import type { Cart, Product } from "./models";
 import { CLIENT_STORAGE_VERSION } from "./persistence";
@@ -173,6 +179,117 @@ test("fusiona líneas iguales sin superar el máximo y reporta el ajuste", () =>
       acceptedQuantity: 10,
     },
   ]);
+});
+
+test("el carrito conserva configuraciones diferentes en líneas separadas", () => {
+  const result = mergeCartItems(
+    { items: [], kitchenNote: "" },
+    [
+      {
+        id: "la-bendita__cheddar-extra",
+        productId: "la-bendita",
+        optionIds: ["cheddar-extra"],
+        quantity: 1,
+      },
+      {
+        id: "la-bendita__tocineta",
+        productId: "la-bendita",
+        optionIds: ["tocineta"],
+        quantity: 1,
+      },
+    ],
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+
+  assert.deepEqual(
+    result.cart.items.map((item) => item.id),
+    ["la-bendita__cheddar-extra", "la-bendita__tocineta"],
+  );
+});
+
+test("el carrito fusiona selecciones equivalentes aunque cambie su orden", () => {
+  const result = mergeCartItems(
+    {
+      items: [
+        {
+          id: "configuracion-anterior",
+          productId: "la-bendita",
+          optionIds: ["tocineta", "cheddar-extra"],
+          quantity: 1,
+        },
+      ],
+      kitchenNote: "",
+    },
+    [
+      {
+        id: "configuracion-nueva",
+        productId: "la-bendita",
+        optionIds: ["cheddar-extra", "tocineta"],
+        quantity: 2,
+      },
+    ],
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+
+  assert.deepEqual(result.cart.items, [
+    {
+      id: "la-bendita__cheddar-extra+tocineta",
+      productId: "la-bendita",
+      optionIds: ["cheddar-extra", "tocineta"],
+      quantity: 3,
+    },
+  ]);
+});
+
+test("actualiza, elimina y anota el carrito sin alterar las otras líneas", () => {
+  const updated = updateCartItemQuantity(
+    referenceCart,
+    referenceCart.items[0].id,
+    2,
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+  const removed = removeCartItem(updated, referenceCart.items[1].id);
+  const annotated = updateCartKitchenNote(removed, "Sin sal");
+  const updatedPricing = calculateCartPricing(
+    updated,
+    products,
+    SERVICE_FEE_COP,
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+
+  assert.equal(updated.items[0]?.quantity, 2);
+  assert.equal(updated.items[1]?.quantity, 1);
+  assert.deepEqual(
+    {
+      subtotalCop: updatedPricing.subtotalCop,
+      totalCop: updatedPricing.totalCop,
+    },
+    { subtotalCop: 73_700, totalCop: 76_600 },
+  );
+  assert.deepEqual(
+    removed.items.map((item) => item.id),
+    [referenceCart.items[0].id],
+  );
+  assert.equal(annotated.kitchenNote, "Sin sal");
+});
+
+test("impide actualizar una línea por debajo de uno o sobre el máximo", () => {
+  assert.throws(() =>
+    updateCartItemQuantity(
+      referenceCart,
+      referenceCart.items[0].id,
+      0,
+      MAX_QUANTITY_PER_CART_LINE,
+    ),
+  );
+  assert.throws(() =>
+    updateCartItemQuantity(
+      referenceCart,
+      referenceCart.items[0].id,
+      MAX_QUANTITY_PER_CART_LINE + 1,
+      MAX_QUANTITY_PER_CART_LINE,
+    ),
+  );
 });
 
 test("volver a pedir omite el producto histórico que ya no existe", () => {

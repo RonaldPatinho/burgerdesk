@@ -75,6 +75,25 @@ test("guarda únicamente el esquema versionado del carrito", async () => {
   );
 });
 
+test("recupera cantidades y nota de cocina después de una recarga simulada", async () => {
+  const storage = createStorage();
+  const repository = new LocalStorageCartRepository({
+    getStorage: () => storage,
+    now: () => "2026-08-04T12:00:00-04:00",
+  });
+  const persistedCart: Cart = {
+    ...sampleCart,
+    kitchenNote: "Alergia a la cebolla",
+  };
+
+  await repository.saveCart(persistedCart);
+
+  const reloadedRepository = new LocalStorageCartRepository({
+    getStorage: () => storage,
+  });
+  assert.deepEqual(await reloadedRepository.getCart(), persistedCart);
+});
+
 test("elimina solo un carrito corrupto y conserva las demás claves", async () => {
   const storage = createStorage({
     [clientStorageKeys.cart]: "{incompleto",

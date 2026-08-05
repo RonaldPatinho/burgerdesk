@@ -90,6 +90,45 @@ export function mergeCartItems(
   };
 }
 
+export function updateCartItemQuantity(
+  cart: Cart,
+  itemId: string,
+  quantity: number,
+  maximumQuantity: number,
+): Cart {
+  assertQuantity(quantity, maximumQuantity);
+
+  if (!cart.items.some((item) => item.id === itemId)) {
+    return cart;
+  }
+
+  return {
+    ...cart,
+    items: cart.items.map((item) =>
+      item.id === itemId ? { ...item, quantity } : item,
+    ),
+  };
+}
+
+export function removeCartItem(cart: Cart, itemId: string): Cart {
+  if (!cart.items.some((item) => item.id === itemId)) {
+    return cart;
+  }
+
+  return {
+    ...cart,
+    items: cart.items.filter((item) => item.id !== itemId),
+  };
+}
+
+export function updateCartKitchenNote(cart: Cart, kitchenNote: string): Cart {
+  if (cart.kitchenNote === kitchenNote) {
+    return cart;
+  }
+
+  return { ...cart, kitchenNote };
+}
+
 export function buildReorderCart(
   order: Order,
   currentCart: Cart,

@@ -11,7 +11,12 @@ import {
   type ReactNode,
 } from "react";
 import { MAX_QUANTITY_PER_CART_LINE } from "@/data/provisional";
-import { mergeCartItems } from "@/domain/cart";
+import {
+  mergeCartItems,
+  removeCartItem,
+  updateCartItemQuantity,
+  updateCartKitchenNote,
+} from "@/domain/cart";
 import type { Cart, CartItem } from "@/domain/models";
 import { clientStorageKeys } from "@/domain/persistence";
 import { browserCartRepository } from "@/services/browser-cart";
@@ -36,6 +41,9 @@ export interface AddCartItemResult {
 interface ClientCartValue extends CartState {
   cartCount: number;
   addItem(item: CartItem): Promise<AddCartItemResult>;
+  setItemQuantity(itemId: string, quantity: number): Promise<void>;
+  removeItem(itemId: string): Promise<void>;
+  setKitchenNote(kitchenNote: string): Promise<void>;
   reload(): Promise<void>;
 }
 
@@ -94,6 +102,27 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
     return () => window.removeEventListener("storage", handleStorage);
   }, [loadCart]);
 
+  const persistChange = useCallback(
+    async (change: (currentCart: Cart) => Cart) => {
+      const previousCart = cartRef.current;
+      const nextCart = change(previousCart);
+
+      if (nextCart === previousCart) return;
+
+      cartRef.current = nextCart;
+      dispatch({ type: "changed", cart: nextCart });
+
+      try {
+        await browserCartRepository.saveCart(nextCart);
+      } catch (error: unknown) {
+        cartRef.current = previousCart;
+        dispatch({ type: "failed", cart: previousCart });
+        throw error;
+      }
+    },
+    [],
+  );
+
   const addItem = useCallback(async (item: CartItem) => {
     const previousCart = cartRef.current;
     const result = mergeCartItems(
@@ -122,14 +151,54 @@ export function ClientCartProvider({ children }: ClientCartProviderProps) {
     };
   }, []);
 
+  const setItemQuantity = useCallback(
+    async (itemId: string, quantity: number) => {
+      await persistChange((cart) =>
+        updateCartItemQuantity(
+          cart,
+          itemId,
+          quantity,
+          MAX_QUANTITY_PER_CART_LINE,
+        ),
+      );
+    },
+    [persistChange],
+  );
+
+  const removeItem = useCallback(
+    async (itemId: string) => {
+      await persistChange((cart) => removeCartItem(cart, itemId));
+    },
+    [persistChange],
+  );
+
+  const setKitchenNote = useCallback(
+    async (kitchenNote: string) => {
+      await persistChange((cart) =>
+        updateCartKitchenNote(cart, kitchenNote),
+      );
+    },
+    [persistChange],
+  );
+
   const value = useMemo<ClientCartValue>(
     () => ({
       ...state,
       cartCount: countItems(state.cart),
       addItem,
+      setItemQuantity,
+      removeItem,
+      setKitchenNote,
       reload: loadCart,
     }),
-    [addItem, loadCart, state],
+    [
+      addItem,
+      loadCart,
+      removeItem,
+      setItemQuantity,
+      setKitchenNote,
+      state,
+    ],
   );
 
   return (
