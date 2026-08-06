@@ -123,8 +123,20 @@ test("crea efectivo en una transaccion y reutiliza el pedido sin duplicarlo", as
   assert.equal(first.order.paymentMethod, "efectivo");
   assert.equal(first.order.paymentStatus, "pendiente_en_efectivo");
   assert.equal(first.order.orderStatus, "confirmado");
+  assert.equal(first.order.operationalStatus, "recibido");
   assert.equal(first.order.paymentAttempts.length, 0);
   assert.equal(first.order.lines[0]?.options[0]?.optionId, "cheddar-extra");
+
+  const [cashHistoryRows] = await getMySqlPool().execute<
+    (RowDataPacket & { history_count: number })[]
+  >(
+    `SELECT COUNT(*) AS history_count
+     FROM order_status_history
+     WHERE order_id = ? AND new_status = 'recibido'
+       AND change_source = 'checkout_cash'`,
+    [first.order.id],
+  );
+  assert.equal(Number(cashHistoryRows[0]?.history_count), 1);
 
   await assert.rejects(
     createInternalOrder({ ...draft, kitchenNote: "Otra nota" }),
@@ -215,7 +227,18 @@ test("el webhook confirma una sola vez y nunca degrada un pedido pagado", async 
   assert.equal(lateExpiration.outcome, "procesado");
   assert.equal(order?.paymentStatus, "pagado");
   assert.equal(order?.orderStatus, "confirmado");
+  assert.equal(order?.operationalStatus, "recibido");
   assert.equal(order?.paymentAttempts[0]?.status, "pagado");
+
+  const [historyRows] = await getMySqlPool().execute<
+    (RowDataPacket & { history_count: number })[]
+  >(
+    `SELECT COUNT(*) AS history_count
+     FROM order_status_history
+     WHERE order_id = ? AND new_status = 'recibido'`,
+    [created.order.id],
+  );
+  assert.equal(Number(historyRows[0]?.history_count), 1);
 });
 
 test("un evento antiguo no degrada un reintento pendiente y la sesion es unica", async () => {

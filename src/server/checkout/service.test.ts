@@ -89,6 +89,7 @@ class FakePersistence implements CheckoutOrderPersistence {
       paymentMethod: draft.paymentMethod,
       orderStatus:
         draft.paymentMethod === "stripe" ? "pendiente_de_pago" : "confirmado",
+      operationalStatus: draft.paymentMethod === "stripe" ? null : "recibido",
       paymentStatus:
         draft.paymentMethod === "stripe"
           ? "pendiente"
@@ -187,6 +188,7 @@ class FakePersistence implements CheckoutOrderPersistence {
     this.orders.set(orderId, {
       ...order,
       orderStatus: paid ? "confirmado" : "pendiente_de_pago",
+      operationalStatus: paid ? "recibido" : null,
       paymentStatus,
       confirmedAt: paid ? now : null,
       paymentAttempts: order.paymentAttempts.map((attempt, index) =>
@@ -320,13 +322,45 @@ test("solo el estado pagado del servidor autoriza vaciar el carrito", async () =
   );
   assert.equal(status.state, "confirmed");
   assert.equal(status.cartCanBeCleared, true);
-  assert.equal(status.tracking?.currentStatus, "preparing");
+  assert.equal(status.tracking?.currentStatus, "received");
   assert.deepEqual(
     status.tracking?.steps.map((step) => step.state),
-    ["completed", "current", "upcoming", "upcoming"],
+    ["current", "upcoming", "upcoming", "upcoming"],
   );
   assert.equal(status.tracking?.steps[0]?.occurredAt, now);
   assert.equal(status.tracking?.steps[0]?.description, "Pago validado.");
+});
+
+
+
+test("el seguimiento del cliente refleja el estado operativo real", async () => {
+  const deps = dependencies();
+  const created = await createCheckout(
+    request("request-cash-tracking", "efectivo"),
+    deps,
+  );
+  const order = deps.persistence.orders.get(created.orderId);
+  if (!order) throw new Error("FAKE_ORDER_MISSING");
+  deps.persistence.orders.set(created.orderId, {
+    ...order,
+    operationalStatus: "listo_para_retirar",
+  });
+
+  const status = await getCheckoutOrderStatus(
+    {
+      clientSessionId: "session-1",
+      orderId: created.orderId,
+      checkoutSessionId: null,
+    },
+    deps.persistence,
+  );
+
+  assert.equal(status.tracking?.currentStatus, "ready");
+  assert.equal(status.tracking?.currentLabel, "Listo para retirar");
+  assert.deepEqual(
+    status.tracking?.steps.map((step) => step.state),
+    ["completed", "completed", "current", "upcoming"],
+  );
 });
 
 test("efectivo confirma el pedido sin crear sesion Stripe", async () => {

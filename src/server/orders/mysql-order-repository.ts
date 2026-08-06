@@ -13,6 +13,7 @@ import type {
   CreatedInternalOrder,
   InternalOrderStatus,
   InternalPaymentStatus,
+  OperationalOrderStatus,
   PaymentAttemptRecord,
   PaymentAttemptStatus,
   PersistedOrder,
@@ -37,6 +38,7 @@ interface OrderRow extends RowDataPacket {
   store_id: string;
   payment_method: ServerPaymentMethod;
   order_status: InternalOrderStatus;
+  operational_status: OperationalOrderStatus | null;
   payment_status: InternalPaymentStatus;
   currency: "COP";
   subtotal_cop: number | string;
@@ -317,6 +319,7 @@ async function loadOrderById(
     storeId: orderRow.store_id,
     paymentMethod: orderRow.payment_method,
     orderStatus: orderRow.order_status,
+    operationalStatus: orderRow.operational_status,
     paymentStatus: orderRow.payment_status,
     currency: orderRow.currency,
     subtotalCop: toSafeInteger(orderRow.subtotal_cop, "subtotal_cop"),
@@ -374,6 +377,31 @@ async function insertPaymentAttempt(
   return attemptId;
 }
 
+async function insertOperationalStatusHistory(
+  connection: PoolConnection,
+  input: {
+    orderId: string;
+    previousStatus: OperationalOrderStatus | null;
+    newStatus: OperationalOrderStatus;
+    changedByUserId: string | null;
+    changeSource: "checkout_cash" | "stripe_webhook" | "staff" | "migration";
+  },
+): Promise<void> {
+  await connection.execute<ResultSetHeader>(
+    `INSERT IGNORE INTO order_status_history (
+      id, order_id, previous_status, new_status, changed_by_user_id, change_source
+    ) VALUES (?, ?, ?, ?, ?, ?)` ,
+    [
+      randomUUID(),
+      input.orderId,
+      input.previousStatus,
+      input.newStatus,
+      input.changedByUserId,
+      input.changeSource,
+    ],
+  );
+}
+
 async function createOrderInTransaction(
   connection: PoolConnection,
   draft: RecalculatedOrderDraft,
@@ -402,9 +430,9 @@ async function createOrderInTransaction(
     `INSERT INTO orders (
       id, creation_idempotency_key, request_fingerprint_sha256,
       client_session_id, client_id, user_id, store_id, payment_method,
-      order_status, payment_status, currency, subtotal_cop,
+      order_status, operational_status, payment_status, currency, subtotal_cop,
       service_fee_cop, total_cop, kitchen_note, confirmed_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'COP', ?, ?, ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'COP', ?, ?, ?, ?, ?)`,
     [
       orderId,
       draft.creationIdempotencyKey,
@@ -415,6 +443,7 @@ async function createOrderInTransaction(
       draft.storeId,
       draft.paymentMethod,
       isStripe ? "pendiente_de_pago" : "confirmado",
+      isStripe ? null : "recibido",
       isStripe ? "pendiente" : "pendiente_en_efectivo",
       draft.subtotalCop,
       draft.serviceFeeCop,
@@ -423,6 +452,16 @@ async function createOrderInTransaction(
       isStripe ? null : new Date(),
     ],
   );
+
+  if (!isStripe) {
+    await insertOperationalStatusHistory(connection, {
+      orderId,
+      previousStatus: null,
+      newStatus: "recibido",
+      changedByUserId: null,
+      changeSource: "checkout_cash",
+    });
+  }
 
   for (const [lineIndex, line] of draft.lines.entries()) {
     const lineId = randomUUID();
@@ -865,7 +904,7 @@ export async function processStripeWebhookEventInTransaction(
     if (
       session.currency?.toUpperCase() !== attempt.order_currency ||
       stripeMinorUnitsToWholeCop(session.amountTotalMinor) !==
-        toSafeInteger(attempt.order_total_cop, "total_cop")
+      toSafeInteger(attempt.order_total_cop, "total_cop")
     ) {
       await finishWebhookEvent(
         connection,
@@ -887,11 +926,20 @@ export async function processStripeWebhookEventInTransaction(
     );
     await connection.execute<ResultSetHeader>(
       `UPDATE orders
-       SET order_status = 'confirmado', payment_status = 'pagado',
+       SET order_status = 'confirmado',
+           operational_status = COALESCE(operational_status, 'recibido'),
+           payment_status = 'pagado',
            confirmed_at = COALESCE(confirmed_at, CURRENT_TIMESTAMP(3))
        WHERE id = ?`,
       [attempt.order_id],
     );
+    await insertOperationalStatusHistory(connection, {
+      orderId: attempt.order_id,
+      previousStatus: null,
+      newStatus: "recibido",
+      changedByUserId: null,
+      changeSource: "stripe_webhook",
+    });
   } else if (attempt.status !== "pagado" && attempt.order_payment_status !== "pagado") {
     const attemptStatus =
       event.eventType === "checkout.session.expired" ? "expirado" : "fallido";

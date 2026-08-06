@@ -222,6 +222,18 @@ export function OrderConfirmationScreen({
 
   useEffect(() => {
     if (
+      loadState.kind !== "loaded" ||
+      loadState.result.state !== "confirmed" ||
+      view !== "tracking"
+    ) {
+      return;
+    }
+    const timer = window.setTimeout(() => void verifyOrder(), 15_000);
+    return () => window.clearTimeout(timer);
+  }, [loadState, verifyOrder, view]);
+
+  useEffect(() => {
+    if (
       clearAttemptedRef.current ||
       cartStatus === "loading" ||
       loadState.kind !== "loaded" ||

@@ -1,3 +1,5 @@
+import type { OperationalOrderStatus } from "@/domain/staff-orders";
+
 export const serverPaymentMethods = ["stripe", "efectivo"] as const;
 export type ServerPaymentMethod = (typeof serverPaymentMethods)[number];
 
@@ -93,6 +95,8 @@ export interface PaymentAttemptRecord {
   updatedAt: string;
 }
 
+export type { OperationalOrderStatus };
+
 export interface PersistedOrder {
   id: string;
   clientSessionId: string;
@@ -101,6 +105,7 @@ export interface PersistedOrder {
   storeId: string;
   paymentMethod: ServerPaymentMethod;
   orderStatus: InternalOrderStatus;
+  operationalStatus: OperationalOrderStatus | null;
   paymentStatus: InternalPaymentStatus;
   currency: "COP";
   subtotalCop: number;
