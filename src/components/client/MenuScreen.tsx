@@ -7,6 +7,7 @@ import type { Category, CategoryId, Product } from "@/domain/models";
 import { provisionalCatalogService } from "@/services/provisional";
 import { ClientBottomNav } from "./ClientBottomNav";
 import { ProductCard } from "./ProductCard";
+import { ClientHeader } from "./ClientHeader";
 import styles from "./MenuScreen.module.css";
 
 type CategoryFilter = "all" | CategoryId;
@@ -60,6 +61,8 @@ export function MenuScreen({ categories, initialProducts }: MenuScreenProps) {
 
   return (
     <div className={styles.page}>
+      <ClientHeader homeLink />
+      {/* Contenido actual del menú */}
       <main id="contenido-principal" className={styles.main}>
         <header className={styles.heading}>
           <h1>Menú</h1>
