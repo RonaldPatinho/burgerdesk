@@ -24,6 +24,7 @@ const order: PersistedOrder = {
   storeId: "sede-centro",
   paymentMethod: "stripe",
   orderStatus: "pendiente_de_pago",
+  operationalStatus: null,
   paymentStatus: "pendiente",
   currency: "COP",
   subtotalCop: 30_400,

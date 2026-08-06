@@ -89,6 +89,7 @@ class FakePersistence implements CheckoutOrderPersistence {
       paymentMethod: draft.paymentMethod,
       orderStatus:
         draft.paymentMethod === "stripe" ? "pendiente_de_pago" : "confirmado",
+      operationalStatus: draft.paymentMethod === "stripe" ? null : "recibido",
       paymentStatus:
         draft.paymentMethod === "stripe"
           ? "pendiente"
@@ -187,6 +188,7 @@ class FakePersistence implements CheckoutOrderPersistence {
     this.orders.set(orderId, {
       ...order,
       orderStatus: paid ? "confirmado" : "pendiente_de_pago",
+      operationalStatus: paid ? "recibido" : null,
       paymentStatus,
       confirmedAt: paid ? now : null,
       paymentAttempts: order.paymentAttempts.map((attempt, index) =>

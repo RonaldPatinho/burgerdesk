@@ -4,6 +4,7 @@ const requiredMigrations = [
   "001_create_order_persistence.sql",
   "002_create_client_profiles.sql",
   "003_create_internal_access.sql",
+  "004_add_operational_order_status.sql",
 ];
 
 const requiredTables = [
@@ -20,6 +21,7 @@ const requiredTables = [
   "internal_sessions",
   "staff_shifts",
   "internal_access_events",
+  "order_status_history",
 ];
 
 const requiredUniqueIndexes = [
@@ -33,6 +35,7 @@ const requiredUniqueIndexes = [
   "uq_internal_users_username_normalized",
   "uq_internal_users_email_normalized",
   "uq_internal_sessions_token_hash",
+  "uq_order_status_history_order_status",
 ];
 
 function requireDatabaseUrl() {
