@@ -2,6 +2,8 @@ import Image from "next/image";
 import { redirect } from "next/navigation";
 import { UserRound } from "lucide-react";
 import type { ReactNode } from "react";
+import { StaffBottomNav } from "@/components/staff/StaffBottomNav";
+import { SkipLink } from "@/components/ui";
 import type { StaffRole } from "@/domain/internal-auth";
 import { getAuthenticatedStaffSession } from "@/server/internal-auth/session";
 import styles from "./staff-layout.module.css";
@@ -25,8 +27,11 @@ export default async function StaffProtectedLayout({
   const session = await getAuthenticatedStaffSession();
   if (!session) redirect("/personal/acceso");
 
+  const currentRoleLabel = roleLabel(session.role);
+
   return (
     <div className={styles.shell}>
+      <SkipLink href="#contenido-principal">Saltar al contenido</SkipLink>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.brand} aria-label="BurgerDesk">
@@ -48,7 +53,14 @@ export default async function StaffProtectedLayout({
           <div className={styles.identity}>
             <div className={styles.identityCopy}>
               <strong>Hola, {firstName(session.fullName)}</strong>
-              <span>{roleLabel(session.role)}</span>
+              <span
+                className={styles.sessionStatus}
+                aria-label={`Sesión activa. Rol ${currentRoleLabel}`}
+                title={`Rol: ${currentRoleLabel}`}
+              >
+                <span aria-hidden="true" />
+                En sesión
+              </span>
             </div>
             <span className={styles.avatar} aria-hidden="true">
               <UserRound />
@@ -57,6 +69,7 @@ export default async function StaffProtectedLayout({
         </div>
       </header>
       {children}
+      <StaffBottomNav />
     </div>
   );
 }
