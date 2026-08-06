@@ -345,3 +345,10 @@
     box-shadow: var(--shadow-raised);
   }
 }
+
+@media (hover: hover) {
+  .orderCard:hover {
+    border-color: var(--color-brand-secondary);
+    background: var(--color-surface-muted);
+  }
+}

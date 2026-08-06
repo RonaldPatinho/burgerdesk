@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Clock3, ReceiptText, RefreshCw } from "lucide-react";
 import {
@@ -293,10 +294,11 @@ export function StaffOrderInbox({
             const statusLabel = staffOrderStatusLabel(order.operationalStatus);
 
             return (
-              <article
+              <Link
                 key={order.id}
                 className={styles.orderCard}
                 data-status={order.operationalStatus}
+                href={`/personal/pedidos/${order.id}`}
               >
                 <div className={styles.orderImageFrame}>
                   {imagePath ? (
@@ -327,7 +329,7 @@ export function StaffOrderInbox({
                     {orderTimeLabel(order.createdAt)}
                   </time>
                 </div>
-              </article>
+              </Link>
             );
           })}
         </section>

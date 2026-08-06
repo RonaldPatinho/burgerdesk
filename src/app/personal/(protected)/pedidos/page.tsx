@@ -18,21 +18,22 @@ function emptySnapshot(): StaffOrderInboxSnapshot {
 }
 
 export default async function StaffOrdersPage() {
+  let snapshot: StaffOrderInboxSnapshot;
+  let initialError: string | undefined;
+
   try {
-    const snapshot = await getStaffOrderInboxSnapshot();
-    return (
-      <div className={styles.page}>
-        <StaffOrderInbox initialSnapshot={snapshot} />
-      </div>
-    );
+    snapshot = await getStaffOrderInboxSnapshot();
   } catch {
-    return (
-      <div className={styles.page}>
-        <StaffOrderInbox
-          initialSnapshot={emptySnapshot()}
-          initialError="No fue posible cargar la bandeja de pedidos."
-        />
-      </div>
-    );
+    snapshot = emptySnapshot();
+    initialError = "No fue posible cargar la bandeja de pedidos.";
   }
+
+  return (
+    <div className={styles.page}>
+      <StaffOrderInbox
+        initialSnapshot={snapshot}
+        initialError={initialError}
+      />
+    </div>
+  );
 }

@@ -241,37 +241,69 @@ function getOrderTracking(
     order.paymentMethod === "stripe"
       ? "Pago validado."
       : "Pago en efectivo al retirar.";
+  const currentStatus =
+    order.operationalStatus === "en_preparacion"
+      ? "preparing"
+      : order.operationalStatus === "listo_para_retirar"
+        ? "ready"
+        : order.operationalStatus === "entregado"
+          ? "delivered"
+          : "received";
+  const statusOrder = [
+    "received",
+    "preparing",
+    "ready",
+    "delivered",
+  ] as const;
+  const currentIndex = statusOrder.indexOf(currentStatus);
 
   return {
-    currentStatus: "preparing",
-    currentLabel: "Preparando",
+    currentStatus,
+    currentLabel:
+      currentStatus === "received"
+        ? "Pedido recibido"
+        : currentStatus === "preparing"
+          ? "Preparando"
+          : currentStatus === "ready"
+            ? "Listo para retirar"
+            : "Entregado",
     steps: [
       {
         status: "received",
         label: "Pedido recibido",
         description: paymentDescription,
-        state: "completed",
+        state: currentIndex === 0 ? "current" : "completed",
         occurredAt: receivedAt,
       },
       {
         status: "preparing",
         label: "En preparación",
         description: "La cocina trabaja en tu orden.",
-        state: "current",
+        state:
+          currentIndex > 1
+            ? "completed"
+            : currentIndex === 1
+              ? "current"
+              : "upcoming",
         occurredAt: null,
       },
       {
         status: "ready",
         label: "Listo para retirar",
         description: "Recibirás una notificación.",
-        state: "upcoming",
+        state:
+          currentIndex > 2
+            ? "completed"
+            : currentIndex === 2
+              ? "current"
+              : "upcoming",
         occurredAt: null,
       },
       {
         status: "delivered",
         label: "Entregado",
         description: "Muestra el código al retirar.",
-        state: "upcoming",
+        state: currentIndex === 3 ? "current" : "upcoming",
         occurredAt: null,
       },
     ],

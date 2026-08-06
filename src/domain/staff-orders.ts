@@ -42,6 +42,53 @@ export interface StaffOrderInboxSnapshot {
   synchronizedAt: string;
 }
 
+export interface StaffOrderDetailOption {
+  id: string;
+  optionId: string;
+  optionName: string;
+  priceCop: number;
+}
+
+export interface StaffOrderDetailLine {
+  id: string;
+  productId: string;
+  productName: string;
+  quantity: number;
+  unitPriceCop: number;
+  lineTotalCop: number;
+  options: readonly StaffOrderDetailOption[];
+}
+
+export interface StaffOrderStatusHistoryEntry {
+  previousStatus: OperationalOrderStatus | null;
+  newStatus: OperationalOrderStatus;
+  changedAt: string;
+}
+
+export interface StaffOrderDetail {
+  id: string;
+  code: string;
+  customerName: string;
+  customerEmail: string | null;
+  fulfillmentLabel: "Retiro";
+  paymentMethod: "stripe" | "efectivo";
+  paymentStatus:
+    | "pendiente"
+    | "pendiente_en_efectivo"
+    | "pagado"
+    | "expirado"
+    | "fallido";
+  operationalStatus: OperationalOrderStatus;
+  subtotalCop: number;
+  serviceFeeCop: number;
+  totalCop: number;
+  kitchenNote: string;
+  createdAt: string;
+  confirmedAt: string | null;
+  lines: readonly StaffOrderDetailLine[];
+  history: readonly StaffOrderStatusHistoryEntry[];
+}
+
 export function isOperationalOrderStatus(
   value: unknown,
 ): value is OperationalOrderStatus {
@@ -69,8 +116,48 @@ export function staffOrderStatusLabel(
   }
 }
 
+export function staffOrderStatusLongLabel(
+  status: OperationalOrderStatus,
+): string {
+  switch (status) {
+    case "recibido":
+      return "Recibido";
+    case "en_preparacion":
+      return "En preparación";
+    case "listo_para_retirar":
+      return "Listo para retirar";
+    case "entregado":
+      return "Entregado";
+    case "cancelado":
+      return "Cancelado";
+  }
+}
+
 export function staffOrderCode(orderId: string): string {
   return `BD-${orderId.replaceAll("-", "").slice(0, 8).toUpperCase()}`;
+}
+
+export function nextOperationalOrderStatus(
+  currentStatus: OperationalOrderStatus,
+): OperationalOrderStatus | null {
+  switch (currentStatus) {
+    case "recibido":
+      return "en_preparacion";
+    case "en_preparacion":
+      return "listo_para_retirar";
+    case "listo_para_retirar":
+      return "entregado";
+    case "entregado":
+    case "cancelado":
+      return null;
+  }
+}
+
+export function canTransitionOperationalOrderStatus(
+  currentStatus: OperationalOrderStatus,
+  nextStatus: OperationalOrderStatus,
+): boolean {
+  return nextOperationalOrderStatus(currentStatus) === nextStatus;
 }
 
 export function calculateStaffOrderIndicators(
