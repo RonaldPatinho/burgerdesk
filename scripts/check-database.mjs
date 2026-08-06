@@ -1,5 +1,11 @@
 import mysql from "mysql2/promise";
 
+const requiredMigrations = [
+  "001_create_order_persistence.sql",
+  "002_create_client_profiles.sql",
+  "003_create_internal_access.sql",
+];
+
 const requiredTables = [
   "schema_migrations",
   "orders",
@@ -7,6 +13,13 @@ const requiredTables = [
   "order_line_options",
   "payment_attempts",
   "stripe_webhook_events",
+  "client_users",
+  "client_sessions",
+  "client_avatars",
+  "internal_users",
+  "internal_sessions",
+  "staff_shifts",
+  "internal_access_events",
 ];
 
 const requiredUniqueIndexes = [
@@ -15,6 +28,11 @@ const requiredUniqueIndexes = [
   "uq_payment_attempts_request_idempotency",
   "uq_payment_attempts_checkout_session",
   "uq_payment_attempts_payment_intent",
+  "uq_client_users_email_normalized",
+  "uq_client_sessions_token_hash",
+  "uq_internal_users_username_normalized",
+  "uq_internal_users_email_normalized",
+  "uq_internal_sessions_token_hash",
 ];
 
 function requireDatabaseUrl() {
@@ -37,6 +55,13 @@ async function checkDatabase() {
     );
     const [migrationRows] = await connection.execute(
       "SELECT COUNT(*) AS migration_count FROM schema_migrations",
+    );
+    const migrationPlaceholders = requiredMigrations.map(() => "?").join(", ");
+    const [requiredMigrationRows] = await connection.execute(
+      `SELECT migration_name
+       FROM schema_migrations
+       WHERE migration_name IN (${migrationPlaceholders})`,
+      requiredMigrations,
     );
     const tablePlaceholders = requiredTables.map(() => "?").join(", ");
     const [tableRows] = await connection.execute(
@@ -64,8 +89,12 @@ async function checkDatabase() {
       throw new Error("INNODB_NOT_AVAILABLE");
     }
 
-    if (Number(migrationRows[0]?.migration_count) < 1) {
+    if (Number(migrationRows[0]?.migration_count) < requiredMigrations.length) {
       throw new Error("MIGRATIONS_NOT_APPLIED");
+    }
+
+    if (requiredMigrationRows.length !== requiredMigrations.length) {
+      throw new Error("REQUIRED_MIGRATIONS_MISSING");
     }
 
     if (
@@ -79,7 +108,9 @@ async function checkDatabase() {
       throw new Error("REQUIRED_UNIQUE_INDEXES_MISSING");
     }
 
-    console.log("Conexión MySQL, InnoDB y migraciones verificadas.");
+    console.log(
+      "Conexión MySQL, InnoDB, migraciones, tablas e índices verificados.",
+    );
   } finally {
     await connection.end();
   }
