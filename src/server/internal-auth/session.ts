@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import {
+  getAdministratorSessionByToken,
   getInternalSessionByToken,
   getStaffSessionByToken,
   INTERNAL_SESSION_LIFETIME_MS,
@@ -19,6 +20,13 @@ export async function getAuthenticatedInternalSession() {
 export async function getAuthenticatedStaffSession() {
   const cookieStore = await cookies();
   return getStaffSessionByToken(
+    cookieStore.get(INTERNAL_SESSION_COOKIE)?.value,
+  );
+}
+
+export async function getAuthenticatedAdministratorSession() {
+  const cookieStore = await cookies();
+  return getAdministratorSessionByToken(
     cookieStore.get(INTERNAL_SESSION_COOKIE)?.value,
   );
 }

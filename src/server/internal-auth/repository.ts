@@ -5,15 +5,17 @@ import type {
   RowDataPacket,
 } from "mysql2/promise";
 import {
+  isAdministratorRole,
   isInternalRole,
   isStaffRole,
   normalizeUsername,
   validateInternalLogin,
+  type AdministratorRole,
   type InternalRole,
   type StaffRole,
-} from "@/domain/internal-auth";
-import { getMySqlPool, withMySqlTransaction } from "@/server/database/mysql";
-import { verifyPassword } from "@/server/auth/password";
+} from "../../domain/internal-auth";
+import { getMySqlPool, withMySqlTransaction } from "../database/mysql";
+import { verifyPassword } from "../auth/password";
 
 export const INTERNAL_SESSION_LIFETIME_MS = 12 * 60 * 60 * 1000;
 
@@ -61,6 +63,11 @@ export interface AuthenticatedInternalSession {
 export interface AuthenticatedStaffSession
   extends Omit<AuthenticatedInternalSession, "role"> {
   role: StaffRole;
+}
+
+export interface AuthenticatedAdministratorSession
+  extends Omit<AuthenticatedInternalSession, "role"> {
+  role: AdministratorRole;
 }
 
 export class InternalAuthRepositoryError extends Error {
@@ -124,10 +131,17 @@ function toAuthenticatedSession(
   };
 }
 
-export async function loginStaff(input: {
-  username: string;
-  password: string;
-}): Promise<{ token: string; session: AuthenticatedStaffSession }> {
+async function loginInternalUser<Role extends InternalRole>(
+  input: {
+    username: string;
+    password: string;
+  },
+  roleGuard: (value: unknown) => value is Role,
+  unauthorizedMessage: string,
+): Promise<{
+  token: string;
+  session: Omit<AuthenticatedInternalSession, "role"> & { role: Role };
+}> {
   const validation = validateInternalLogin(input);
   const normalizedUsername = normalizeUsername(input.username);
 
@@ -159,14 +173,14 @@ export async function loginStaff(input: {
     );
   }
 
-  if (!isStaffRole(user.role)) {
+  if (!roleGuard(user.role)) {
     await recordRejectedLogin(user.id);
     throw new InternalAuthRepositoryError(
       "NOT_AUTHORIZED",
-      "La cuenta no tiene acceso al flujo Personal.",
+      unauthorizedMessage,
     );
   }
-  const staffRole = user.role;
+  const authorizedRole = user.role;
 
   const token = randomBytes(32).toString("base64url");
   const sessionId = randomUUID();
@@ -190,10 +204,35 @@ export async function loginStaff(input: {
       username: user.username,
       fullName: user.full_name,
       email: user.email,
-      role: staffRole,
+      role: authorizedRole,
       expiresAt: expiresAt.toISOString(),
     },
   };
+}
+
+export async function loginStaff(input: {
+  username: string;
+  password: string;
+}): Promise<{ token: string; session: AuthenticatedStaffSession }> {
+  return loginInternalUser(
+    input,
+    isStaffRole,
+    "La cuenta no tiene acceso al flujo Personal.",
+  );
+}
+
+export async function loginAdministrator(input: {
+  username: string;
+  password: string;
+}): Promise<{
+  token: string;
+  session: AuthenticatedAdministratorSession;
+}> {
+  return loginInternalUser(
+    input,
+    isAdministratorRole,
+    "La cuenta no tiene acceso al flujo Administrador.",
+  );
 }
 
 export async function getInternalSessionByToken(
@@ -246,6 +285,20 @@ export async function getStaffSessionByToken(
 ): Promise<AuthenticatedStaffSession | null> {
   const session = await getInternalSessionByToken(token);
   if (!session || !isStaffRole(session.role)) {
+    return null;
+  }
+
+  return {
+    ...session,
+    role: session.role,
+  };
+}
+
+export async function getAdministratorSessionByToken(
+  token: string | undefined,
+): Promise<AuthenticatedAdministratorSession | null> {
+  const session = await getInternalSessionByToken(token);
+  if (!session || !isAdministratorRole(session.role)) {
     return null;
   }
 

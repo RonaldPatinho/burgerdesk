@@ -27,12 +27,28 @@ export const staffRoles = [
 
 export type StaffRole = (typeof staffRoles)[number];
 
+/** Role that may access the Administrator flow. */
+export const administratorRoles = [
+  "administrador",
+] as const satisfies readonly InternalRole[];
+
+export type AdministratorRole = (typeof administratorRoles)[number];
+
 export function isInternalRole(value: unknown): value is InternalRole {
   return typeof value === "string" && internalRoles.some((r) => r === value);
 }
 
 export function isStaffRole(value: unknown): value is StaffRole {
   return typeof value === "string" && staffRoles.some((r) => r === value);
+}
+
+export function isAdministratorRole(
+  value: unknown,
+): value is AdministratorRole {
+  return (
+    typeof value === "string" &&
+    administratorRoles.some((role) => role === value)
+  );
 }
 
 // ---------------------------------------------------------------------------

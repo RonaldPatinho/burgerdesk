@@ -2,7 +2,9 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+  administratorRoles,
   internalRoles,
+  isAdministratorRole,
   isInternalRole,
   isStaffRole,
   normalizeUsername,
@@ -33,6 +35,10 @@ test("los roles de Personal excluyen administrador", () => {
   assert.deepEqual([...staffRoles], ["caja", "cocina", "caja_cocina"]);
 });
 
+test("el flujo Administrador admite únicamente administrador", () => {
+  assert.deepEqual([...administratorRoles], ["administrador"]);
+});
+
 test("isInternalRole acepta los cuatro roles y rechaza valores arbitrarios", () => {
   for (const role of internalRoles) {
     assert.equal(isInternalRole(role), true, `debería aceptar ${role}`);
@@ -49,6 +55,14 @@ test("isStaffRole acepta solo los tres roles operativos", () => {
   assert.equal(isStaffRole("caja_cocina"), true);
   assert.equal(isStaffRole("administrador"), false);
   assert.equal(isStaffRole("gerente"), false);
+});
+
+test("isAdministratorRole acepta solo el rol administrador", () => {
+  assert.equal(isAdministratorRole("administrador"), true);
+  assert.equal(isAdministratorRole("caja"), false);
+  assert.equal(isAdministratorRole("cocina"), false);
+  assert.equal(isAdministratorRole("caja_cocina"), false);
+  assert.equal(isAdministratorRole("gerente"), false);
 });
 
 // ---------------------------------------------------------------------------

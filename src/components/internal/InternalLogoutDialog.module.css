@@ -1,0 +1,26 @@
+.copy {
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-relaxed);
+}
+
+.error {
+  margin-top: var(--space-4);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  border: 0.125rem solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  color: var(--color-danger);
+  background: color-mix(
+    in srgb,
+    var(--color-danger) 7%,
+    var(--color-surface)
+  );
+}
+
+.error svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}

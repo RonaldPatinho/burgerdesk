@@ -1,0 +1,71 @@
+.nav {
+  position: sticky;
+  bottom: 0;
+  z-index: var(--layer-sticky);
+  width: 100%;
+  margin-top: auto;
+  border-top: 0.0625rem solid var(--color-border);
+  padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(
+    in srgb,
+    var(--color-surface) 96%,
+    transparent
+  );
+  backdrop-filter: blur(0.75rem);
+}
+
+.list {
+  min-height: 4.75rem;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  list-style: none;
+  padding: var(--space-1);
+}
+
+.list li {
+  min-width: 0;
+}
+
+.item {
+  min-height: 4.25rem;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-1);
+  border-radius: var(--radius-md);
+  padding: var(--space-1);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.item[data-active] {
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.item[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+
+.icon {
+  width: 1.65rem;
+  height: 1.65rem;
+}
+
+.icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 359px) {
+  .item {
+    font-size: 0.62rem;
+  }
+
+  .icon {
+    width: 1.45rem;
+    height: 1.45rem;
+  }
+}
