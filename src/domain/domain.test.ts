@@ -111,11 +111,10 @@ test("los pedidos provisionales obtienen sus totales desde las líneas", () => {
   });
 });
 
-test("el formato monetario identifica explícitamente COP", () => {
+test("formatea importes COP con signo de dólar y separador colombiano", () => {
   const formatted = formatCop(26_900);
 
-  assert.match(formatted, /COP/);
-  assert.match(formatted, /26[.]900/);
+  assert.equal(formatted, "$26.900");
 });
 
 test("rechaza cantidades fuera de la política provisional", () => {

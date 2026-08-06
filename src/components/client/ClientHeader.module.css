@@ -35,6 +35,12 @@
   background: var(--color-surface);
 }
 
+.logoFrame img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .wordmark {
   font-size: 1.375rem;
   line-height: 1;
@@ -64,7 +70,8 @@
 }
 
 .cartLink {
-  background: var(--color-brand-primary);
+  color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
 }
 
 .profileLink svg,
