@@ -10,6 +10,7 @@ import {
 
 const runId = randomUUID();
 const sessionPrefix = `integration-admin-finance-${runId}`;
+const storeId = `integration-admin-finance-${runId}`;
 const now = new Date("2026-08-06T16:30:00.000Z");
 
 const orderIds = {
@@ -187,12 +188,13 @@ async function seedOrder(order: SeedOrder): Promise<void> {
       order_status, operational_status, payment_status, currency,
       subtotal_cop, service_fee_cop, total_cop, kitchen_note,
       confirmed_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, NULL, NULL, 'sede-principal', ?, ?, ?, ?, 'COP', ?, 0, ?, '', ?, ?, ?)`,
+    ) VALUES (?, ?, ?, ?, NULL, NULL, ?, ?, ?, ?, ?, 'COP', ?, 0, ?, '', ?, ?, ?)`,
     [
       order.id,
       `admin-finance-order-${runId}-${order.sequence}`,
       String(order.sequence).padStart(64, "0"),
       `${sessionPrefix}-${order.sequence}`,
+      storeId,
       order.paymentMethod,
       order.orderStatus,
       order.operationalStatus,
@@ -260,7 +262,7 @@ after(async () => {
 });
 
 test("calcula ventas pagadas, pedidos confirmados, variación, serie y ranking", async () => {
-  const snapshot = await getAdministratorFinancialSnapshot({ now });
+  const snapshot = await getAdministratorFinancialSnapshot({ now, storeId });
 
   assert.equal(snapshot.summary.paidSalesCop, 50_000);
   assert.equal(snapshot.summary.paidOrderCount, 2);
@@ -289,11 +291,13 @@ test("calcula ventas pagadas, pedidos confirmados, variación, serie y ranking",
 test("pagina y filtra transacciones sin sumar pagos pendientes ni duplicar intentos", async () => {
   const firstPage = await getAdministratorTransactions({
     now,
+    storeId,
     page: 1,
     pageSize: 2,
   });
   const secondPage = await getAdministratorTransactions({
     now,
+    storeId,
     page: 2,
     pageSize: 2,
   });
@@ -311,6 +315,7 @@ test("pagina y filtra transacciones sin sumar pagos pendientes ni duplicar inten
 
   const paidStripe = await getAdministratorTransactions({
     now,
+    storeId,
     paymentMethod: "stripe",
     paymentStatus: "pagado",
   });
@@ -324,6 +329,7 @@ test("pagina y filtra transacciones sin sumar pagos pendientes ni duplicar inten
 
   const searched = await getAdministratorTransactions({
     now,
+    storeId,
     search: paidStripe.items[0]?.orderCode,
   });
   assert.equal(searched.totalItems, 1);
@@ -332,8 +338,14 @@ test("pagina y filtra transacciones sin sumar pagos pendientes ni duplicar inten
 
 test("devuelve contratos vacíos y evita división entre cero fuera del período", async () => {
   const emptyNow = new Date("2035-01-10T16:30:00.000Z");
-  const snapshot = await getAdministratorFinancialSnapshot({ now: emptyNow });
-  const transactions = await getAdministratorTransactions({ now: emptyNow });
+  const snapshot = await getAdministratorFinancialSnapshot({
+    now: emptyNow,
+    storeId,
+  });
+  const transactions = await getAdministratorTransactions({
+    now: emptyNow,
+    storeId,
+  });
 
   assert.deepEqual(snapshot.summary, {
     paidSalesCop: 0,

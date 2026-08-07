@@ -1,5 +1,5 @@
 export const ADMINISTRATOR_BUSINESS_TIME_ZONE = "America/Caracas";
-export const ADMINISTRATOR_DEFAULT_STORE_ID = "sede-principal";
+export const ADMINISTRATOR_DEFAULT_STORE_ID = "sede-centro";
 
 export const administratorFinancialPeriodKinds = ["day", "month"] as const;
 export type AdministratorFinancialPeriodKind =
