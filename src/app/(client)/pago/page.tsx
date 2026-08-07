@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { PaymentScreen } from "@/components/client/PaymentScreen";
-import { provisionalCatalogService } from "@/services/provisional";
+import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
   title: "Pago seguro",
 };
+
+export const dynamic = "force-dynamic";
 
 export interface PaymentPageProps {
   searchParams: Promise<{ estado?: string | string[] }>;
@@ -13,8 +15,8 @@ export interface PaymentPageProps {
 export default async function PaymentPage({ searchParams }: PaymentPageProps) {
   const [{ estado }, products, stores] = await Promise.all([
     searchParams,
-    provisionalCatalogService.listProducts(),
-    provisionalCatalogService.listStores(),
+    catalogService.listProducts(),
+    catalogService.listStores(),
   ]);
   const returnState =
     estado === "cancelado" || estado === "expirado" || estado === "fallido"

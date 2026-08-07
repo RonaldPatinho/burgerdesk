@@ -16,6 +16,7 @@ import {
 import { OrderPersistenceError } from "@/server/orders/mysql-order-repository";
 import { StripeConfigurationError } from "@/server/stripe/client";
 import { getAuthenticatedClientSession } from "@/server/auth/session";
+import { catalogService } from "@/services/catalog";
 
 export const runtime = "nodejs";
 
@@ -60,6 +61,10 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const parsedInput = parseCheckoutRequest(await readJsonBody(request));
     const authenticatedSession = await getAuthenticatedClientSession();
+    const [catalogProducts, catalogStores] = await Promise.all([
+      catalogService.listProducts(),
+      catalogService.listStores(),
+    ]);
     const input = {
       ...parsedInput,
       clientSession: authenticatedSession
@@ -73,6 +78,10 @@ export async function POST(request: Request): Promise<Response> {
             clientId: null,
             userId: null,
           },
+      catalogSnapshot: {
+        products: catalogProducts,
+        pickupStore: catalogStores[0] ?? null,
+      },
     };
     const result = await createCheckout(input, {
       persistence: mysqlCheckoutOrderPersistence,

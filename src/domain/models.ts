@@ -7,7 +7,7 @@ export const categoryIds = [
   "bebidas",
 ] as const;
 
-export type CategoryId = (typeof categoryIds)[number];
+export type CategoryId = string;
 
 export const productIds = [
   "la-bendita",
@@ -18,7 +18,7 @@ export const productIds = [
   "combo-gloria",
 ] as const;
 
-export type ProductId = (typeof productIds)[number];
+export type ProductId = string;
 
 export const productOptionIds = [
   "cheddar-extra",
@@ -27,7 +27,7 @@ export const productOptionIds = [
   "salsa-incluida",
 ] as const;
 
-export type ProductOptionId = (typeof productOptionIds)[number];
+export type ProductOptionId = string;
 
 export type CopAmount = number;
 export type IsoDateTime = string;
@@ -54,7 +54,7 @@ export interface Product {
   summary: string;
   detailDescription?: string;
   priceCop: CopAmount;
-  imagePath: `/images/${string}`;
+  imagePath: string;
   categoryIds: readonly CategoryId[];
   available: boolean;
   badge?: string;
@@ -68,7 +68,7 @@ export interface Promotion {
   title: string;
   description: string;
   actionLabel: string;
-  imagePath: `/images/${string}`;
+  imagePath: string;
   productId: ProductId;
 }
 

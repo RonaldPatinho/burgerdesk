@@ -1,14 +1,11 @@
-import {
-  categoryIds,
-  productIds,
-  productOptionIds,
-  type Cart,
-  type CartItem,
-  type CategoryId,
-  type ClientSession,
-  type Order,
-  type ProductId,
-  type ProductOptionId,
+import type {
+  Cart,
+  CartItem,
+  CategoryId,
+  ClientSession,
+  Order,
+  ProductId,
+  ProductOptionId,
 } from "./models";
 import {
   CLIENT_STORAGE_VERSION,
@@ -25,6 +22,9 @@ export interface ValidationIssue {
 export type ValidationResult<T> =
   | { success: true; data: T }
   | { success: false; issues: readonly ValidationIssue[] };
+
+const CATALOG_ENTITY_ID_MAX_LENGTH = 64;
+const catalogEntityIdPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -53,16 +53,25 @@ function includesValue<T extends string>(
   return typeof value === "string" && values.some((item) => item === value);
 }
 
+export function isCatalogEntityId(value: unknown): value is string {
+  return (
+    typeof value === "string" &&
+    value.length >= 1 &&
+    value.length <= CATALOG_ENTITY_ID_MAX_LENGTH &&
+    catalogEntityIdPattern.test(value)
+  );
+}
+
 export function isCategoryId(value: unknown): value is CategoryId {
-  return includesValue(categoryIds, value);
+  return isCatalogEntityId(value);
 }
 
 export function isProductId(value: unknown): value is ProductId {
-  return includesValue(productIds, value);
+  return isCatalogEntityId(value);
 }
 
 export function isProductOptionId(value: unknown): value is ProductOptionId {
-  return includesValue(productOptionIds, value);
+  return isCatalogEntityId(value);
 }
 
 function isCartItem(value: unknown): value is CartItem {

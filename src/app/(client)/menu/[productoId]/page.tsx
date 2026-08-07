@@ -1,19 +1,14 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductDetailScreen } from "@/components/client/ProductDetailScreen";
-import { productIds } from "@/domain/models";
 import { isProductId } from "@/domain/validation";
-import { provisionalCatalogService } from "@/services/provisional";
+import { catalogService } from "@/services/catalog";
 
 interface ProductDetailPageProps {
   params: Promise<{ productoId: string }>;
 }
 
-export const dynamicParams = false;
-
-export function generateStaticParams() {
-  return productIds.map((productoId) => ({ productoId }));
-}
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,
@@ -24,7 +19,7 @@ export async function generateMetadata({
     return { title: "Producto" };
   }
 
-  const product = await provisionalCatalogService.getProduct(productoId);
+  const product = await catalogService.getProduct(productoId);
   return { title: product?.name ?? "Producto" };
 }
 
@@ -37,9 +32,9 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const product = await provisionalCatalogService.getProduct(productoId);
+  const product = await catalogService.getProduct(productoId);
 
-  if (!product) {
+  if (!product || !product.available) {
     notFound();
   }
 

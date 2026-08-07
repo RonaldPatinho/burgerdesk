@@ -66,12 +66,27 @@ test("rechaza moneda, precio o total enviados por el navegador", () => {
   }
 });
 
-test("rechaza productos ajenos a la fuente canonica", () => {
-  const body = validBody();
-  body.cart = {
+test("acepta ids dinámicos bien formados y rechaza identificadores inseguros", () => {
+  const dynamicBody = validBody();
+  dynamicBody.cart = {
     items: [
       {
-        productId: "producto-manipulado",
+        productId: "producto-dinamico",
+        optionIds: ["extra-dinamico"],
+        quantity: 1,
+      },
+    ],
+    kitchenNote: "",
+  };
+
+  const parsed = parseCheckoutRequest(dynamicBody);
+  assert.equal(parsed.cart.items[0]?.productId, "producto-dinamico");
+
+  const invalidBody = validBody();
+  invalidBody.cart = {
+    items: [
+      {
+        productId: "../producto",
         optionIds: [],
         quantity: 1,
       },
@@ -80,7 +95,7 @@ test("rechaza productos ajenos a la fuente canonica", () => {
   };
 
   assert.throws(
-    () => parseCheckoutRequest(body),
+    () => parseCheckoutRequest(invalidBody),
     (error: unknown) =>
       error instanceof CheckoutRequestError &&
       error.code === "INVALID_PRODUCT",

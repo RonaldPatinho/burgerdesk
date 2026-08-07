@@ -2,8 +2,8 @@ import { createHash } from "node:crypto";
 import {
   MAX_QUANTITY_PER_CART_LINE,
   SERVICE_FEE_COP,
-  products,
-  stores,
+  products as provisionalProducts,
+  stores as provisionalStores,
 } from "../../data/provisional";
 import type {
   Cart,
@@ -75,7 +75,13 @@ function normalizeCart(input: CheckoutRequestInput): Cart {
 export function buildCanonicalCheckout(
   input: CheckoutRequestInput,
 ): CanonicalCheckout {
-  const pickupStore = stores[0];
+  const usesPersistentCatalog = input.catalogSnapshot !== undefined;
+  const catalogProducts =
+    input.catalogSnapshot?.products ?? provisionalProducts;
+  const pickupStore = usesPersistentCatalog
+    ? input.catalogSnapshot?.pickupStore ?? null
+    : provisionalStores[0] ?? null;
+
   if (!pickupStore) {
     throw new CheckoutValidationError(
       "CART_INVALID",
@@ -88,7 +94,7 @@ export function buildCanonicalCheckout(
   try {
     pricing = calculateCartPricing(
       cart,
-      products,
+      catalogProducts,
       SERVICE_FEE_COP,
       MAX_QUANTITY_PER_CART_LINE,
     );
@@ -100,7 +106,7 @@ export function buildCanonicalCheckout(
   }
 
   const lines = pricing.lines.map((pricedLine) => {
-    const product = products.find(
+    const product = catalogProducts.find(
       (candidate) => candidate.id === pricedLine.productId,
     );
     if (!product) {

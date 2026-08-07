@@ -1,15 +1,17 @@
 import type { Metadata } from "next";
 import { CartScreen } from "@/components/client/CartScreen";
-import { provisionalCatalogService } from "@/services/provisional";
+import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
   title: "Carrito",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function CartPage() {
   const [products, stores] = await Promise.all([
-    provisionalCatalogService.listProducts(),
-    provisionalCatalogService.listStores(),
+    catalogService.listProducts(),
+    catalogService.listStores(),
   ]);
 
   return <CartScreen products={products} pickupStore={stores[0] ?? null} />;

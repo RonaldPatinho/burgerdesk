@@ -1,16 +1,18 @@
 import type { Metadata } from "next";
 import { HomeScreen } from "@/components/client/HomeScreen";
-import { provisionalCatalogService } from "@/services/provisional";
+import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
   title: "Inicio",
 };
 
+export const dynamic = "force-dynamic";
+
 export default async function HomePage() {
   const [categories, featuredProducts, promotions] = await Promise.all([
-    provisionalCatalogService.listCategories("home"),
-    provisionalCatalogService.listFeaturedProducts(),
-    provisionalCatalogService.listPromotions(),
+    catalogService.listCategories("home"),
+    catalogService.listFeaturedProducts(),
+    catalogService.listPromotions(),
   ]);
 
   return (

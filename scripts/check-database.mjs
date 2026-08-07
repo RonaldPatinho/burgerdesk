@@ -6,6 +6,7 @@ const requiredMigrations = [
   "003_create_internal_access.sql",
   "004_add_operational_order_status.sql",
   "005_add_financial_read_indexes.sql",
+  "006_create_catalog_persistence.sql",
 ];
 
 const requiredTables = [
@@ -23,6 +24,13 @@ const requiredTables = [
   "staff_shifts",
   "internal_access_events",
   "order_status_history",
+  "catalog_categories",
+  "catalog_category_placements",
+  "catalog_products",
+  "catalog_product_categories",
+  "catalog_product_options",
+  "catalog_product_default_options",
+  "catalog_product_images",
 ];
 
 const requiredUniqueIndexes = [
@@ -43,6 +51,13 @@ const requiredIndexes = [
   ...requiredUniqueIndexes,
   "idx_orders_finance_period",
   "idx_payment_attempts_finance_period",
+  "idx_catalog_categories_active_order",
+  "idx_catalog_category_placements_placement",
+  "idx_catalog_products_available_order",
+  "idx_catalog_products_featured",
+  "idx_catalog_product_categories_category",
+  "idx_catalog_product_options_available_order",
+  "idx_catalog_product_images_sha",
 ];
 
 function requireDatabaseUrl() {

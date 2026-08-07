@@ -1,8 +1,10 @@
 import type {
   Cart,
   OrderStatus,
+  Product,
   ProductId,
   ProductOptionId,
+  StoreLocation,
 } from "../../domain/models";
 import type {
   CreatedInternalOrder,
@@ -19,6 +21,11 @@ export interface CheckoutCartItemInput {
   quantity: number;
 }
 
+export interface CheckoutCatalogSnapshot {
+  products: readonly Product[];
+  pickupStore: StoreLocation | null;
+}
+
 export interface CheckoutRequestInput {
   requestId: string;
   paymentMethod: CheckoutPaymentMethod;
@@ -33,6 +40,7 @@ export interface CheckoutRequestInput {
     kitchenNote: string;
   };
   retryOrderId: string | null;
+  catalogSnapshot?: CheckoutCatalogSnapshot;
 }
 
 export interface CanonicalCheckout {

@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { AdminDashboardScreen } from "@/components/admin/AdminDashboardScreen";
 import { getAdministratorFinancialSnapshot } from "@/server/admin-finance/repository";
 import { getAuthenticatedAdministratorSession } from "@/server/internal-auth/session";
-import { provisionalCatalogService } from "@/services/provisional";
+import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
   title: "Administrador",
@@ -18,7 +18,7 @@ export default async function AdministratorDashboardPage() {
 
   const [snapshot, activeProducts] = await Promise.all([
     getAdministratorFinancialSnapshot({ periodKind: "day" }),
-    provisionalCatalogService.listProducts({ availableOnly: true }),
+    catalogService.listProducts({ availableOnly: true }),
   ]);
 
   return (
