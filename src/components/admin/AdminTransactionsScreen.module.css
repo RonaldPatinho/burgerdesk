@@ -1,0 +1,523 @@
+.main {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: 0.95rem;
+  padding: 0.8rem var(--space-4) 1.25rem;
+  background: var(--color-surface);
+}
+
+.heading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.heading h1 {
+  font-size: clamp(2rem, 9vw, 2.45rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.heading p {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.periodTabs {
+  width: min(100%, 13.5rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.periodTab {
+  min-height: var(--touch-target-min);
+  display: grid;
+  place-items: center;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  font-size: 1rem;
+}
+
+.periodTab[data-active] {
+  border-color: color-mix(
+    in srgb,
+    var(--color-brand-secondary) 68%,
+    var(--color-surface)
+  );
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 72%,
+    var(--color-surface)
+  );
+}
+
+.filters {
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  overflow: clip;
+}
+
+.filters summary {
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  list-style: none;
+  font-size: 0.86rem;
+}
+
+.filters summary::-webkit-details-marker {
+  display: none;
+}
+
+.filters summary::after {
+  content: "+";
+  width: 1.5rem;
+  height: 1.5rem;
+  display: grid;
+  place-items: center;
+  margin-left: auto;
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
+}
+
+.filters[open] summary::after {
+  content: "−";
+}
+
+.filters summary strong {
+  min-width: 1.5rem;
+  height: 1.5rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 0.72rem;
+}
+
+.filterForm {
+  display: grid;
+  gap: 0.8rem;
+  border-top: 0.0625rem solid var(--color-border);
+  padding: 0.8rem;
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 28%,
+    var(--color-surface)
+  );
+}
+
+.filterForm label {
+  min-width: 0;
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+}
+
+.searchControl {
+  min-height: var(--touch-target-min);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.55rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.85rem;
+  padding-inline: 0.7rem;
+  background: var(--color-surface);
+}
+
+.searchControl svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  color: var(--color-brand-primary);
+}
+
+.searchControl input {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-size: 0.82rem;
+}
+
+.selectGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.selectGrid select {
+  min-width: 0;
+  min-height: var(--touch-target-min);
+  width: 100%;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 0.85rem;
+  padding: 0 0.65rem;
+  background: var(--color-surface);
+  font-size: 0.76rem;
+}
+
+.filterActions {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.filterActions button,
+.filterActions a {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  padding-inline: 1rem;
+  font-size: 0.78rem;
+}
+
+.filterActions button {
+  border: 0;
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.filterActions a {
+  border: 0.0625rem solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.history {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.historyMeta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.historyMeta h2 {
+  font-size: 1rem;
+}
+
+.historyMeta span {
+  color: color-mix(in srgb, var(--color-text) 65%, transparent);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.transactionList {
+  display: grid;
+  gap: 0.7rem;
+  list-style: none;
+}
+
+.transactionCard {
+  min-height: 4.15rem;
+  display: grid;
+  grid-template-columns: 2.75rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1rem;
+  padding: 0.6rem 0.72rem;
+  background: var(--color-surface);
+}
+
+.transactionIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 82%,
+    var(--color-surface)
+  );
+}
+
+.transactionIcon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.transactionInfo {
+  min-width: 0;
+  display: grid;
+  gap: 0.28rem;
+}
+
+.transactionInfo h3 {
+  min-width: 0;
+  font-size: 0.86rem;
+  line-height: 1.18;
+}
+
+.statusText[data-tone="pending"] {
+  color: color-mix(in srgb, var(--color-brand-primary) 88%, var(--color-text));
+}
+
+.statusText[data-tone="danger"] {
+  color: var(--color-danger);
+}
+
+.transactionInfo p {
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
+.amount {
+  max-width: 6.8rem;
+  font-size: clamp(1rem, 5vw, 1.25rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.emptyState {
+  min-height: 8rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.7rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.15rem;
+  padding: var(--space-5);
+  text-align: center;
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 52%,
+    var(--color-surface)
+  );
+}
+
+.emptyState > svg {
+  width: 1.8rem;
+  height: 1.8rem;
+  color: var(--color-brand-primary);
+}
+
+.emptyState h3 {
+  font-size: 1rem;
+}
+
+.emptyState p {
+  margin-top: 0.25rem;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.pagination {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.pagination a,
+.pagination > span {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  padding-inline: 0.55rem;
+  font-size: 0.7rem;
+}
+
+.pagination > span[aria-disabled="true"] {
+  opacity: 0.45;
+}
+
+.pagination svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.pagination strong {
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.filteredSummary {
+  margin-top: -0.25rem;
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.totalCard {
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  border-radius: 1rem;
+  padding: 0.85rem 1rem;
+  background: var(--color-surface-cream);
+}
+
+.totalCard h2 {
+  font-size: 0.95rem;
+}
+
+.totalCard strong {
+  font-size: clamp(1.45rem, 7vw, 1.8rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.loadingMain {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 0.95rem;
+  padding: 0.8rem var(--space-4) 1.25rem;
+}
+
+.loadingHeading,
+.loadingTabs span,
+.loadingFilter,
+.loadingRows span,
+.loadingTotal {
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 76%,
+    var(--color-surface)
+  );
+}
+
+.loadingHeading {
+  width: 13rem;
+  height: 3.4rem;
+  border-radius: var(--radius-sm);
+}
+
+.loadingTabs {
+  width: min(100%, 13.5rem);
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.loadingTabs span {
+  min-height: var(--touch-target-min);
+  border-radius: var(--radius-pill);
+}
+
+.loadingFilter {
+  min-height: var(--touch-target-min);
+  border-radius: 1rem;
+}
+
+.loadingRows {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.loadingRows span {
+  min-height: 4.15rem;
+  border-radius: 1rem;
+}
+
+.loadingTotal {
+  min-height: 4.25rem;
+  border-radius: 1rem;
+}
+
+.errorState {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.errorCard {
+  width: 100%;
+  display: grid;
+  gap: var(--space-4);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.errorCard h1 {
+  font-size: var(--font-size-xl);
+}
+
+.errorCard p {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+@media (max-width: 359px) {
+  .main,
+  .loadingMain {
+    padding-inline: var(--space-3);
+  }
+
+  .heading h1 {
+    font-size: 1.9rem;
+  }
+
+  .transactionCard {
+    grid-template-columns: 2.35rem minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    padding-inline: 0.6rem;
+  }
+
+  .transactionIcon {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .transactionInfo h3 {
+    font-size: 0.78rem;
+  }
+
+  .transactionInfo p {
+    font-size: 0.68rem;
+  }
+
+  .amount {
+    font-size: 0.95rem;
+  }
+
+  .selectGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pagination {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pagination strong {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    text-align: center;
+  }
+}

@@ -489,7 +489,12 @@ export function normalizeAdministratorTransactionQuery(
     typeof input.search === "string"
       ? input.search.trim().toLowerCase().slice(0, 64)
       : "";
-  const search = rawSearch.startsWith("bd-") ? rawSearch.slice(3) : rawSearch;
+  const searchWithoutHash = rawSearch.startsWith("#")
+    ? rawSearch.slice(1)
+    : rawSearch;
+  const search = searchWithoutHash.startsWith("bd-")
+    ? searchWithoutHash.slice(3)
+    : searchWithoutHash;
 
   return {
     period: resolveAdministratorFinancialPeriod({

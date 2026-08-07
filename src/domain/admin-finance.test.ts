@@ -67,6 +67,12 @@ test("normaliza paginación, búsqueda y filtros sin aceptar valores libres", ()
   assert.equal(query.paymentStatus, "pagado");
   assert.equal(query.storeId, "sede-principal");
   assert.equal(query.period.kind, "month");
+
+  const visibleCode = normalizeAdministratorTransactionQuery({
+    search: "  #BD-ABCD1234  ",
+    now: new Date("2026-08-06T16:30:00.000Z"),
+  });
+  assert.equal(visibleCode.search, "abcd1234");
 });
 
 test("evita divisiones inválidas en variación y ticket promedio", () => {

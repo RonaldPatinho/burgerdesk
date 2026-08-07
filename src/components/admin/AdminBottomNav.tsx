@@ -36,7 +36,7 @@ const items: readonly NavigationItem[] = [
     label: "Ventas",
     href: "/administrador/transacciones",
     icon: <ReceiptText />,
-    available: false,
+    available: true,
   },
   {
     label: "Reportes",
