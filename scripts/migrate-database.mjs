@@ -24,6 +24,21 @@ function safeErrorCode(error) {
   return typeof error.code === "string" ? error.code : "UNKNOWN";
 }
 
+function sha256(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
+function normalizeMigrationSql(sql) {
+  return sql.replace(/\r\n?/g, "\n");
+}
+
+function migrationChecksums(sql) {
+  return {
+    raw: sha256(sql),
+    canonical: sha256(normalizeMigrationSql(sql)),
+  };
+}
+
 async function migrate() {
   const connection = await mysql.createConnection(requireDatabaseUrl());
   let lockAcquired = false;
@@ -58,7 +73,7 @@ async function migrate() {
 
     for (const migrationFile of migrationFiles) {
       const sql = await readFile(resolve(migrationsDirectory, migrationFile), "utf8");
-      const checksum = createHash("sha256").update(sql).digest("hex");
+      const checksums = migrationChecksums(sql);
       const [existingRows] = await connection.execute(
         "SELECT checksum_sha256 FROM schema_migrations WHERE migration_name = ?",
         [migrationFile],
@@ -66,7 +81,11 @@ async function migrate() {
       const existing = existingRows[0];
 
       if (existing) {
-        if (existing.checksum_sha256 !== checksum) {
+        const checksumMatches =
+          existing.checksum_sha256 === checksums.raw ||
+          existing.checksum_sha256 === checksums.canonical;
+
+        if (!checksumMatches) {
           throw new Error("MIGRATION_CHECKSUM_MISMATCH");
         }
 
@@ -85,7 +104,7 @@ async function migrate() {
 
       await connection.execute(
         "INSERT INTO schema_migrations (migration_name, checksum_sha256) VALUES (?, ?)",
-        [migrationFile, checksum],
+        [migrationFile, checksums.canonical],
       );
       console.log(`Migración aplicada: ${migrationFile}`);
     }
