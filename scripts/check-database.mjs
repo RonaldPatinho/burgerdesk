@@ -5,6 +5,7 @@ const requiredMigrations = [
   "002_create_client_profiles.sql",
   "003_create_internal_access.sql",
   "004_add_operational_order_status.sql",
+  "005_add_financial_read_indexes.sql",
 ];
 
 const requiredTables = [
@@ -36,6 +37,12 @@ const requiredUniqueIndexes = [
   "uq_internal_users_email_normalized",
   "uq_internal_sessions_token_hash",
   "uq_order_status_history_order_status",
+];
+
+const requiredIndexes = [
+  ...requiredUniqueIndexes,
+  "idx_orders_finance_period",
+  "idx_payment_attempts_finance_period",
 ];
 
 function requireDatabaseUrl() {
@@ -74,14 +81,13 @@ async function checkDatabase() {
          AND TABLE_NAME IN (${tablePlaceholders})`,
       requiredTables,
     );
-    const indexPlaceholders = requiredUniqueIndexes.map(() => "?").join(", ");
+    const indexPlaceholders = requiredIndexes.map(() => "?").join(", ");
     const [indexRows] = await connection.execute(
       `SELECT DISTINCT INDEX_NAME
        FROM information_schema.STATISTICS
        WHERE TABLE_SCHEMA = DATABASE()
-         AND NON_UNIQUE = 0
          AND INDEX_NAME IN (${indexPlaceholders})`,
-      requiredUniqueIndexes,
+      requiredIndexes,
     );
 
     if (!databaseRows[0]?.database_name) {
@@ -107,8 +113,8 @@ async function checkDatabase() {
       throw new Error("REQUIRED_INNODB_TABLES_MISSING");
     }
 
-    if (indexRows.length !== requiredUniqueIndexes.length) {
-      throw new Error("REQUIRED_UNIQUE_INDEXES_MISSING");
+    if (indexRows.length !== requiredIndexes.length) {
+      throw new Error("REQUIRED_INDEXES_MISSING");
     }
 
     console.log(
