@@ -68,8 +68,10 @@ export default async function StaffProtectedLayout({
           </div>
         </div>
       </header>
-      {children}
-      <StaffBottomNav />
+      <div className={styles.body}>
+        <StaffBottomNav />
+        <div className={styles.content}>{children}</div>
+      </div>
     </div>
   );
 }

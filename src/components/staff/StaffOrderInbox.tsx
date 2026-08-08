@@ -306,7 +306,7 @@ export function StaffOrderInbox({
                       src={imagePath}
                       alt={order.firstProductName ?? "Producto del pedido"}
                       fill
-                      sizes="(max-width: 430px) 28vw, 112px"
+                      sizes="(max-width: 768px) 28vw, 140px"
                       className={styles.orderImage}
                     />
                   ) : (

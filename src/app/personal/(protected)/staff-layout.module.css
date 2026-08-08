@@ -4,6 +4,14 @@
   background: var(--color-surface);
 }
 
+.body {
+  min-height: calc(100dvh - 5.75rem);
+}
+
+.content {
+  min-width: 0;
+}
+
 .header {
   width: 100%;
   color: var(--color-surface);
@@ -144,5 +152,18 @@
   .avatar {
     width: var(--touch-target-min);
     height: var(--touch-target-min);
+  }
+}
+
+@media (min-width: 48rem) {
+  .headerInner {
+    max-width: none;
+    padding-inline: var(--space-8);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: 16rem minmax(0, 1fr);
+    align-items: stretch;
   }
 }

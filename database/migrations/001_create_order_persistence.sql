@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS orders (
     CHECK (payment_status IN ('pendiente', 'pendiente_en_efectivo', 'pagado', 'expirado', 'fallido')),
   CONSTRAINT chk_orders_currency CHECK (currency = 'COP'),
   CONSTRAINT chk_orders_totals CHECK (total_cop = subtotal_cop + service_fee_cop)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -52,7 +52,7 @@ CREATE TABLE IF NOT EXISTS order_lines (
   CONSTRAINT chk_order_lines_quantity CHECK (quantity >= 1),
   CONSTRAINT chk_order_lines_total CHECK (line_total_cop = unit_price_cop * quantity),
   CONSTRAINT chk_order_lines_prices CHECK (unit_price_cop >= unit_base_price_cop)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS order_line_options (
   KEY idx_order_line_options_option (option_id),
   CONSTRAINT fk_order_line_options_line
     FOREIGN KEY (order_line_id) REFERENCES order_lines (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS payment_attempts (
   CONSTRAINT chk_payment_attempts_number CHECK (attempt_number >= 1),
   CONSTRAINT chk_payment_attempts_status
     CHECK (status IN ('pendiente', 'pagado', 'expirado', 'fallido'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -121,4 +121,4 @@ CREATE TABLE IF NOT EXISTS stripe_webhook_events (
     FOREIGN KEY (payment_attempt_id) REFERENCES payment_attempts (id) ON DELETE SET NULL,
   CONSTRAINT chk_webhook_events_status
     CHECK (processing_status IN ('procesando', 'procesado', 'ignorado'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS client_users (
   PRIMARY KEY (id),
   UNIQUE KEY uq_client_users_email_normalized (email_normalized),
   KEY idx_client_users_active (active)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS client_sessions (
   KEY idx_client_sessions_user_active (user_id, revoked_at, expires_at),
   CONSTRAINT fk_client_sessions_user
     FOREIGN KEY (user_id) REFERENCES client_users (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
@@ -50,7 +50,7 @@ CREATE TABLE IF NOT EXISTS client_avatars (
     CHECK (mime_type IN ('image/jpeg', 'image/png', 'image/webp')),
   CONSTRAINT chk_client_avatars_size
     CHECK (size_bytes >= 1 AND size_bytes <= 5242880)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 
