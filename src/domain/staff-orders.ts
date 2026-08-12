@@ -106,7 +106,7 @@ export function staffOrderStatusLabel(
     case "recibido":
       return "Nuevo";
     case "en_preparacion":
-      return "Preparación";
+      return "Preparando";
     case "listo_para_retirar":
       return "Listo";
     case "entregado":

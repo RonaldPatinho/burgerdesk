@@ -256,6 +256,7 @@ export function StaffOrderInbox({
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1>Bandeja de pedidos</h1>
+          <p>Panel en tiempo real</p>
         </div>
 
         <div className={styles.profileCard}>
@@ -292,6 +293,18 @@ export function StaffOrderInbox({
           </button>
         ))}
       </div>
+
+      <section
+        className={styles.mobileIndicators}
+        aria-label="Indicadores rápidos de pedidos"
+        aria-busy={syncing || undefined}
+      >
+        <strong>Indicadores rápidos</strong>
+        <span>
+          Nuevos {snapshot.indicators.nuevos} · Preparación{" "}
+          {snapshot.indicators.preparacion} · Listos {snapshot.indicators.listos}
+        </span>
+      </section>
 
       <div className={styles.content}>
         <section className={styles.ordersArea} aria-label="Pedidos activos">
