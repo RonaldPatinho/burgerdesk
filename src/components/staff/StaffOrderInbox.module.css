@@ -11,19 +11,85 @@
   background: var(--color-surface);
 }
 
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
 .heading {
-  display: grid;
-  gap: var(--space-1);
+  min-width: 0;
 }
 
 .heading h1 {
-  font-size: clamp(2rem, 9vw, 2.45rem);
+  font-size: clamp(1.9rem, 8vw, 2.45rem);
   line-height: var(--line-height-tight);
   letter-spacing: -0.035em;
 }
 
-.heading p {
-  font-size: var(--font-size-lg);
+.profileCard {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.profileCopy {
+  min-width: 0;
+  display: grid;
+  justify-items: end;
+  gap: var(--space-1);
+  text-align: right;
+}
+
+.welcomeText {
+  max-width: 8rem;
+  overflow: hidden;
+  font-size: var(--font-size-sm);
+  line-height: 1.1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turnBadge {
+  max-width: 7.5rem;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-pill);
+  padding: 0.2rem var(--space-2);
+  color: var(--color-surface);
+  background: var(--color-brand-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.turnBadge > span {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background: var(--color-brand-secondary);
+}
+
+.avatar svg {
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .filters {
@@ -49,28 +115,9 @@
   background: var(--color-text);
 }
 
-.indicators {
-  min-height: 4.25rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  border: 0.125rem solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-  background: var(--color-surface);
-}
-
-.indicators strong {
-  flex: 0 0 auto;
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
-}
-
-.indicators span {
-  min-width: 0;
-  font-size: var(--font-size-xs);
-  text-align: right;
+.content {
+  display: grid;
+  gap: var(--space-6);
 }
 
 .inlineError {
@@ -107,9 +154,9 @@
 .orderCard {
   min-height: 9.5rem;
   display: grid;
-  grid-template-columns: 7.5rem minmax(0, 1fr) auto;
+  grid-template-columns: 7rem minmax(0, 1fr) auto;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-4);
   border: 0.125rem solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-3);
@@ -139,31 +186,29 @@
   transform: scale(1.08);
 }
 
-.orderCopy {
+.orderDetails {
   min-width: 0;
-  align-self: stretch;
   display: grid;
-  align-content: center;
   gap: var(--space-2);
 }
 
-.orderCopy h2 {
-  font-size: clamp(1.15rem, 5.7vw, 1.45rem);
+.orderDetails h2 {
+  font-size: clamp(1.1rem, 5.5vw, 1.4rem);
   line-height: var(--line-height-tight);
 }
 
-.orderCopy p {
+.orderDetails p {
   font-size: var(--font-size-sm);
   line-height: 1.25;
 }
 
-.orderCopy strong {
-  font-size: clamp(1.15rem, 5.8vw, 1.4rem);
+.orderDetails strong {
+  font-size: clamp(1.1rem, 5.6vw, 1.35rem);
   line-height: 1;
 }
 
-.orderMeta {
-  min-width: 5.5rem;
+.orderSide {
+  min-width: 4.5rem;
   align-self: stretch;
   display: flex;
   flex-direction: column;
@@ -173,6 +218,8 @@
 }
 
 .statusBadge {
+  min-width: 0;
+  max-width: 100%;
   min-height: 2.35rem;
   display: inline-flex;
   align-items: center;
@@ -185,7 +232,7 @@
   white-space: nowrap;
 }
 
-.statusBadge > span {
+.statusBadgeDot {
   width: 0.8rem;
   height: 0.8rem;
   flex: 0 0 auto;
@@ -193,20 +240,44 @@
   background: var(--color-danger);
 }
 
+.statusBadgeLabel {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .orderCard[data-status="recibido"] .statusBadge {
   color: var(--color-surface);
   background: var(--color-danger);
 }
 
-.orderCard[data-status="recibido"] .statusBadge > span {
+.orderCard[data-status="recibido"] .statusBadgeDot {
   background: var(--color-surface);
 }
 
-.orderCard[data-status="listo_para_retirar"] .statusBadge > span {
+.orderCard[data-status="en_preparacion"] .statusBadge {
+  color: var(--color-surface);
+  background: var(--color-brand-secondary);
+}
+
+.orderCard[data-status="en_preparacion"] .statusBadgeDot {
+  background: var(--color-surface);
+}
+
+.orderCard[data-status="listo_para_retirar"] .statusBadge {
+  color: var(--color-surface);
   background: var(--color-brand-primary);
 }
 
-.orderMeta time {
+.orderCard[data-status="listo_para_retirar"] .statusBadgeDot {
+  background: var(--color-surface);
+}
+
+.orderSide time {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-size: var(--font-size-xs);
   white-space: nowrap;
 }
@@ -276,6 +347,80 @@
   color: var(--color-danger);
 }
 
+.summaryPanel {
+  align-self: start;
+  display: grid;
+  gap: var(--space-5);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  background: var(--color-surface);
+}
+
+.summaryTitle {
+  font-size: clamp(1.35rem, 6vw, 1.6rem);
+  line-height: var(--line-height-tight);
+}
+
+.summaryList {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.summaryItem {
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-sm);
+}
+
+.summaryItem > span {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summaryItem strong {
+  font-size: var(--font-size-lg);
+  white-space: nowrap;
+}
+
+.summaryDot {
+  width: 0.8rem;
+  height: 0.8rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: var(--color-danger);
+}
+
+.summaryItem[data-tone="preparacion"] .summaryDot {
+  background: var(--color-brand-secondary);
+}
+
+.summaryItem[data-tone="listos"] .summaryDot {
+  background: var(--color-brand-primary);
+}
+
+.actionButton {
+  min-height: 3.5rem;
+  width: 100%;
+}
+
+.lastUpdate {
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  text-align: center;
+}
+
 .visuallyHidden {
   position: absolute;
   width: 1px;
@@ -288,12 +433,12 @@
 
 @media (max-width: 399px) {
   .orderCard {
-    grid-template-columns: 6.5rem minmax(0, 1fr) auto;
-    gap: var(--space-2);
+    grid-template-columns: 6rem minmax(0, 1fr) auto;
+    gap: var(--space-3);
   }
 
-  .orderMeta {
-    min-width: 4.8rem;
+  .orderSide {
+    min-width: 4rem;
   }
 
   .statusBadge {
@@ -311,20 +456,11 @@
     font-size: 0.7rem;
   }
 
-  .indicators {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .indicators span {
-    text-align: left;
-  }
-
   .orderCard {
     grid-template-columns: 5.75rem minmax(0, 1fr);
   }
 
-  .orderMeta {
+  .orderSide {
     grid-column: 1 / -1;
     width: 100%;
     min-width: 0;
@@ -348,6 +484,7 @@
 
 @media (min-width: 48rem) {
   .main {
+    min-height: 100dvh;
     max-width: 80rem;
     margin-inline: auto;
     padding: var(--space-8) var(--space-8) var(--space-12);
@@ -360,7 +497,7 @@
 
   .filters {
     width: fit-content;
-    max-width: 26rem;
+    max-width: 47.125rem;
   }
 
   .orderList {
@@ -373,7 +510,14 @@
   }
 }
 
-@media (min-width: 80rem) {
+@media (min-width: 64rem) {
+  .content {
+    grid-template-columns: minmax(0, 1fr) 19.625rem;
+    align-items: start;
+  }
+}
+
+@media (min-width: 96rem) {
   .orderList {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

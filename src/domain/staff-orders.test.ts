@@ -62,7 +62,7 @@ test("reconoce únicamente estados operativos y filtros documentados", () => {
 
 test("presenta etiquetas operativas comprensibles", () => {
   assert.equal(staffOrderStatusLabel("recibido"), "Nuevo");
-  assert.equal(staffOrderStatusLabel("en_preparacion"), "Preparando");
+  assert.equal(staffOrderStatusLabel("en_preparacion"), "Preparación");
   assert.equal(staffOrderStatusLongLabel("listo_para_retirar"), "Listo para retirar");
   assert.equal(staffOrderStatusLongLabel("entregado"), "Entregado");
 });

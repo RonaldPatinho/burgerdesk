@@ -12,6 +12,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loading?: boolean;
   loadingLabel?: string;
   leadingIcon?: ReactNode;
+  inverse?: boolean;
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -25,6 +26,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       loading = false,
       loadingLabel = "Cargando",
       leadingIcon,
+      inverse = false,
       disabled,
       type = "button",
       ...props
@@ -42,6 +44,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         data-variant={variant}
         data-size={size}
         data-full-width={fullWidth || undefined}
+        data-inverse={inverse || undefined}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
       >

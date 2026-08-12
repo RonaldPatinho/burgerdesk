@@ -156,14 +156,16 @@
 }
 
 @media (min-width: 48rem) {
-  .headerInner {
-    max-width: none;
-    padding-inline: var(--space-8);
+  /* En escritorio el perfil vive en la cabecera de cada página y el
+     logo en la barra lateral, por eso se oculta el encabezado. */
+  .header {
+    display: none;
   }
 
   .body {
+    min-height: 100dvh;
     display: grid;
-    grid-template-columns: 16rem minmax(0, 1fr);
+    grid-template-columns: 19.25rem minmax(0, 1fr);
     align-items: stretch;
   }
 }

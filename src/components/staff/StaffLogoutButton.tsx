@@ -3,14 +3,24 @@
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { useRef, useState } from "react";
-import { Button } from "@/components/ui";
+import { Button, type ButtonProps } from "@/components/ui";
 import styles from "./StaffLogoutButton.module.css";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-export function StaffLogoutButton() {
+interface StaffLogoutButtonProps {
+  variant?: ButtonProps["variant"];
+  inverse?: boolean;
+  className?: string;
+}
+
+export function StaffLogoutButton({
+  variant = "secondary",
+  inverse = false,
+  className,
+}: StaffLogoutButtonProps) {
   const router = useRouter();
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,11 +71,13 @@ export function StaffLogoutButton() {
       ) : null}
       <Button
         type="button"
-        variant="secondary"
+        variant={variant}
+        inverse={inverse}
         fullWidth
         loading={pending}
         loadingLabel="Cerrando sesión"
         leadingIcon={<LogOut />}
+        className={className}
         onClick={handleLogout}
       >
         Cerrar sesión

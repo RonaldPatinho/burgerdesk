@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { StaffOrderInbox } from "@/components/staff/StaffOrderInbox";
 import type { StaffOrderInboxSnapshot } from "@/domain/staff-orders";
+import { getAuthenticatedStaffSession } from "@/server/internal-auth/session";
 import { getStaffOrderInboxSnapshot } from "@/server/staff-orders/repository";
 import styles from "./page.module.css";
 
@@ -8,6 +9,10 @@ export const metadata: Metadata = {
   title: "Bandeja del personal",
   description: "Bandeja operativa del personal de BurgerDesk.",
 };
+
+function firstName(fullName: string): string {
+  return fullName.trim().split(/\s+/)[0] || "Personal";
+}
 
 function emptySnapshot(): StaffOrderInboxSnapshot {
   return {
@@ -18,19 +23,22 @@ function emptySnapshot(): StaffOrderInboxSnapshot {
 }
 
 export default async function StaffOrdersPage() {
-  let snapshot: StaffOrderInboxSnapshot;
-  let initialError: string | undefined;
+  const [session, snapshotOrError] = await Promise.all([
+    getAuthenticatedStaffSession(),
+    getStaffOrderInboxSnapshot().then(
+      (snapshot) => ({ snapshot }) as const,
+      () => ({ error: "No fue posible cargar la bandeja de pedidos." }) as const,
+    ),
+  ]);
 
-  try {
-    snapshot = await getStaffOrderInboxSnapshot();
-  } catch {
-    snapshot = emptySnapshot();
-    initialError = "No fue posible cargar la bandeja de pedidos.";
-  }
+  const snapshot =
+    "error" in snapshotOrError ? emptySnapshot() : snapshotOrError.snapshot;
+  const initialError = "error" in snapshotOrError ? snapshotOrError.error : null;
 
   return (
     <div className={styles.page}>
       <StaffOrderInbox
+        staffName={session ? firstName(session.fullName) : "Personal"}
         initialSnapshot={snapshot}
         initialError={initialError}
       />
