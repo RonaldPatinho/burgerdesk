@@ -3,7 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Clock3, ReceiptText, RefreshCw } from "lucide-react";
+import {
+  Clock3,
+  ReceiptText,
+  RefreshCw,
+  UserRound,
+} from "lucide-react";
 import {
   useCallback,
   useEffect,
@@ -27,6 +32,7 @@ import styles from "./StaffOrderInbox.module.css";
 const POLL_INTERVAL_MS = 15_000;
 
 interface StaffOrderInboxProps {
+  staffName: string;
   initialSnapshot: StaffOrderInboxSnapshot;
   initialError?: string | null;
 }
@@ -67,7 +73,7 @@ function isInboxSnapshot(value: unknown): value is StaffOrderInboxSnapshot {
   );
 }
 
-function orderTimeLabel(isoDate: string): string {
+function timeLabel(isoDate: string): string {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "—";
 
@@ -112,7 +118,14 @@ function emptyCopy(filter: StaffInboxFilter): {
   };
 }
 
+const summaryRows = [
+  ["nuevos", "Nuevos"],
+  ["preparacion", "En preparación"],
+  ["listos", "Listos"],
+] as const;
+
 export function StaffOrderInbox({
+  staffName,
   initialSnapshot,
   initialError = null,
 }: StaffOrderInboxProps) {
@@ -240,10 +253,24 @@ export function StaffOrderInbox({
 
   return (
     <main id="contenido-principal" className={styles.main}>
-      <div className={styles.heading}>
-        <h1>Bandeja de pedidos</h1>
-        <p>Panel en tiempo real</p>
-      </div>
+      <header className={styles.header}>
+        <div className={styles.heading}>
+          <h1>Bandeja de pedidos</h1>
+        </div>
+
+        <div className={styles.profileCard}>
+          <div className={styles.profileCopy}>
+            <span className={styles.welcomeText}>Hola, {staffName}</span>
+            <span className={styles.turnBadge}>
+              <span aria-hidden="true" />
+              En turno
+            </span>
+          </div>
+          <span className={styles.avatar} aria-hidden="true">
+            <UserRound />
+          </span>
+        </div>
+      </header>
 
       <div className={styles.filters} role="group" aria-label="Filtrar pedidos">
         {(
@@ -266,115 +293,146 @@ export function StaffOrderInbox({
         ))}
       </div>
 
-      <section
-        className={styles.indicators}
-        aria-label="Indicadores rápidos de pedidos"
-        aria-busy={syncing || undefined}
-      >
-        <strong>Indicadores rápidos</strong>
-        <span>
-          Nuevos {snapshot.indicators.nuevos} · Preparación{" "}
-          {snapshot.indicators.preparacion} · Listos {snapshot.indicators.listos}
-        </span>
-      </section>
+      <div className={styles.content}>
+        <section className={styles.ordersArea} aria-label="Pedidos activos">
+          {error && snapshot.orders.length > 0 ? (
+            <div className={styles.inlineError} role="alert">
+              <span>{error}</span>
+              <button type="button" onClick={() => void refresh(true)}>
+                Reintentar
+              </button>
+            </div>
+          ) : null}
 
-      {error && snapshot.orders.length > 0 ? (
-        <div className={styles.inlineError} role="alert">
-          <span>{error}</span>
-          <button type="button" onClick={() => void refresh(true)}>
-            Reintentar
-          </button>
-        </div>
-      ) : null}
+          {visibleOrders.length > 0 ? (
+            <div className={styles.orderList}>
+              {visibleOrders.map((order) => {
+                const imagePath = productImagePath(order.firstProductId);
+                const statusLabel = staffOrderStatusLabel(
+                  order.operationalStatus,
+                );
 
-      {visibleOrders.length > 0 ? (
-        <section className={styles.orderList} aria-label="Pedidos activos">
-          {visibleOrders.map((order) => {
-            const imagePath = productImagePath(order.firstProductId);
-            const statusLabel = staffOrderStatusLabel(order.operationalStatus);
-
-            return (
-              <Link
-                key={order.id}
-                className={styles.orderCard}
-                data-status={order.operationalStatus}
-                href={`/personal/pedidos/${order.id}`}
-              >
-                <div className={styles.orderImageFrame}>
-                  {imagePath ? (
-                    <Image
-                      src={imagePath}
-                      alt={order.firstProductName ?? "Producto del pedido"}
-                      fill
-                      sizes="(max-width: 430px) 28vw, 112px"
-                      className={styles.orderImage}
-                    />
-                  ) : (
-                    <ReceiptText aria-hidden="true" />
-                  )}
-                </div>
-
-                <div className={styles.orderCopy}>
-                  <h2>Pedido #{order.code}</h2>
-                  <p>{itemSummary(order)}</p>
-                  <strong>{formatCop(order.totalCop)}</strong>
-                </div>
-
-                <div className={styles.orderMeta}>
-                  <span className={styles.statusBadge}>
-                    <span aria-hidden="true" />
-                    {statusLabel}
-                  </span>
-                  <time dateTime={order.createdAt}>
-                    {orderTimeLabel(order.createdAt)}
-                  </time>
-                </div>
-              </Link>
-            );
-          })}
-        </section>
-      ) : (
-        <div className={styles.emptyStack}>
-          <section
-            className={styles.emptyState}
-            role={error ? "alert" : "status"}
-          >
-            <span className={styles.emptyIcon} aria-hidden="true">
-              <ReceiptText />
-            </span>
-            <div>
-              <h2>{noOrdersCopy.title}</h2>
-              <p>{noOrdersCopy.description}</p>
-              {error ? (
-                <div className={styles.retryAction}>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    loading={syncing}
-                    loadingLabel="Actualizando"
-                    leadingIcon={<RefreshCw />}
-                    onClick={() => void refresh(true)}
+                return (
+                  <Link
+                    key={order.id}
+                    className={styles.orderCard}
+                    data-status={order.operationalStatus}
+                    href={`/personal/pedidos/${order.id}`}
                   >
-                    Reintentar
-                  </Button>
-                </div>
-              ) : null}
-            </div>
-          </section>
+                    <div className={styles.orderImageFrame}>
+                      {imagePath ? (
+                        <Image
+                          src={imagePath}
+                          alt={order.firstProductName ?? "Producto del pedido"}
+                          fill
+                          sizes="(max-width: 768px) 28vw, 120px"
+                          className={styles.orderImage}
+                        />
+                      ) : (
+                        <ReceiptText aria-hidden="true" />
+                      )}
+                    </div>
 
-          <section className={styles.syncNotice} aria-label="Sincronización">
-            <Clock3 aria-hidden="true" />
-            <div>
-              <h2>Actualización automática</h2>
-              <p>
-                {syncing
-                  ? "Sincronizando la bandeja…"
-                  : "La bandeja se mantiene sincronizada."}
-              </p>
+                    <div className={styles.orderDetails}>
+                      <h2>Pedido #{order.code}</h2>
+                      <p>{itemSummary(order)}</p>
+                      <strong>{formatCop(order.totalCop)}</strong>
+                    </div>
+
+                    <div className={styles.orderSide}>
+                      <span className={styles.statusBadge}>
+                        <span className={styles.statusBadgeDot} aria-hidden="true" />
+                        <span className={styles.statusBadgeLabel}>
+                          {statusLabel}
+                        </span>
+                      </span>
+                      <time dateTime={order.createdAt}>
+                        Pedido - {timeLabel(order.createdAt)}
+                      </time>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          </section>
-        </div>
-      )}
+          ) : (
+            <div className={styles.emptyStack}>
+              <section
+                className={styles.emptyState}
+                role={error ? "alert" : "status"}
+              >
+                <span className={styles.emptyIcon} aria-hidden="true">
+                  <ReceiptText />
+                </span>
+                <div>
+                  <h2>{noOrdersCopy.title}</h2>
+                  <p>{noOrdersCopy.description}</p>
+                  {error ? (
+                    <div className={styles.retryAction}>
+                      <Button
+                        type="button"
+                        variant="secondary"
+                        loading={syncing}
+                        loadingLabel="Actualizando"
+                        leadingIcon={<RefreshCw />}
+                        onClick={() => void refresh(true)}
+                      >
+                        Reintentar
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+
+              <section
+                className={styles.syncNotice}
+                aria-label="Sincronización"
+              >
+                <Clock3 aria-hidden="true" />
+                <div>
+                  <h2>Actualización automática</h2>
+                  <p>
+                    {syncing
+                      ? "Sincronizando la bandeja…"
+                      : "La bandeja se mantiene sincronizada."}
+                  </p>
+                </div>
+              </section>
+            </div>
+          )}
+        </section>
+
+        <aside className={styles.summaryPanel} aria-label="Resumen de pedidos">
+          <h2 className={styles.summaryTitle}>Datos de pedidos</h2>
+
+          <ul className={styles.summaryList}>
+            {summaryRows.map(([key, label]) => (
+              <li key={key} className={styles.summaryItem} data-tone={key}>
+                <span>
+                  <span className={styles.summaryDot} aria-hidden="true" />
+                  {label}
+                </span>
+                <strong>{snapshot.indicators[key]}</strong>
+              </li>
+            ))}
+          </ul>
+
+          <Button
+            type="button"
+            className={styles.actionButton}
+            loading={syncing}
+            loadingLabel="Actualizando"
+            leadingIcon={<RefreshCw />}
+            onClick={() => void refresh(true)}
+          >
+            Actualizar bandeja
+          </Button>
+
+          <p className={styles.lastUpdate}>
+            Última actualización -{" "}
+            {syncing ? "Sincronizando…" : timeLabel(snapshot.synchronizedAt)}
+          </p>
+        </aside>
+      </div>
 
       <p className={styles.visuallyHidden} aria-live="polite" aria-atomic="true">
         {announcement}

@@ -217,3 +217,29 @@
     box-shadow: var(--shadow-raised);
   }
 }
+
+@media (min-width: 48rem) {
+  .headerInner {
+    max-width: none;
+    padding-inline: var(--space-8);
+  }
+
+  .main {
+    max-width: none;
+    margin-inline: 0;
+    padding: var(--space-10) var(--space-8) var(--space-12);
+    justify-items: center;
+    box-shadow: none;
+  }
+
+  .heading,
+  .accessCard,
+  .securityNotice {
+    width: 100%;
+    max-width: 30rem;
+  }
+
+  .accessCard {
+    padding: var(--space-8);
+  }
+}

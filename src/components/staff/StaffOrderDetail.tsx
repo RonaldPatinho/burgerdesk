@@ -253,7 +253,7 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
                       src={imagePath}
                       alt={line.productName}
                       fill
-                      sizes="(max-width: 430px) 28vw, 116px"
+                      sizes="(max-width: 768px) 28vw, 140px"
                       className={styles.productImage}
                     />
                   ) : (

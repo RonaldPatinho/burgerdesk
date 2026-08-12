@@ -59,7 +59,7 @@ export default async function StaffProtectedLayout({
                 title={`Rol: ${currentRoleLabel}`}
               >
                 <span aria-hidden="true" />
-                En sesión
+                En turno
               </span>
             </div>
             <span className={styles.avatar} aria-hidden="true">
@@ -68,8 +68,10 @@ export default async function StaffProtectedLayout({
           </div>
         </div>
       </header>
-      {children}
-      <StaffBottomNav />
+      <div className={styles.body}>
+        <StaffBottomNav roleLabel={currentRoleLabel} />
+        <div className={styles.content}>{children}</div>
+      </div>
     </div>
   );
 }

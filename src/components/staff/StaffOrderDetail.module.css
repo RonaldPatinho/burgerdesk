@@ -366,3 +366,22 @@
     box-shadow: var(--shadow-raised);
   }
 }
+
+@media (min-width: 48rem) {
+  .main {
+    max-width: 80rem;
+    margin-inline: auto;
+    padding: var(--space-8) var(--space-8) var(--space-12);
+    box-shadow: none;
+  }
+
+  .productList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .updateButton[data-full-width="true"] {
+    width: auto;
+    min-width: 16rem;
+    justify-self: start;
+  }
+}

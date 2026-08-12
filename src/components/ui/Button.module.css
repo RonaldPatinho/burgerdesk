@@ -48,6 +48,10 @@
   color: var(--color-text);
 }
 
+.button[data-inverse="true"][data-variant="ghost"] {
+  color: var(--color-surface);
+}
+
 .button:disabled {
   opacity: 0.55;
 }
@@ -80,6 +84,14 @@
   .button[data-variant="secondary"]:not(:disabled):hover,
   .button[data-variant="ghost"]:not(:disabled):hover {
     background: var(--color-surface-cream);
+  }
+
+  .button[data-inverse="true"][data-variant="ghost"]:not(:disabled):hover {
+    background: color-mix(
+      in srgb,
+      var(--color-surface) 12%,
+      transparent
+    );
   }
 }
 

@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS order_status_history (
     ),
   CONSTRAINT chk_order_status_history_source
     CHECK (change_source IN ('checkout_cash', 'stripe_webhook', 'staff', 'migration'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --> statement-breakpoint
 

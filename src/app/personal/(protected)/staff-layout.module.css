@@ -4,6 +4,14 @@
   background: var(--color-surface);
 }
 
+.body {
+  min-height: calc(100dvh - 5.75rem);
+}
+
+.content {
+  min-width: 0;
+}
+
 .header {
   width: 100%;
   color: var(--color-surface);
@@ -144,5 +152,20 @@
   .avatar {
     width: var(--touch-target-min);
     height: var(--touch-target-min);
+  }
+}
+
+@media (min-width: 48rem) {
+  /* En escritorio el perfil vive en la cabecera de cada página y el
+     logo en la barra lateral, por eso se oculta el encabezado. */
+  .header {
+    display: none;
+  }
+
+  .body {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 19.25rem minmax(0, 1fr);
+    align-items: stretch;
   }
 }
