@@ -20,6 +20,8 @@
 
 .heading {
   min-width: 0;
+  display: grid;
+  gap: var(--space-1);
 }
 
 .heading h1 {
@@ -28,9 +30,14 @@
   letter-spacing: -0.035em;
 }
 
+.heading p {
+  font-size: var(--font-size-md);
+  line-height: 1.35;
+}
+
 .profileCard {
   flex: 0 0 auto;
-  display: flex;
+  display: none;
   align-items: center;
   gap: var(--space-3);
 }
@@ -115,6 +122,36 @@
   background: var(--color-text);
 }
 
+.mobileIndicators {
+  min-height: 4.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+}
+
+.mobileIndicators strong {
+  flex: 0 0 auto;
+  color: var(--color-danger);
+}
+
+.mobileIndicators span {
+  min-width: 0;
+  text-align: right;
+  line-height: 1.35;
+}
+
+.content,
+.ordersArea,
+.orderList {
+  min-width: 0;
+}
+
 .content {
   display: grid;
   gap: var(--space-6);
@@ -154,9 +191,13 @@
 .orderCard {
   min-height: 9.5rem;
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1fr) auto;
+  grid-template-columns: 5.75rem minmax(0, 1fr);
+  grid-template-areas:
+    "image details"
+    "image side";
   align-items: center;
-  gap: var(--space-4);
+  column-gap: var(--space-3);
+  row-gap: var(--space-2);
   border: 0.125rem solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-3);
@@ -164,6 +205,7 @@
 }
 
 .orderImageFrame {
+  grid-area: image;
   position: relative;
   width: 100%;
   aspect-ratio: 1;
@@ -187,6 +229,7 @@
 }
 
 .orderDetails {
+  grid-area: details;
   min-width: 0;
   display: grid;
   gap: var(--space-2);
@@ -208,13 +251,15 @@
 }
 
 .orderSide {
-  min-width: 4.5rem;
-  align-self: stretch;
+  grid-area: side;
+  width: 100%;
+  min-width: 0;
+  align-self: start;
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  flex-direction: row;
+  align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
 .statusBadge {
@@ -276,6 +321,7 @@
 
 .orderSide time {
   max-width: 100%;
+  margin-left: auto;
   overflow: hidden;
   text-overflow: ellipsis;
   font-size: var(--font-size-xs);
@@ -349,7 +395,7 @@
 
 .summaryPanel {
   align-self: start;
-  display: grid;
+  display: none;
   gap: var(--space-5);
   border: 0.125rem solid var(--color-border);
   border-radius: var(--radius-xl);
@@ -433,16 +479,12 @@
 
 @media (max-width: 399px) {
   .orderCard {
-    grid-template-columns: 6rem minmax(0, 1fr) auto;
-    gap: var(--space-3);
-  }
-
-  .orderSide {
-    min-width: 4rem;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
   }
 
   .statusBadge {
-    padding-inline: var(--space-2);
+    min-height: 2.1rem;
+    padding: var(--space-1) var(--space-2);
   }
 }
 
@@ -457,15 +499,7 @@
   }
 
   .orderCard {
-    grid-template-columns: 5.75rem minmax(0, 1fr);
-  }
-
-  .orderSide {
-    grid-column: 1 / -1;
-    width: 100%;
-    min-width: 0;
-    flex-direction: row;
-    align-items: center;
+    grid-template-columns: 5.25rem minmax(0, 1fr);
   }
 
   .emptyState {
@@ -491,8 +525,20 @@
     box-shadow: none;
   }
 
+  .header {
+    align-items: flex-start;
+  }
+
   .heading h1 {
     font-size: clamp(2rem, 3vw, 2.75rem);
+  }
+
+  .heading p {
+    font-size: var(--font-size-lg);
+  }
+
+  .profileCard {
+    display: flex;
   }
 
   .filters {
@@ -500,26 +546,76 @@
     max-width: 47.125rem;
   }
 
+  .mobileIndicators {
+    display: none;
+  }
+
+  .summaryPanel {
+    display: grid;
+  }
+
   .orderList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
   }
 
   .orderCard {
-    min-height: 11.5rem;
+    min-height: 10.5rem;
+    grid-template-columns: 6.5rem minmax(0, 1fr);
+    grid-template-areas:
+      "image details"
+      "image side";
+    align-items: center;
+    column-gap: var(--space-4);
+    row-gap: var(--space-3);
+  }
+
+  .orderImageFrame {
+    grid-area: image;
+  }
+
+  .orderDetails {
+    grid-area: details;
+    align-self: end;
+  }
+
+  .orderDetails h2 {
+    font-size: 1.25rem;
+    overflow-wrap: break-word;
+    word-break: normal;
+  }
+
+  .orderDetails strong {
+    font-size: 1.25rem;
+  }
+
+  .orderSide {
+    grid-area: side;
+    width: 100%;
+    min-width: 0;
+    align-self: start;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+  }
+
+  .orderSide time {
+    margin-left: auto;
+    text-align: right;
   }
 }
 
 @media (min-width: 64rem) {
   .content {
-    grid-template-columns: minmax(0, 1fr) 19.625rem;
+    grid-template-columns: minmax(0, 1fr) 17.5rem;
     align-items: start;
   }
 }
 
-@media (min-width: 96rem) {
+@media (min-width: 80rem) {
   .orderList {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
