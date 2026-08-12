@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS catalog_categories (
   updated_at DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3) ON UPDATE CURRENT_TIMESTAMP(3),
   PRIMARY KEY (id),
   KEY idx_catalog_categories_active_order (active, sort_order, id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS catalog_category_placements (
     FOREIGN KEY (category_id) REFERENCES catalog_categories (id) ON DELETE CASCADE,
   CONSTRAINT chk_catalog_category_placements_value
     CHECK (placement IN ('home', 'menu'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS catalog_products (
   KEY idx_catalog_products_featured (featured_order, archived_at, available),
   CONSTRAINT chk_catalog_products_image_path
     CHECK (CHAR_LENGTH(image_path) >= 1)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS catalog_product_categories (
     FOREIGN KEY (product_id) REFERENCES catalog_products (id) ON DELETE CASCADE,
   CONSTRAINT fk_catalog_product_categories_category
     FOREIGN KEY (category_id) REFERENCES catalog_categories (id) ON DELETE RESTRICT
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS catalog_product_options (
   KEY idx_catalog_product_options_available_order (product_id, available, sort_order, id),
   CONSTRAINT fk_catalog_product_options_product
     FOREIGN KEY (product_id) REFERENCES catalog_products (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS catalog_product_default_options (
     FOREIGN KEY (product_id, option_id)
     REFERENCES catalog_product_options (product_id, id)
     ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS catalog_product_images (
     CHECK (mime_type IN ('image/jpeg', 'image/png', 'image/webp')),
   CONSTRAINT chk_catalog_product_images_size
     CHECK (size_bytes >= 1 AND size_bytes <= 5242880)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 

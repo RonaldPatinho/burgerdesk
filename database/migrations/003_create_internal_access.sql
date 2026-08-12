@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS internal_users (
   KEY idx_internal_users_role_active (role, active),
   CONSTRAINT chk_internal_users_role
     CHECK (role IN ('caja', 'cocina', 'caja_cocina', 'administrador'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS internal_sessions (
   KEY idx_internal_sessions_user_active (user_id, revoked_at, expires_at),
   CONSTRAINT fk_internal_sessions_user
     FOREIGN KEY (user_id) REFERENCES internal_users (id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS staff_shifts (
       (status = 'activo' AND ends_at IS NULL)
       OR (status = 'cerrado' AND ends_at IS NOT NULL)
     )
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --> statement-breakpoint
 
@@ -72,4 +72,4 @@ CREATE TABLE IF NOT EXISTS internal_access_events (
     FOREIGN KEY (user_id) REFERENCES internal_users (id) ON DELETE SET NULL,
   CONSTRAINT chk_internal_access_events_type
     CHECK (event_type IN ('login_success', 'login_failure', 'logout'))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
