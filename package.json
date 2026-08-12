@@ -10,7 +10,8 @@
     "test": "node --env-file-if-exists=.env.local --test --experimental-transform-types --loader ./scripts/typescript-test-loader.mjs \"src/**/*.test.ts\"",
     "db:migrate": "node --env-file-if-exists=.env.local scripts/migrate-database.mjs",
     "db:check": "node --env-file-if-exists=.env.local scripts/check-database.mjs",
-    "db:create-internal-user": "node --env-file-if-exists=.env.local --experimental-transform-types scripts/create-internal-user.mjs"
+    "db:create-internal-user": "node --env-file-if-exists=.env.local --experimental-transform-types scripts/create-internal-user.mjs",
+    "db:seed-demo-orders": "node --env-file-if-exists=.env.local scripts/seed-demo-orders.mjs"
   },
   "dependencies": {
     "lucide-react": "^1.28.0",
