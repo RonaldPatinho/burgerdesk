@@ -14,6 +14,7 @@ interface StaffBottomNavProps {
 export function StaffBottomNav({ roleLabel }: StaffBottomNavProps) {
   const pathname = usePathname();
   const ordersActive = pathname.startsWith("/personal/pedidos");
+  const profileActive = pathname.startsWith("/personal/perfil");
 
   return (
     <nav className={styles.nav} aria-label="Navegación principal del personal">
@@ -50,15 +51,18 @@ export function StaffBottomNav({ roleLabel }: StaffBottomNavProps) {
             </Link>
           </li>
           <li>
-            <span
+            <Link
               className={styles.item}
-              data-disabled="true"
-              aria-disabled="true"
-              title="El perfil se habilitará en el hito P4"
+              data-active={profileActive || undefined}
+              href="/personal/perfil"
+              aria-current={profileActive ? "page" : undefined}
             >
               <UserRound aria-hidden="true" />
               <span>Perfil</span>
-            </span>
+              {profileActive ? (
+                <span className={styles.activeDot} aria-hidden="true" />
+              ) : null}
+            </Link>
           </li>
         </ul>
 

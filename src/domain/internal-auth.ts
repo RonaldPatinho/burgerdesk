@@ -51,6 +51,12 @@ export function isAdministratorRole(
   );
 }
 
+/** Human-readable label for a staff role. */
+export function staffRoleLabel(role: StaffRole): string {
+  if (role === "caja_cocina") return "Caja / Cocina";
+  return role === "caja" ? "Caja" : "Cocina";
+}
+
 // ---------------------------------------------------------------------------
 // Username normalisation
 // ---------------------------------------------------------------------------

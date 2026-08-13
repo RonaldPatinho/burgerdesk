@@ -254,21 +254,23 @@ export function StaffOrderInbox({
   return (
     <main id="contenido-principal" className={styles.main}>
       <header className={styles.header}>
-        <div className={styles.heading}>
-          <h1>Bandeja de pedidos</h1>
-        </div>
+        <div className={styles.headerInner}>
+          <div className={styles.heading}>
+            <h1>Bandeja de pedidos</h1>
+          </div>
 
-        <div className={styles.profileCard}>
-          <div className={styles.profileCopy}>
-            <span className={styles.welcomeText}>Hola, {staffName}</span>
-            <span className={styles.turnBadge}>
-              <span aria-hidden="true" />
-              En turno
+          <div className={styles.profileCard}>
+            <div className={styles.profileCopy}>
+              <span className={styles.welcomeText}>Hola, {staffName}</span>
+              <span className={styles.turnBadge}>
+                <span aria-hidden="true" />
+                En turno
+              </span>
+            </div>
+            <span className={styles.avatar} aria-hidden="true">
+              <UserRound />
             </span>
           </div>
-          <span className={styles.avatar} aria-hidden="true">
-            <UserRound />
-          </span>
         </div>
       </header>
 

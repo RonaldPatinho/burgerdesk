@@ -12,10 +12,17 @@
 }
 
 .header {
+  display: grid;
+}
+
+.headerInner {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-4);
+  border-bottom: 0.125rem solid var(--color-border);
+  padding-bottom: var(--space-4);
 }
 
 .heading {

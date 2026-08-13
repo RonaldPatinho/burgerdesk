@@ -4,7 +4,7 @@ import { UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { StaffBottomNav } from "@/components/staff/StaffBottomNav";
 import { SkipLink } from "@/components/ui";
-import type { StaffRole } from "@/domain/internal-auth";
+import { staffRoleLabel } from "@/domain/internal-auth";
 import { getAuthenticatedStaffSession } from "@/server/internal-auth/session";
 import styles from "./staff-layout.module.css";
 
@@ -12,11 +12,6 @@ export const dynamic = "force-dynamic";
 
 function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] || "Personal";
-}
-
-function roleLabel(role: StaffRole): string {
-  if (role === "caja_cocina") return "Caja / Cocina";
-  return role === "caja" ? "Caja" : "Cocina";
 }
 
 export default async function StaffProtectedLayout({
@@ -27,7 +22,7 @@ export default async function StaffProtectedLayout({
   const session = await getAuthenticatedStaffSession();
   if (!session) redirect("/personal/acceso");
 
-  const currentRoleLabel = roleLabel(session.role);
+  const currentRoleLabel = staffRoleLabel(session.role);
 
   return (
     <div className={styles.shell}>
