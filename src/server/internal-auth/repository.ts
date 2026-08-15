@@ -50,6 +50,10 @@ interface RevocableSessionRow extends RowDataPacket {
   revoked_at: Date | null;
 }
 
+interface AccountOverviewRow extends RowDataPacket {
+  created_at: Date;
+}
+
 export interface AuthenticatedInternalSession {
   sessionId: string;
   userId: string;
@@ -68,6 +72,11 @@ export interface AuthenticatedStaffSession
 export interface AuthenticatedAdministratorSession
   extends Omit<AuthenticatedInternalSession, "role"> {
   role: AdministratorRole;
+}
+
+/** Datos complementarios de la cuenta para la pantalla de perfil. */
+export interface StaffAccountOverview {
+  memberSince: string | null;
 }
 
 export class InternalAuthRepositoryError extends Error {
@@ -340,4 +349,18 @@ export async function revokeInternalSessionByToken(
     );
     await insertAccessEvent("logout", session.user_id, connection);
   });
+}
+
+export async function getStaffAccountOverview(
+  userId: string,
+): Promise<StaffAccountOverview> {
+  const [rows] = await getMySqlPool().execute<AccountOverviewRow[]>(
+    `SELECT created_at
+     FROM internal_users
+     WHERE id = ?
+     LIMIT 1`,
+    [userId],
+  );
+  const row = rows[0];
+  return { memberSince: row?.created_at?.toISOString() ?? null };
 }

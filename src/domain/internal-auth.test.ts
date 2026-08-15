@@ -8,6 +8,7 @@ import {
   isInternalRole,
   isStaffRole,
   normalizeUsername,
+  staffRoleLabel,
   staffRoles,
   validateInternalLogin,
   validateInternalUser,
@@ -63,6 +64,12 @@ test("isAdministratorRole acepta solo el rol administrador", () => {
   assert.equal(isAdministratorRole("cocina"), false);
   assert.equal(isAdministratorRole("caja_cocina"), false);
   assert.equal(isAdministratorRole("gerente"), false);
+});
+
+test("staffRoleLabel traduce cada rol operativo a su etiqueta", () => {
+  assert.equal(staffRoleLabel("caja"), "Caja");
+  assert.equal(staffRoleLabel("cocina"), "Cocina");
+  assert.equal(staffRoleLabel("caja_cocina"), "Caja / Cocina");
 });
 
 // ---------------------------------------------------------------------------
