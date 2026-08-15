@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { revokeInternalSessionByToken } from "@/server/internal-auth/repository";
+import { revokeStaffSessionByToken } from "@/server/internal-auth/repository";
 import {
   INTERNAL_SESSION_COOKIE,
   internalSessionCookieOptions,
@@ -10,7 +10,7 @@ export const runtime = "nodejs";
 export async function POST(): Promise<Response> {
   try {
     const cookieStore = await cookies();
-    await revokeInternalSessionByToken(
+    await revokeStaffSessionByToken(
       cookieStore.get(INTERNAL_SESSION_COOKIE)?.value,
     );
     cookieStore.set(INTERNAL_SESSION_COOKIE, "", {

@@ -50,6 +50,15 @@ interface RevocableSessionRow extends RowDataPacket {
   revoked_at: Date | null;
 }
 
+interface AccountOverviewRow extends RowDataPacket {
+  created_at: Date;
+  active_shift_starts_at: Date | null;
+}
+
+interface ActiveShiftRow extends RowDataPacket {
+  id: string;
+}
+
 export interface AuthenticatedInternalSession {
   sessionId: string;
   userId: string;
@@ -68,6 +77,12 @@ export interface AuthenticatedStaffSession
 export interface AuthenticatedAdministratorSession
   extends Omit<AuthenticatedInternalSession, "role"> {
   role: AdministratorRole;
+}
+
+/** Datos complementarios de la cuenta para la pantalla de perfil. */
+export interface StaffAccountOverview {
+  memberSince: string | null;
+  activeShiftStartedAt: string | null;
 }
 
 export class InternalAuthRepositoryError extends Error {
@@ -113,6 +128,41 @@ async function recordRejectedLogin(userId: string | null): Promise<void> {
   await insertAccessEvent("login_failure", userId);
 }
 
+async function ensureActiveStaffShift(
+  userId: string,
+  connection: PoolConnection,
+): Promise<void> {
+  // Lock the user row so concurrent logins for the same employee cannot
+  // create two active shifts in the same transaction window.
+  await connection.execute<RowDataPacket[]>(
+    `SELECT id
+     FROM internal_users
+     WHERE id = ?
+     LIMIT 1
+     FOR UPDATE`,
+    [userId],
+  );
+
+  const [rows] = await connection.execute<ActiveShiftRow[]>(
+    `SELECT id
+     FROM staff_shifts
+     WHERE user_id = ?
+       AND status = 'activo'
+       AND ends_at IS NULL
+     ORDER BY starts_at DESC
+     LIMIT 1`,
+    [userId],
+  );
+
+  if (rows[0]) return;
+
+  await connection.execute<ResultSetHeader>(
+    `INSERT INTO staff_shifts (id, user_id)
+     VALUES (?, ?)`,
+    [randomUUID(), userId],
+  );
+}
+
 function toAuthenticatedSession(
   row: InternalSessionRow,
 ): AuthenticatedInternalSession | null {
@@ -138,6 +188,7 @@ async function loginInternalUser<Role extends InternalRole>(
   },
   roleGuard: (value: unknown) => value is Role,
   unauthorizedMessage: string,
+  startStaffShift: boolean,
 ): Promise<{
   token: string;
   session: Omit<AuthenticatedInternalSession, "role"> & { role: Role };
@@ -193,6 +244,11 @@ async function loginInternalUser<Role extends InternalRole>(
        VALUES (?, ?, ?, ?)`,
       [sessionId, user.id, hashSessionToken(token), expiresAt],
     );
+
+    if (startStaffShift) {
+      await ensureActiveStaffShift(user.id, connection);
+    }
+
     await insertAccessEvent("login_success", user.id, connection);
   });
 
@@ -218,6 +274,7 @@ export async function loginStaff(input: {
     input,
     isStaffRole,
     "La cuenta no tiene acceso al flujo Personal.",
+    true,
   );
 }
 
@@ -232,6 +289,7 @@ export async function loginAdministrator(input: {
     input,
     isAdministratorRole,
     "La cuenta no tiene acceso al flujo Administrador.",
+    false,
   );
 }
 
@@ -308,8 +366,9 @@ export async function getAdministratorSessionByToken(
   };
 }
 
-export async function revokeInternalSessionByToken(
+async function revokeSessionByToken(
   token: string | undefined,
+  closeStaffShift: boolean,
 ): Promise<void> {
   if (!isPlausibleSessionToken(token)) {
     return;
@@ -338,6 +397,59 @@ export async function revokeInternalSessionByToken(
        WHERE id = ?`,
       [session.id],
     );
+
+    if (closeStaffShift) {
+      await connection.execute<ResultSetHeader>(
+        `UPDATE staff_shifts
+         SET status = 'cerrado',
+             ends_at = CURRENT_TIMESTAMP(3)
+         WHERE user_id = ?
+           AND status = 'activo'
+           AND ends_at IS NULL`,
+        [session.user_id],
+      );
+    }
+
     await insertAccessEvent("logout", session.user_id, connection);
   });
+}
+
+export async function revokeInternalSessionByToken(
+  token: string | undefined,
+): Promise<void> {
+  await revokeSessionByToken(token, false);
+}
+
+export async function revokeStaffSessionByToken(
+  token: string | undefined,
+): Promise<void> {
+  await revokeSessionByToken(token, true);
+}
+
+export async function getStaffAccountOverview(
+  userId: string,
+): Promise<StaffAccountOverview> {
+  const [rows] = await getMySqlPool().execute<AccountOverviewRow[]>(
+    `SELECT
+       u.created_at,
+       (
+         SELECT s.starts_at
+         FROM staff_shifts s
+         WHERE s.user_id = u.id
+           AND s.status = 'activo'
+           AND s.ends_at IS NULL
+         ORDER BY s.starts_at DESC
+         LIMIT 1
+       ) AS active_shift_starts_at
+     FROM internal_users u
+     WHERE u.id = ?
+     LIMIT 1`,
+    [userId],
+  );
+  const row = rows[0];
+  return {
+    memberSince: row?.created_at?.toISOString() ?? null,
+    activeShiftStartedAt:
+      row?.active_shift_starts_at?.toISOString() ?? null,
+  };
 }

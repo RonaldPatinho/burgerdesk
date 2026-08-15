@@ -1,87 +1,47 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { InternalLogoutDialog } from "@/components/internal/InternalLogoutDialog";
 import { Button, type ButtonProps } from "@/components/ui";
 import styles from "./StaffLogoutButton.module.css";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
-}
 
 interface StaffLogoutButtonProps {
   variant?: ButtonProps["variant"];
   inverse?: boolean;
   className?: string;
+  accountLabel?: string;
 }
 
 export function StaffLogoutButton({
   variant = "secondary",
   inverse = false,
   className,
+  accountLabel = "Personal",
 }: StaffLogoutButtonProps) {
-  const router = useRouter();
-  const [pending, setPending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const pendingRef = useRef(false);
-
-  async function handleLogout() {
-    if (pendingRef.current) return;
-
-    pendingRef.current = true;
-    setPending(true);
-    setError(null);
-
-    try {
-      const response = await fetch("/api/personal/auth/logout", {
-        method: "POST",
-        credentials: "same-origin",
-        cache: "no-store",
-      });
-      const value: unknown = await response.json().catch(() => null);
-
-      if (!response.ok) {
-        throw new Error(
-          isRecord(value) && typeof value.message === "string"
-            ? value.message
-            : "No fue posible cerrar la sesión.",
-        );
-      }
-
-      router.replace("/personal/acceso");
-      router.refresh();
-    } catch (caught: unknown) {
-      pendingRef.current = false;
-      setPending(false);
-      setError(
-        caught instanceof Error
-          ? caught.message
-          : "No fue posible cerrar la sesión.",
-      );
-    }
-  }
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <div className={styles.wrapper}>
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
       <Button
         type="button"
         variant={variant}
         inverse={inverse}
         fullWidth
-        loading={pending}
-        loadingLabel="Cerrando sesión"
         leadingIcon={<LogOut />}
         className={className}
-        onClick={handleLogout}
+        onClick={() => setDialogOpen(true)}
       >
         Cerrar sesión
       </Button>
+
+      <InternalLogoutDialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        endpoint="/api/personal/auth/logout"
+        redirectTo="/personal/acceso"
+        accountLabel={accountLabel}
+      />
     </div>
   );
 }

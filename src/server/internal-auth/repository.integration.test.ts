@@ -8,29 +8,33 @@ import {
 } from "../database/mysql";
 import {
   getAdministratorSessionByToken,
+  getStaffAccountOverview,
   getStaffSessionByToken,
   InternalAuthRepositoryError,
   loginAdministrator,
   loginStaff,
   revokeInternalSessionByToken,
+  revokeStaffSessionByToken,
 } from "./repository";
 
 const runId = randomUUID();
 const adminUserId = randomUUID();
 const staffUserId = randomUUID();
+const overviewUserId = randomUUID();
 const adminUsername = `admin-${runId}`;
 const staffUsername = `staff-${runId}`;
+const overviewUsername = `resumen-${runId}`;
 const password = "clave-administrativa-segura";
 
 after(async () => {
   const pool = getMySqlPool();
   await pool.execute(
-    "DELETE FROM internal_access_events WHERE user_id IN (?, ?)",
-    [adminUserId, staffUserId],
+    "DELETE FROM internal_access_events WHERE user_id IN (?, ?, ?)",
+    [adminUserId, staffUserId, overviewUserId],
   );
   await pool.execute(
-    "DELETE FROM internal_users WHERE id IN (?, ?)",
-    [adminUserId, staffUserId],
+    "DELETE FROM internal_users WHERE id IN (?, ?, ?)",
+    [adminUserId, staffUserId, overviewUserId],
   );
   await closeMySqlPool();
 });
@@ -96,11 +100,52 @@ test("autoriza administrador, rechaza Personal y conserva separación de sesione
     null,
   );
 
+  const activeStaffOverview = await getStaffAccountOverview(staffUserId);
+  assert.ok(
+    activeStaffOverview.activeShiftStartedAt,
+    "el login de Personal debería iniciar o reutilizar un turno activo",
+  );
+
   await revokeInternalSessionByToken(administratorLogin.token);
   assert.equal(
     await getAdministratorSessionByToken(administratorLogin.token),
     null,
   );
 
-  await revokeInternalSessionByToken(staffLogin.token);
+  await revokeStaffSessionByToken(staffLogin.token);
+  assert.equal(
+    (await getStaffAccountOverview(staffUserId)).activeShiftStartedAt,
+    null,
+    "el logout de Personal debería cerrar el turno activo",
+  );
+});
+
+test("el resumen de cuenta expone la fecha de creación del usuario", async () => {
+  const passwordHash = await hashPassword(password);
+  await getMySqlPool().execute(
+    `INSERT INTO internal_users (
+      id, username, username_normalized, full_name, email,
+      email_normalized, password_hash, role, active
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, 'caja', TRUE)`,
+    [
+      overviewUserId,
+      overviewUsername,
+      overviewUsername,
+      "Resumen de prueba",
+      `${overviewUsername}@burgerdesk.local`,
+      `${overviewUsername}@burgerdesk.local`,
+      passwordHash,
+    ],
+  );
+
+  const overview = await getStaffAccountOverview(overviewUserId);
+  assert.ok(overview.memberSince, "debería exponer la fecha de creación");
+  assert.equal(typeof overview.memberSince, "string");
+  assert.equal(overview.activeShiftStartedAt, null);
+});
+
+test("el resumen de cuenta es vacío para un usuario inexistente", async () => {
+  const overview = await getStaffAccountOverview(randomUUID());
+  assert.equal(overview.memberSince, null);
+  assert.equal(overview.activeShiftStartedAt, null);
 });
