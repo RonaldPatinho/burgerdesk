@@ -8,6 +8,7 @@ import {
   isInternalRole,
   isStaffRole,
   normalizeUsername,
+  staffPermissionsForRole,
   staffRoleLabel,
   staffRoles,
   validateInternalLogin,
@@ -70,6 +71,18 @@ test("staffRoleLabel traduce cada rol operativo a su etiqueta", () => {
   assert.equal(staffRoleLabel("caja"), "Caja");
   assert.equal(staffRoleLabel("cocina"), "Cocina");
   assert.equal(staffRoleLabel("caja_cocina"), "Caja / Cocina");
+});
+
+test("staffPermissionsForRole refleja las capacidades operativas vigentes", () => {
+  const expected = [
+    "Consultar la bandeja de pedidos",
+    "Consultar el detalle de los pedidos",
+    "Actualizar estados operativos de los pedidos",
+  ];
+
+  for (const role of staffRoles) {
+    assert.deepEqual([...staffPermissionsForRole(role)], expected);
+  }
 });
 
 // ---------------------------------------------------------------------------

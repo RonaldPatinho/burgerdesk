@@ -57,6 +57,32 @@ export function staffRoleLabel(role: StaffRole): string {
   return role === "caja" ? "Caja" : "Cocina";
 }
 
+/**
+ * Capacidades que el backend autoriza actualmente a cualquier rol operativo.
+ * La función recibe el rol para mantener el contrato preparado para futuras
+ * diferencias de autorización sin mostrar permisos que el servidor no aplica.
+ */
+const currentStaffPermissions = [
+  "Consultar la bandeja de pedidos",
+  "Consultar el detalle de los pedidos",
+  "Actualizar estados operativos de los pedidos",
+] as const;
+
+const staffPermissionsByRole: Record<
+  StaffRole,
+  readonly string[]
+> = {
+  caja: currentStaffPermissions,
+  cocina: currentStaffPermissions,
+  caja_cocina: currentStaffPermissions,
+};
+
+export function staffPermissionsForRole(
+  role: StaffRole,
+): readonly string[] {
+  return staffPermissionsByRole[role];
+}
+
 // ---------------------------------------------------------------------------
 // Username normalisation
 // ---------------------------------------------------------------------------

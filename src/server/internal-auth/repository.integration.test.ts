@@ -14,6 +14,7 @@ import {
   loginAdministrator,
   loginStaff,
   revokeInternalSessionByToken,
+  revokeStaffSessionByToken,
 } from "./repository";
 
 const runId = randomUUID();
@@ -99,13 +100,24 @@ test("autoriza administrador, rechaza Personal y conserva separación de sesione
     null,
   );
 
+  const activeStaffOverview = await getStaffAccountOverview(staffUserId);
+  assert.ok(
+    activeStaffOverview.activeShiftStartedAt,
+    "el login de Personal debería iniciar o reutilizar un turno activo",
+  );
+
   await revokeInternalSessionByToken(administratorLogin.token);
   assert.equal(
     await getAdministratorSessionByToken(administratorLogin.token),
     null,
   );
 
-  await revokeInternalSessionByToken(staffLogin.token);
+  await revokeStaffSessionByToken(staffLogin.token);
+  assert.equal(
+    (await getStaffAccountOverview(staffUserId)).activeShiftStartedAt,
+    null,
+    "el logout de Personal debería cerrar el turno activo",
+  );
 });
 
 test("el resumen de cuenta expone la fecha de creación del usuario", async () => {
@@ -129,9 +141,11 @@ test("el resumen de cuenta expone la fecha de creación del usuario", async () =
   const overview = await getStaffAccountOverview(overviewUserId);
   assert.ok(overview.memberSince, "debería exponer la fecha de creación");
   assert.equal(typeof overview.memberSince, "string");
+  assert.equal(overview.activeShiftStartedAt, null);
 });
 
 test("el resumen de cuenta es vacío para un usuario inexistente", async () => {
   const overview = await getStaffAccountOverview(randomUUID());
   assert.equal(overview.memberSince, null);
+  assert.equal(overview.activeShiftStartedAt, null);
 });

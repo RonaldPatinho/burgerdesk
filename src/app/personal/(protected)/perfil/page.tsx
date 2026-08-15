@@ -7,7 +7,7 @@ import {
 import { getAuthenticatedStaffSession } from "@/server/internal-auth/session";
 
 export const metadata: Metadata = {
-  title: "Perfil del Personal",
+  title: "Perfil",
   description: "Información de la cuenta del personal de BurgerDesk.",
 };
 
@@ -25,9 +25,8 @@ export default async function StaffProfilePage() {
       username={session.username}
       email={session.email}
       role={session.role}
-      userId={session.userId}
       memberSince={overview.memberSince}
-      sessionExpiresAt={session.expiresAt}
+      activeShiftStartedAt={overview.activeShiftStartedAt}
     />
   );
 }

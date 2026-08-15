@@ -243,3 +243,45 @@
     padding: var(--space-8);
   }
 }
+
+@media (min-width: 48rem) {
+  .page {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 15.375rem minmax(0, 1fr);
+    background: var(--color-surface);
+  }
+
+  .header {
+    grid-column: 1;
+    min-height: 100dvh;
+    align-self: stretch;
+  }
+
+  .headerInner {
+    min-height: auto;
+    max-width: none;
+    margin: 0;
+    align-items: flex-start;
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .main {
+    grid-column: 2;
+    min-height: 100dvh;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    align-content: center;
+    justify-items: center;
+    gap: var(--space-5);
+    padding: var(--space-8);
+    box-shadow: none;
+  }
+
+  .heading,
+  .accessCard,
+  .securityNotice {
+    width: min(100%, 24rem);
+  }
+}

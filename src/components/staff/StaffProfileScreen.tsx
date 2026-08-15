@@ -3,23 +3,28 @@
 import {
   AtSign,
   CalendarDays,
-  Fingerprint,
+  CheckCircle2,
+  Clock3,
   ShieldCheck,
-  Timer,
   UserRound,
 } from "lucide-react";
 import { StaffLogoutButton } from "@/components/staff/StaffLogoutButton";
-import { staffRoleLabel, type StaffRole } from "@/domain/internal-auth";
+import {
+  staffPermissionsForRole,
+  staffRoleLabel,
+  type StaffRole,
+} from "@/domain/internal-auth";
 import styles from "./StaffProfileScreen.module.css";
+
+const BUSINESS_TIME_ZONE = "America/Caracas";
 
 interface StaffProfileScreenProps {
   fullName: string;
   username: string;
   email: string;
   role: StaffRole;
-  userId: string;
   memberSince: string | null;
-  sessionExpiresAt: string;
+  activeShiftStartedAt: string | null;
 }
 
 function formatDate(isoDate: string | null): string {
@@ -27,28 +32,24 @@ function formatDate(isoDate: string | null): string {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return "No disponible";
 
-  return new Intl.DateTimeFormat("es-CO", {
+  return new Intl.DateTimeFormat("es-VE", {
     day: "numeric",
     month: "long",
     year: "numeric",
+    timeZone: BUSINESS_TIME_ZONE,
   }).format(date);
 }
 
-function formatExpiry(isoDate: string): string {
+function formatShiftStart(isoDate: string | null): string {
+  if (!isoDate) return "Sin turno activo";
   const date = new Date(isoDate);
-  if (Number.isNaN(date.getTime())) return "No disponible";
+  if (Number.isNaN(date.getTime())) return "Hora no disponible";
 
-  return new Intl.DateTimeFormat("es-CO", {
-    day: "numeric",
-    month: "long",
+  return new Intl.DateTimeFormat("es-VE", {
     hour: "numeric",
     minute: "2-digit",
-    timeZone: "America/Bogota",
+    timeZone: BUSINESS_TIME_ZONE,
   }).format(date);
-}
-
-function shortAccountId(userId: string): string {
-  return `#${userId.slice(0, 8).toUpperCase()}`;
 }
 
 export function StaffProfileScreen({
@@ -56,15 +57,17 @@ export function StaffProfileScreen({
   username,
   email,
   role,
-  userId,
   memberSince,
-  sessionExpiresAt,
+  activeShiftStartedAt,
 }: StaffProfileScreenProps) {
+  const onShift = Boolean(activeShiftStartedAt);
+  const permissions = staffPermissionsForRole(role);
+
   return (
     <main id="contenido-principal" className={styles.main}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
-          <h1>Perfil del Personal</h1>
+          <h1>Perfil</h1>
         </div>
       </header>
 
@@ -77,15 +80,15 @@ export function StaffProfileScreen({
             <h2>{fullName}</h2>
             <p>@{username}</p>
           </div>
-          <span className={styles.turnBadge}>
+          <span className={styles.turnBadge} data-active={onShift}>
             <span aria-hidden="true" />
-            En turno
+            {onShift ? "En turno" : "Sin turno activo"}
           </span>
         </div>
 
         <div className={styles.profileBody}>
-          <div className={styles.copy}>
-            <h3>Información personal</h3>
+          <section className={styles.section} aria-labelledby="staff-account-title">
+            <h3 id="staff-account-title">Información personal</h3>
             <dl className={styles.fields}>
               <div className={styles.field}>
                 <span className={styles.fieldIcon} aria-hidden="true">
@@ -114,26 +117,45 @@ export function StaffProfileScreen({
                   <dd>{formatDate(memberSince)}</dd>
                 </div>
               </div>
-              <div className={styles.field}>
-                <span className={styles.fieldIcon} aria-hidden="true">
-                  <Fingerprint />
-                </span>
-                <div className={styles.fieldCopy}>
-                  <dt>ID de cuenta</dt>
-                  <dd>{shortAccountId(userId)}</dd>
-                </div>
-              </div>
             </dl>
+          </section>
 
-            <p className={styles.sessionNote}>
-              <Timer aria-hidden="true" />
-              Sesión válida hasta el {formatExpiry(sessionExpiresAt)}.
+          <section className={styles.section} aria-labelledby="staff-shift-title">
+            <h3 id="staff-shift-title">Turno actual</h3>
+            <div className={styles.shiftCard}>
+              <span className={styles.shiftIcon} aria-hidden="true">
+                <Clock3 />
+              </span>
+              <div className={styles.shiftCopy}>
+                <strong>{onShift ? "Turno activo" : "Sin turno activo"}</strong>
+                <span>
+                  {onShift
+                    ? `Inicio: ${formatShiftStart(activeShiftStartedAt)}`
+                    : "Inicia sesión nuevamente para comenzar un turno."}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          <section className={styles.section} aria-labelledby="staff-permissions-title">
+            <h3 id="staff-permissions-title">Permisos del rol</h3>
+            <p className={styles.permissionsIntro}>
+              Capacidades disponibles para {staffRoleLabel(role)}.
             </p>
-          </div>
+            <ul className={styles.permissions}>
+              {permissions.map((permission) => (
+                <li key={permission} className={styles.permissionItem}>
+                  <CheckCircle2 aria-hidden="true" />
+                  <span>{permission}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
 
           <StaffLogoutButton
             variant="primary"
             className={styles.logoutButton}
+            accountLabel={fullName}
           />
         </div>
       </section>
