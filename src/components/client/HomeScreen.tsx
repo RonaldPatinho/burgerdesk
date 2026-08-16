@@ -59,7 +59,7 @@ export function HomeScreen({
     ? featuredProducts.find((product) => product.id === promotion.productId)
     : null;
   const featuredIds = new Set(featuredProducts.map((product) => product.id));
-  const mobileProducts = [
+  const prioritizedProducts = [
     ...featuredProducts,
     ...desktopProducts.filter((product) => !featuredIds.has(product.id)),
   ];
@@ -80,7 +80,7 @@ export function HomeScreen({
           <div className={styles.desktopContentGrid}>
             <DesktopProductExplorer
               categories={desktopCategories}
-              products={desktopProducts}
+              products={prioritizedProducts}
               title="Favoritos de la casa"
               subtitle="Encuentra tu próxima favorita"
             />
@@ -170,9 +170,9 @@ export function HomeScreen({
             <h2 id="favoritos-inicio">Favoritos de la casa</h2>
             <Link href="/menu">Ver todo →</Link>
           </div>
-          {mobileProducts.length > 0 ? (
+          {prioritizedProducts.length > 0 ? (
             <MobileProductCarousel
-              products={mobileProducts}
+              products={prioritizedProducts}
               ariaLabel="Favoritos y productos destacados"
             />
           ) : (

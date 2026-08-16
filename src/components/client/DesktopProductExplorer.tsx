@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Chip, Feedback } from "@/components/ui";
 import type { Category, CategoryId, Product } from "@/domain/models";
-import { ProductCard } from "./ProductCard";
+import { DesktopProductCarousel } from "./DesktopProductCarousel";
 import styles from "./DesktopProductExplorer.module.css";
 
 type CategoryFilter = "all" | CategoryId;
@@ -32,10 +32,9 @@ export function DesktopProductExplorer({
 }: DesktopProductExplorerProps) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<CategoryFilter>("all");
+  const normalizedSearch = normalizeSearch(search);
 
   const filteredProducts = useMemo(() => {
-    const normalizedSearch = normalizeSearch(search);
-
     return products.filter((product) => {
       if (category !== "all" && !product.categoryIds.includes(category)) {
         return false;
@@ -47,7 +46,7 @@ export function DesktopProductExplorer({
         `${product.name} ${product.summary} ${product.detailDescription ?? ""}`,
       ).includes(normalizedSearch);
     });
-  }, [category, products, search]);
+  }, [category, normalizedSearch, products]);
 
   return (
     <section className={styles.explorer} id="productos-menu" aria-labelledby="desktop-products-title">
@@ -76,7 +75,7 @@ export function DesktopProductExplorer({
 
       <div className={styles.filters} aria-label="Filtrar productos por categoría">
         <Chip selected={category === "all"} onClick={() => setCategory("all")}>
-          Todos
+          Todas
         </Chip>
         {categories.map((item) => (
           <Chip
@@ -94,11 +93,11 @@ export function DesktopProductExplorer({
 
       <div id="desktop-product-results" className={styles.results}>
         {filteredProducts.length > 0 ? (
-          <div className={styles.grid}>
-            {filteredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
+          <DesktopProductCarousel
+            products={filteredProducts}
+            resetKey={`${category}:${normalizedSearch}`}
+            ariaLabel={`${title}: productos disponibles`}
+          />
         ) : (
           <Feedback
             variant="empty"
