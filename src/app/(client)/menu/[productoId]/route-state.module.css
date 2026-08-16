@@ -25,3 +25,9 @@
   padding: var(--space-3) var(--space-4);
   background: var(--color-brand-primary);
 }
+
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .main {
+    max-width: 40rem;
+  }
+}

@@ -4,53 +4,58 @@ import { useMemo, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import type { Product } from "@/domain/models";
 import { ProductCard } from "./ProductCard";
+import {
+  nextCarouselPage,
+  paginateItems,
+  previousCarouselPage,
+  resolveCarouselPage,
+} from "./product-carousel-pagination";
 import styles from "./MobileProductCarousel.module.css";
 
 export interface MobileProductCarouselProps {
   products: readonly Product[];
   ariaLabel?: string;
+  itemsPerPage?: number;
 }
 
-const PRODUCTS_PER_PAGE = 2;
+const DEFAULT_PRODUCTS_PER_PAGE = 2;
 
 export function MobileProductCarousel({
   products,
   ariaLabel = "Productos",
+  itemsPerPage = DEFAULT_PRODUCTS_PER_PAGE,
 }: MobileProductCarouselProps) {
   const productSignature = products.map((product) => product.id).join("|");
+  const carouselSignature = `${itemsPerPage}:${productSignature}`;
   const [pageState, setPageState] = useState({
-    productSignature,
+    signature: carouselSignature,
     page: 0,
   });
-  const pages = useMemo(() => {
-    const result: Product[][] = [];
-
-    for (let index = 0; index < products.length; index += PRODUCTS_PER_PAGE) {
-      result.push(products.slice(index, index + PRODUCTS_PER_PAGE));
-    }
-
-    return result;
-  }, [products]);
+  const pages = useMemo(
+    () => paginateItems(products, itemsPerPage),
+    [itemsPerPage, products],
+  );
 
   const pageCount = pages.length;
-  const currentPage =
-    pageState.productSignature === productSignature ? pageState.page : 0;
-  const safePage =
-    pageCount === 0 ? 0 : Math.min(currentPage, pageCount - 1);
+  const safePage = resolveCarouselPage(
+    pageState,
+    carouselSignature,
+    pageCount,
+  );
   const visibleProducts = pages[safePage] ?? [];
 
   function setPage(page: number) {
-    setPageState({ productSignature, page });
+    setPageState({ signature: carouselSignature, page });
   }
 
   function previousPage() {
     if (pageCount <= 1) return;
-    setPage((safePage - 1 + pageCount) % pageCount);
+    setPage(previousCarouselPage(safePage, pageCount));
   }
 
   function nextPage() {
     if (pageCount <= 1) return;
-    setPage((safePage + 1) % pageCount);
+    setPage(nextCarouselPage(safePage, pageCount));
   }
 
   return (

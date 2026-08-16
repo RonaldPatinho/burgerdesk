@@ -143,10 +143,12 @@ export function ProductDetailScreen({
               className={styles.productImage}
               priority
             />
-            <p className={styles.imageNote}>
-              <Info aria-hidden="true" />
-              <span>Imagen ilustrativa · producto preparado al momento</span>
-            </p>
+            {product.id === "la-bendita" ? (
+              <p className={styles.imageNote}>
+                <Info aria-hidden="true" />
+                <span>Imagen ilustrativa · producto preparado al momento</span>
+              </p>
+            ) : null}
           </div>
 
           <div className={styles.detailPanel}>

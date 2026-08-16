@@ -291,3 +291,17 @@ export async function getClientAvatar(userId: string): Promise<{
   if (!row || row.image_data.byteLength !== row.size_bytes) return null;
   return { mimeType: row.mime_type, bytes: row.image_data, etag: row.content_sha256 };
 }
+
+export async function deleteClientAvatar(userId: string): Promise<{
+  deleted: boolean;
+  profile: ClientProfileView;
+}> {
+  const [result] = await getMySqlPool().execute<ResultSetHeader>(
+    "DELETE FROM client_avatars WHERE user_id = ?",
+    [userId],
+  );
+  return {
+    deleted: result.affectedRows === 1,
+    profile: await loadProfile(userId),
+  };
+}

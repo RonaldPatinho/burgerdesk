@@ -208,7 +208,13 @@
   display: none;
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .main {
+    max-width: 40rem;
+  }
+}
+
+@media (min-width: 64rem) {
   .page {
     background: var(--color-surface);
   }
@@ -243,13 +249,13 @@
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .mobilePromotionFeedback {
     display: none;
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .desktopContentGrid {
     min-width: 0;
     display: grid;

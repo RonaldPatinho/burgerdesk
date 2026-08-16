@@ -61,7 +61,13 @@
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .nav {
+    width: min(100%, 40rem);
+  }
+}
+
+@media (min-width: 64rem) {
   .nav {
     display: none;
   }

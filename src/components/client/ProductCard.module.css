@@ -96,7 +96,7 @@
 }
 
 
-@media (max-width: 47.999rem) {
+@media (max-width: 63.999rem) {
   .card {
     min-height: 0;
     grid-template-rows: auto minmax(0, 1fr) auto;
@@ -163,7 +163,7 @@
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .card {
     min-height: 14.25rem;
     border-width: 0.0625rem;

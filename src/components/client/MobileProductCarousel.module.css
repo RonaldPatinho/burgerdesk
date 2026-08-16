@@ -59,7 +59,7 @@
   background: var(--color-brand-primary);
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .carousel {
     display: none;
   }

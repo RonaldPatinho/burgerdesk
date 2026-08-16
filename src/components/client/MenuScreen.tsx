@@ -207,6 +207,7 @@ export function MenuScreen({
             <MobileProductCarousel
               products={products}
               ariaLabel="Productos del menú"
+              itemsPerPage={4}
             />
           ) : null}
         </section>

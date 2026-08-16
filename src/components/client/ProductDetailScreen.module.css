@@ -311,13 +311,23 @@
   }
 }
 
-@media (min-width: 26.876rem) and (max-width: 47.999rem) {
+@media (min-width: 26.876rem) and (max-width: 63.999rem) {
   .main {
     box-shadow: var(--shadow-raised);
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .main {
+    max-width: 40rem;
+  }
+
+  .addBar {
+    width: min(100%, 40rem);
+  }
+}
+
+@media (min-width: 64rem) {
   .page {
     background: var(--color-surface);
   }
@@ -392,6 +402,7 @@
   }
 
   .detailPanel {
+    container: product-detail-panel / inline-size;
     min-width: 0;
     display: grid;
     align-content: start;
@@ -442,6 +453,10 @@
   .sectionHeading h2,
   .quantitySection h2 {
     font-size: var(--font-size-lg);
+  }
+
+  .quantitySection h2 {
+    white-space: nowrap;
   }
 
   .sectionHeading p {
@@ -521,7 +536,7 @@
 
   .quantitySection {
     display: grid;
-    grid-template-columns: minmax(0, auto) minmax(12rem, 1fr);
+    grid-template-columns: minmax(0, 1fr);
     align-items: center;
     gap: var(--space-5);
     border-top: 0.0625rem solid var(--color-border);
@@ -529,7 +544,9 @@
   }
 
   .quantityGroup {
-    display: flex;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: max-content max-content;
     align-items: center;
     gap: var(--space-4);
   }
@@ -547,12 +564,15 @@
   }
 
   .desktopAddWrap {
+    min-width: 0;
     display: block;
   }
 
   .desktopAddButton {
+    min-width: 0;
     min-height: 3.25rem;
     border-radius: var(--radius-md);
+    white-space: nowrap;
   }
 
   .message {
@@ -596,6 +616,12 @@
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-4);
+  }
+}
+
+@container product-detail-panel (min-width: 28rem) {
+  .quantitySection {
+    grid-template-columns: max-content minmax(12rem, 1fr);
   }
 }
 

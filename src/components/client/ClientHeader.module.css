@@ -107,7 +107,13 @@
     font-size: 1.05rem;
   }
 }
-@media (min-width: 48rem) {
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .inner {
+    max-width: 40rem;
+  }
+}
+
+@media (min-width: 64rem) {
   .header {
     display: none;
   }

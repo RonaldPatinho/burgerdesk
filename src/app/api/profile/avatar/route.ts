@@ -1,5 +1,6 @@
 import { getAuthenticatedClientSession } from "@/server/auth/session";
-import { getClientAvatar } from "@/server/profile/repository";
+import { createDeleteClientAvatarResponse } from "@/server/profile/avatar-delete-response";
+import { deleteClientAvatar, getClientAvatar } from "@/server/profile/repository";
 
 export const runtime = "nodejs";
 
@@ -21,4 +22,9 @@ export async function GET(request: Request): Promise<Response> {
       "X-Content-Type-Options": "nosniff",
     },
   });
+}
+
+export async function DELETE(): Promise<Response> {
+  const session = await getAuthenticatedClientSession();
+  return createDeleteClientAvatarResponse(session, deleteClientAvatar);
 }

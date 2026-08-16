@@ -63,7 +63,7 @@ test("el acceso persiste solo la sesión versionada y nunca las credenciales", a
   assert.deepEqual(await service.getSession(), session);
 });
 
-test("el registro y el invitado generan sesiones locales diferenciadas", async () => {
+test("el registro y el invitado generan sesiones locales diferenciadas y aisladas", async () => {
   const storage = new MemoryStorage();
   const service = createService(storage);
 
@@ -80,6 +80,9 @@ test("el registro y el invitado generan sesiones locales diferenciadas", async (
     startedAt: "2026-08-04T12:00:00-04:00",
   });
 
+  storage.setItem(clientStorageKeys.cart, "carrito-de-la-cuenta");
+  storage.setItem(clientStorageKeys.checkout, "checkout-de-la-cuenta");
+
   const guest = await service.continueAsGuest();
   assert.deepEqual(guest, {
     kind: "guest",
@@ -87,6 +90,8 @@ test("el registro y el invitado generan sesiones locales diferenciadas", async (
     startedAt: "2026-08-04T12:00:00-04:00",
   });
   assert.deepEqual(await service.getSession(), guest);
+  assert.equal(storage.getItem(clientStorageKeys.cart), null);
+  assert.equal(storage.getItem(clientStorageKeys.checkout), null);
 });
 
 test("una sesión corrupta elimina solo la clave de sesión de BurgerDesk", async () => {
@@ -100,14 +105,54 @@ test("una sesión corrupta elimina solo la clave de sesión de BurgerDesk", asyn
   assert.equal(storage.getItem("otra-aplicacion"), "conservar");
 });
 
-test("cerrar sesión elimina exclusivamente la sesión del cliente", async () => {
+test("cerrar sesión elimina la sesión y el estado activo de compra", async () => {
   const storage = new MemoryStorage();
   const service = createService(storage);
   await service.continueAsGuest();
-  storage.setItem("burgerdesk:client:cart:v1", "carrito");
+  storage.setItem(clientStorageKeys.cart, "carrito");
+  storage.setItem(clientStorageKeys.checkout, "checkout");
+  storage.setItem(clientStorageKeys.orders, "pedidos-conservados");
+  storage.setItem("otra-aplicacion", "conservar");
 
   await service.signOut();
 
   assert.equal(storage.getItem(clientStorageKeys.session), null);
-  assert.equal(storage.getItem("burgerdesk:client:cart:v1"), "carrito");
+  assert.equal(storage.getItem(clientStorageKeys.cart), null);
+  assert.equal(storage.getItem(clientStorageKeys.checkout), null);
+  assert.equal(storage.getItem(clientStorageKeys.orders), "pedidos-conservados");
+  assert.equal(storage.getItem("otra-aplicacion"), "conservar");
+});
+
+test("una cuenta nueva no hereda el carrito de la sesión anterior", async () => {
+  const storage = new MemoryStorage();
+  let account = 0;
+  const service = new LocalStorageSessionService({
+    getStorage: () => storage,
+    now: () => "2026-08-04T12:00:00-04:00",
+    requestAuth: async () => ({
+      kind: "client",
+      sessionId: `session-${++account}`,
+      clientId: `client-${account}`,
+      startedAt: "2026-08-04T12:00:00-04:00",
+    }),
+  });
+
+  await service.signIn({
+    email: "cliente-a@example.com",
+    password: "password-demo",
+    rememberEmail: false,
+  });
+  storage.setItem(clientStorageKeys.cart, "carrito-del-cliente-a");
+  storage.setItem(clientStorageKeys.checkout, "checkout-del-cliente-a");
+
+  const nextSession = await service.signIn({
+    email: "cliente-b@example.com",
+    password: "password-demo",
+    rememberEmail: false,
+  });
+
+  assert.equal(nextSession.kind, "client");
+  assert.equal(nextSession.kind === "client" ? nextSession.clientId : null, "client-2");
+  assert.equal(storage.getItem(clientStorageKeys.cart), null);
+  assert.equal(storage.getItem(clientStorageKeys.checkout), null);
 });

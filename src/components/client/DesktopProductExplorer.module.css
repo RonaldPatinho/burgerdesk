@@ -2,7 +2,7 @@
   display: none;
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .explorer {
     min-width: 0;
     display: grid;
@@ -98,13 +98,5 @@
 
   .results {
     min-width: 0;
-  }
-
-}
-
-@media (min-width: 48rem) and (max-width: 61.999rem) {
-  .headingRow {
-    grid-template-columns: 1fr;
-    align-items: stretch;
   }
 }

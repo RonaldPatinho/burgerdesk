@@ -16,6 +16,7 @@ import {
 import type { RecalculatedOrderDraft } from "../orders/types";
 import {
   ClientProfileRepositoryError,
+  deleteClientAvatar,
   getClientAvatar,
   getClientOrderDetail,
   getClientProfileDashboard,
@@ -149,6 +150,43 @@ test("sesión real, perfil propio, asociación, estadísticas, avatar y revocaci
   );
   assert.equal(updated.fullName, "Cliente Actualizada");
   assert.equal(updated.hasAvatar, true);
+  assert.equal((await getClientAvatar(registeredA.session.userId))?.mimeType, "image/png");
+
+  const removedAvatar = await deleteClientAvatar(registeredA.session.userId);
+  assert.equal(removedAvatar.deleted, true);
+  assert.equal(removedAvatar.profile.hasAvatar, false);
+  assert.equal(removedAvatar.profile.fullName, updated.fullName);
+  assert.equal(removedAvatar.profile.email, updated.email);
+  assert.equal(removedAvatar.profile.phone, updated.phone);
+  assert.equal(removedAvatar.profile.preferredStoreId, updated.preferredStoreId);
+  assert.equal(removedAvatar.profile.contactWhatsapp, updated.contactWhatsapp);
+  assert.equal(removedAvatar.profile.contactEmail, updated.contactEmail);
+  assert.equal(await getClientAvatar(registeredA.session.userId), null);
+  assert.equal(
+    (await getClientProfileDashboard(registeredA.session.userId)).profile.hasAvatar,
+    false,
+  );
+
+  const repeatedRemoval = await deleteClientAvatar(registeredA.session.userId);
+  assert.equal(repeatedRemoval.deleted, false);
+  assert.equal(repeatedRemoval.profile.hasAvatar, false);
+
+  const restoredAvatar = await updateClientProfile(
+    registeredA.session.userId,
+    {
+      fullName: updated.fullName,
+      email: updated.email,
+      phone: updated.phone,
+      preferredStoreId: updated.preferredStoreId,
+      contactWhatsapp: updated.contactWhatsapp,
+      contactEmail: updated.contactEmail,
+    },
+    {
+      mimeType: "image/png",
+      bytes: Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]),
+    },
+  );
+  assert.equal(restoredAvatar.hasAvatar, true);
   assert.equal((await getClientAvatar(registeredA.session.userId))?.mimeType, "image/png");
 
   const dashboard = await getClientProfileDashboard(registeredA.session.userId);

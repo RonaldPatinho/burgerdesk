@@ -2,7 +2,7 @@
   display: none;
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .progress {
     width: min(100%, 36rem);
     display: block;

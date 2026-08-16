@@ -16,10 +16,11 @@ import {
   ReceiptText,
   RotateCcw,
   ShoppingBag,
+  Trash2,
   UserRound,
   WalletCards,
 } from "lucide-react";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
 import { MAX_QUANTITY_PER_CART_LINE, products } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
 import { buildProfileReorder } from "@/domain/profile-reorder";
@@ -45,6 +46,7 @@ interface ProfileScreenProps {
 }
 
 type DialogName = "edit" | "order" | "logout" | null;
+const PROFILE_UPDATED_EVENT = "burgerdesk:profile-updated";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -67,6 +69,12 @@ function initials(fullName: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
+}
+
+function notifyProfileUpdated(hasAvatar: boolean) {
+  window.dispatchEvent(
+    new CustomEvent(PROFILE_UPDATED_EVENT, { detail: { hasAvatar } }),
+  );
 }
 
 function Avatar({ profile, version }: { profile: ClientProfileView; version: number }) {
@@ -128,22 +136,30 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
   const [detailPending, setDetailPending] = useState(false);
   const [historyPending, setHistoryPending] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
+  const [avatarDeletePending, setAvatarDeletePending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [profileErrors, setProfileErrors] = useState<ClientProfileFieldErrors>({});
   const [message, setMessage] = useState<string | null>(null);
   const [detailMessage, setDetailMessage] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarVersion, setAvatarVersion] = useState(0);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const avatarInputAccept = useMemo(() => acceptedAvatarMimeTypes.join(","), []);
+  const profileMutationPending = profilePending || avatarDeletePending;
+
+  function clearAvatarSelection() {
+    setAvatarFile(null);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  }
 
   function closeDialog() {
-    if (profilePending || logoutPending) return;
+    if (profileMutationPending || logoutPending) return;
     setDialog(null);
     setDetail(null);
     setDetailMessage(null);
     setProfileErrors({});
-    setAvatarFile(null);
+    clearAvatarSelection();
   }
 
   async function loadAllOrders() {
@@ -216,6 +232,7 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (avatarDeletePending) return;
     setProfilePending(true);
     setProfileErrors({});
     const form = new FormData(event.currentTarget);
@@ -246,17 +263,56 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
       if (!isRecord(value) || !isRecord(value.profile)) {
         throw new Error("El servidor devolvió un perfil inválido.");
       }
-      setProfile(value.profile as unknown as ClientProfileView);
+      const nextProfile = value.profile as unknown as ClientProfileView;
+      setProfile(nextProfile);
       if (avatarFile) setAvatarVersion((current) => current + 1);
-      window.dispatchEvent(new Event("burgerdesk:profile-updated"));
+      notifyProfileUpdated(nextProfile.hasAvatar);
       setMessage("Tus datos se guardaron correctamente.");
       setDialog(null);
-      setAvatarFile(null);
+      clearAvatarSelection();
       router.refresh();
     } catch (error: unknown) {
       setMessage(error instanceof Error ? error.message : "No fue posible guardar el perfil.");
     } finally {
       setProfilePending(false);
+    }
+  }
+
+  async function removeAvatar() {
+    if (!profile.hasAvatar || profileMutationPending) return;
+    setAvatarDeletePending(true);
+    setProfileErrors((current) => ({ ...current, avatar: undefined }));
+    try {
+      const response = await fetch("/api/profile/avatar", { method: "DELETE" });
+      const value: unknown = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          isRecord(value) && typeof value.message === "string"
+            ? value.message
+            : "No fue posible eliminar la foto de perfil.",
+        );
+      }
+      if (!isRecord(value) || !isRecord(value.profile)) {
+        throw new Error("El servidor devolvió un perfil inválido.");
+      }
+      const nextProfile = value.profile as unknown as ClientProfileView;
+      if (nextProfile.hasAvatar) {
+        throw new Error("No fue posible confirmar la eliminación de la foto.");
+      }
+      setProfile(nextProfile);
+      clearAvatarSelection();
+      setAvatarVersion((current) => current + 1);
+      notifyProfileUpdated(false);
+      setMessage("La foto de perfil se eliminó correctamente.");
+      router.refresh();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "No fue posible eliminar la foto de perfil.";
+      setProfileErrors((current) => ({ ...current, avatar: errorMessage }));
+    } finally {
+      setAvatarDeletePending(false);
     }
   }
 
@@ -500,8 +556,8 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
         density="compact"
         actions={
           <>
-            <Button variant="secondary" disabled={profilePending} onClick={closeDialog}>Cancelar</Button>
-            <Button type="submit" form="profile-form" loading={profilePending} loadingLabel="Guardando…">Guardar cambios</Button>
+            <Button variant="secondary" disabled={profileMutationPending} onClick={closeDialog}>Cancelar</Button>
+            <Button type="submit" form="profile-form" disabled={avatarDeletePending} loading={profilePending} loadingLabel="Guardando…">Guardar cambios</Button>
           </>
         }
       >
@@ -509,14 +565,29 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
           <div className={styles.avatarEditor}>
             <Avatar profile={profile} version={avatarVersion} />
             <div>
-              <label className={styles.fileButton} htmlFor="profile-avatar"><Camera aria-hidden="true" /> Cambiar foto</label>
+              <div className={styles.avatarActions}>
+                <label className={styles.fileButton} htmlFor="profile-avatar"><Camera aria-hidden="true" /> Cambiar foto</label>
+                {profile.hasAvatar ? (
+                  <button
+                    type="button"
+                    className={styles.removeAvatarButton}
+                    disabled={profileMutationPending}
+                    aria-busy={avatarDeletePending || undefined}
+                    onClick={() => void removeAvatar()}
+                  >
+                    <Trash2 aria-hidden="true" />
+                    {avatarDeletePending ? "Eliminando…" : "Eliminar foto"}
+                  </button>
+                ) : null}
+              </div>
               <input
+                ref={avatarInputRef}
                 id="profile-avatar"
                 className={styles.fileInput}
                 type="file"
                 name="avatar"
                 accept={avatarInputAccept}
-                disabled={profilePending}
+                disabled={profileMutationPending}
                 aria-describedby="profile-avatar-help profile-avatar-error"
                 onChange={(event) => handleAvatarChange(event.currentTarget.files?.[0] ?? null)}
               />
@@ -525,20 +596,20 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
               {profileErrors.avatar ? <p id="profile-avatar-error" className={styles.fieldError} role="alert">{profileErrors.avatar}</p> : null}
             </div>
           </div>
-          <Field id="profile-full-name" name="fullName" label="Nombre completo" defaultValue={profile.fullName} error={profileErrors.fullName} maxLength={120} disabled={profilePending} size="compact" />
-          <Field id="profile-phone" name="phone" type="tel" label="Teléfono" defaultValue={profile.phone} error={profileErrors.phone} maxLength={32} disabled={profilePending} size="compact" />
-          <Field id="profile-email" name="email" type="email" label="Correo electrónico" defaultValue={profile.email} error={profileErrors.email} maxLength={254} disabled={profilePending} size="compact" />
+          <Field id="profile-full-name" name="fullName" label="Nombre completo" defaultValue={profile.fullName} error={profileErrors.fullName} maxLength={120} disabled={profileMutationPending} size="compact" />
+          <Field id="profile-phone" name="phone" type="tel" label="Teléfono" defaultValue={profile.phone} error={profileErrors.phone} maxLength={32} disabled={profileMutationPending} size="compact" />
+          <Field id="profile-email" name="email" type="email" label="Correo electrónico" defaultValue={profile.email} error={profileErrors.email} maxLength={254} disabled={profileMutationPending} size="compact" />
           <label className={styles.selectField} htmlFor="profile-store">
             <span>Sede preferida</span>
-            <select id="profile-store" name="preferredStoreId" defaultValue={profile.preferredStoreId} disabled={profilePending} aria-invalid={Boolean(profileErrors.preferredStoreId) || undefined} aria-describedby={profileErrors.preferredStoreId ? "profile-store-error" : undefined}>
+            <select id="profile-store" name="preferredStoreId" defaultValue={profile.preferredStoreId} disabled={profileMutationPending} aria-invalid={Boolean(profileErrors.preferredStoreId) || undefined} aria-describedby={profileErrors.preferredStoreId ? "profile-store-error" : undefined}>
               {stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
             </select>
             {profileErrors.preferredStoreId ? <span id="profile-store-error" className={styles.fieldError}>{profileErrors.preferredStoreId}</span> : null}
           </label>
           <fieldset className={styles.preferences}>
             <legend>Preferencias de contacto</legend>
-            <Checkbox id="profile-whatsapp" name="contactWhatsapp" label="WhatsApp" defaultChecked={profile.contactWhatsapp} disabled={profilePending} />
-            <Checkbox id="profile-email-contact" name="contactEmail" label="Correo electrónico" defaultChecked={profile.contactEmail} disabled={profilePending} />
+            <Checkbox id="profile-whatsapp" name="contactWhatsapp" label="WhatsApp" defaultChecked={profile.contactWhatsapp} disabled={profileMutationPending} />
+            <Checkbox id="profile-email-contact" name="contactEmail" label="Correo electrónico" defaultChecked={profile.contactEmail} disabled={profileMutationPending} />
           </fieldset>
           <p className={styles.infoBox}>Usaremos estos canales solo para avisos relacionados con tus pedidos.</p>
         </form>

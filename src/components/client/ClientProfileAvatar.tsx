@@ -7,12 +7,24 @@ import styles from "./ClientProfileAvatar.module.css";
 
 const PROFILE_UPDATED_EVENT = "burgerdesk:profile-updated";
 
+interface ProfileUpdatedDetail {
+  hasAvatar?: boolean;
+}
+
 export function ClientProfileAvatar() {
   const [avatarVersion, setAvatarVersion] = useState(0);
   const [avatarAvailable, setAvatarAvailable] = useState(true);
 
   useEffect(() => {
-    function refreshAvatar() {
+    function refreshAvatar(event: Event) {
+      const detail =
+        event instanceof CustomEvent
+          ? (event.detail as ProfileUpdatedDetail | null)
+          : null;
+      if (detail?.hasAvatar === false) {
+        setAvatarAvailable(false);
+        return;
+      }
       setAvatarAvailable(true);
       setAvatarVersion((current) => current + 1);
     }

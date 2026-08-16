@@ -552,7 +552,7 @@
   }
 }
 
-@media (min-width: 70rem) {
+@media (min-width: 80rem) {
   .main {
     padding: var(--space-5) var(--space-8) var(--space-6);
   }
