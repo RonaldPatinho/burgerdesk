@@ -16,6 +16,26 @@
   background: var(--color-surface);
 }
 
+.customerMessage {
+  min-height: var(--touch-target-min);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-sm);
+  line-height: 1.4;
+}
+
+.customerMessage svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  color: var(--color-brand-primary);
+}
+
 .hero {
   min-height: 11rem;
   display: grid;
@@ -234,6 +254,10 @@
     width: 100%;
     display: grid;
     gap: var(--space-6);
+  }
+
+  .customerMessage {
+    margin-bottom: var(--space-5);
   }
 
   .hero,

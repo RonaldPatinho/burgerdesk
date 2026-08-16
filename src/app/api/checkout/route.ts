@@ -16,6 +16,11 @@ import {
 import { OrderPersistenceError } from "@/server/orders/mysql-order-repository";
 import { StripeConfigurationError } from "@/server/stripe/client";
 import { getAuthenticatedClientSession } from "@/server/auth/session";
+import { getBusinessSettings } from "@/server/business-settings/repository";
+import {
+  assertCustomerCheckoutAllowed,
+  BusinessOperationsError,
+} from "@/server/business-settings/policy";
 import { catalogService } from "@/services/catalog";
 
 export const runtime = "nodejs";
@@ -61,10 +66,12 @@ export async function POST(request: Request): Promise<Response> {
   try {
     const parsedInput = parseCheckoutRequest(await readJsonBody(request));
     const authenticatedSession = await getAuthenticatedClientSession();
-    const [catalogProducts, catalogStores] = await Promise.all([
+    const [catalogProducts, catalogStores, businessSettings] = await Promise.all([
       catalogService.listProducts(),
       catalogService.listStores(),
+      getBusinessSettings().catch(() => null),
     ]);
+    assertCustomerCheckoutAllowed(businessSettings, parsedInput.paymentMethod);
     const input = {
       ...parsedInput,
       clientSession: authenticatedSession
@@ -94,6 +101,12 @@ export async function POST(request: Request): Promise<Response> {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error: unknown) {
+    if (error instanceof BusinessOperationsError) {
+      return jsonResponse(
+        error.code === "SETTINGS_UNAVAILABLE" ? 503 : 409,
+        error.message,
+      );
+    }
     if (
       error instanceof CheckoutRequestError ||
       error instanceof CheckoutValidationError

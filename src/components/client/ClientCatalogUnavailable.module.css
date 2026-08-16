@@ -1,0 +1,41 @@
+.page {
+  min-height: 100dvh;
+  width: 100%;
+  background: var(--color-surface-muted);
+}
+
+.main {
+  width: 100%;
+  max-width: 40rem;
+  min-height: calc(100dvh - 8rem);
+  margin-inline: auto;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-4) 7rem;
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.icon {
+  width: 5rem;
+  height: 5rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
+}
+
+.icon svg {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+@media (min-width: 64rem) {
+  .main {
+    min-height: calc(100dvh - 5rem);
+    max-width: none;
+  }
+}

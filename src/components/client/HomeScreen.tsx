@@ -30,6 +30,7 @@ export interface HomeScreenProps {
   desktopCategories: readonly Category[];
   desktopProducts: readonly Product[];
   promotions: readonly Promotion[];
+  customerMessage: string;
 }
 
 const categoryIcons: Partial<Record<CategoryId, LucideIcon>> = {
@@ -53,6 +54,7 @@ export function HomeScreen({
   desktopCategories,
   desktopProducts,
   promotions,
+  customerMessage,
 }: HomeScreenProps) {
   const promotion = promotions[0];
   const promotionProduct = promotion
@@ -72,6 +74,12 @@ export function HomeScreen({
         subtitle="Elige, personaliza y paga sin filas"
       />
       <main id="contenido-principal" className={styles.main}>
+        {customerMessage ? (
+          <aside className={styles.customerMessage} aria-label="Mensaje del local">
+            <Clock3 aria-hidden="true" />
+            <p>{customerMessage}</p>
+          </aside>
+        ) : null}
         <div className={styles.desktopOverview}>
           <ClientDesktopMenuHero
             promotion={promotion}

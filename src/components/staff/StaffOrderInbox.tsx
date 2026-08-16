@@ -34,6 +34,7 @@ interface StaffOrderInboxProps {
   staffName: string;
   initialSnapshot: StaffOrderInboxSnapshot;
   initialError?: string | null;
+  automaticRefreshEnabled: boolean;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -124,6 +125,7 @@ export function StaffOrderInbox({
   staffName,
   initialSnapshot,
   initialError = null,
+  automaticRefreshEnabled,
 }: StaffOrderInboxProps) {
   const router = useRouter();
   const [snapshot, setSnapshot] = useState(initialSnapshot);
@@ -209,6 +211,11 @@ export function StaffOrderInbox({
   );
 
   useEffect(() => {
+    if (!automaticRefreshEnabled) {
+      requestControllerRef.current?.abort();
+      return;
+    }
+
     function refreshWhenVisible() {
       if (document.visibilityState === "visible") {
         void refresh();
@@ -234,7 +241,7 @@ export function StaffOrderInbox({
       window.removeEventListener("focus", refreshOnFocus);
       requestControllerRef.current?.abort();
     };
-  }, [refresh]);
+  }, [automaticRefreshEnabled, refresh]);
 
   const visibleOrders = useMemo(
     () => filterStaffOrders(snapshot.orders, filter),
@@ -252,7 +259,11 @@ export function StaffOrderInbox({
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1>Bandeja de pedidos</h1>
-          <p>Panel en tiempo real</p>
+          <p>
+            {automaticRefreshEnabled
+              ? "Panel en tiempo real"
+              : "Actualización manual"}
+          </p>
         </div>
 
         <div className={styles.profileCard}>
@@ -402,7 +413,9 @@ export function StaffOrderInbox({
                   <p>
                     {syncing
                       ? "Sincronizando la bandeja…"
-                      : "La bandeja se mantiene sincronizada."}
+                      : automaticRefreshEnabled
+                        ? "La bandeja se mantiene sincronizada."
+                        : "Los avisos automáticos están desactivados. Usa Actualizar bandeja."}
                   </p>
                 </div>
               </section>

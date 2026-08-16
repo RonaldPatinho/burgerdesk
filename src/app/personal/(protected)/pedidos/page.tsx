@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { StaffOrderInbox } from "@/components/staff/StaffOrderInbox";
 import type { StaffOrderInboxSnapshot } from "@/domain/staff-orders";
+import { staffAutomaticRefreshIsEnabled } from "@/server/business-settings/policy";
+import { getBusinessSettings } from "@/server/business-settings/repository";
 import { getAuthenticatedStaffSession } from "@/server/internal-auth/session";
 import { getStaffOrderInboxSnapshot } from "@/server/staff-orders/repository";
 import styles from "./page.module.css";
@@ -23,12 +25,13 @@ function emptySnapshot(): StaffOrderInboxSnapshot {
 }
 
 export default async function StaffOrdersPage() {
-  const [session, snapshotOrError] = await Promise.all([
+  const [session, snapshotOrError, businessSettings] = await Promise.all([
     getAuthenticatedStaffSession(),
     getStaffOrderInboxSnapshot().then(
       (snapshot) => ({ snapshot }) as const,
       () => ({ error: "No fue posible cargar la bandeja de pedidos." }) as const,
     ),
+    getBusinessSettings().catch(() => null),
   ]);
 
   const snapshot =
@@ -41,6 +44,7 @@ export default async function StaffOrdersPage() {
         staffName={session ? firstName(session.fullName) : "Personal"}
         initialSnapshot={snapshot}
         initialError={initialError}
+        automaticRefreshEnabled={staffAutomaticRefreshIsEnabled(businessSettings)}
       />
     </div>
   );

@@ -48,7 +48,7 @@ const items: readonly NavigationItem[] = [
     label: "Ajustes",
     href: "/administrador/configuracion",
     icon: <Settings />,
-    available: false,
+    available: true,
   },
 ];
 

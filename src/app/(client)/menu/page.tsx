@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { ClientCatalogUnavailable } from "@/components/client/ClientCatalogUnavailable";
 import { MenuScreen } from "@/components/client/MenuScreen";
+import { customerCatalogIsAvailable } from "@/server/business-settings/policy";
+import { getBusinessSettings } from "@/server/business-settings/repository";
 import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
@@ -25,6 +28,11 @@ function normalizeCategory(value: string | null): string | null {
 }
 
 export default async function MenuPage({ searchParams }: MenuPageProps) {
+  const businessSettings = await getBusinessSettings().catch(() => null);
+  if (!customerCatalogIsAvailable(businessSettings)) {
+    return <ClientCatalogUnavailable />;
+  }
+
   const [params, categories, products, promotions] = await Promise.all([
     searchParams,
     catalogService.listCategories("menu"),
