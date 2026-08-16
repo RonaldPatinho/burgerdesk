@@ -10,6 +10,7 @@ const requiredMigrations = [
   "007_add_beverage_products.sql",
   "008_add_extended_catalog_products.sql",
   "009_add_burger_product_options.sql",
+  "010_create_business_settings.sql",
 ];
 
 const requiredTables = [
@@ -34,6 +35,7 @@ const requiredTables = [
   "catalog_product_options",
   "catalog_product_default_options",
   "catalog_product_images",
+  "business_settings",
 ];
 
 const requiredUniqueIndexes = [
