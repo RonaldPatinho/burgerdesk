@@ -161,6 +161,28 @@ export const products = [
     options: [],
     defaultOptionIds: [],
   },
+  {
+    id: "fanta",
+    name: "Fanta",
+    summary: "Bebida fría",
+    priceCop: 6_900,
+    imagePath: "/images/products/fanta.png",
+    categoryIds: ["bebidas"],
+    available: true,
+    options: [],
+    defaultOptionIds: [],
+  },
+  {
+    id: "sprite",
+    name: "Sprite",
+    summary: "Bebida fría",
+    priceCop: 6_900,
+    imagePath: "/images/products/sprite.png",
+    categoryIds: ["bebidas"],
+    available: true,
+    options: [],
+    defaultOptionIds: [],
+  },
 ] as const satisfies readonly Product[];
 
 export const featuredProductIds = [

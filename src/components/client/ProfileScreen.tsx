@@ -9,7 +9,9 @@ import {
   Clock3,
   Heart,
   LogOut,
+  Mail,
   MapPin,
+  Phone,
   PackageCheck,
   ReceiptText,
   RotateCcw,
@@ -246,6 +248,7 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
       }
       setProfile(value.profile as unknown as ClientProfileView);
       if (avatarFile) setAvatarVersion((current) => current + 1);
+      window.dispatchEvent(new Event("burgerdesk:profile-updated"));
       setMessage("Tus datos se guardaron correctamente.");
       setDialog(null);
       setAvatarFile(null);
@@ -304,70 +307,186 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
     <div className={styles.page}>
       <ClientHeader homeLink />
       <main id="contenido-principal" className={styles.main} tabIndex={-1}>
-        <header className={styles.heading}>
-          <h1>Mi perfil</h1>
-          <p>Administra tus datos y revisa tus pedidos.</p>
-        </header>
+        <section className={styles.desktopOnly} aria-label="Perfil del cliente en escritorio">
+          <header className={styles.desktopHeading}>
+            <h1>Mi perfil</h1>
+            <p>Administra tus datos y revisa pedidos anteriores</p>
+          </header>
 
-        {message ? (
-          <p className={styles.message} role="status" aria-live="polite">
-            {message}
-          </p>
-        ) : null}
+          {message ? (
+            <p className={styles.message} role="status" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
 
-        <section className={styles.profileCard} aria-label="Datos del cliente">
-          <Avatar profile={profile} version={avatarVersion} />
-          <div className={styles.profileCopy}>
-            <h2>{profile.fullName}</h2>
-            <p>{profile.email}</p>
-            <span><MapPin aria-hidden="true" /> {profile.preferredStoreName}</span>
-          </div>
-          <Button
-            size="compact"
-            variant="secondary"
-            leadingIcon={<UserRound />}
-            onClick={() => setDialog("edit")}
-          >
-            Editar
-          </Button>
-        </section>
+          <div className={styles.desktopProfileLayout}>
+            <aside className={styles.desktopIdentityPanel} aria-label="Información del cliente">
+              <section className={styles.desktopIdentityHero}>
+                <Avatar profile={profile} version={avatarVersion} />
+                <h2>{profile.fullName}</h2>
+                <p>Cliente BurgerDesk</p>
+              </section>
 
-        <section className={styles.stats} aria-label="Estadísticas del cliente">
-          <article><PackageCheck aria-hidden="true" /><strong>{initialDashboard.stats.orderCount}</strong><span>Pedidos</span></article>
-          <article><Heart aria-hidden="true" /><strong>{initialDashboard.stats.favoriteCount}</strong><span>Favoritos</span></article>
-          <article><WalletCards aria-hidden="true" /><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong><span>Total pagado</span></article>
-        </section>
+              <section className={styles.desktopPersonalInfo} aria-labelledby="desktop-personal-info">
+                <h3 id="desktop-personal-info">Información personal</h3>
+                <dl>
+                  <div>
+                    <dt><Mail aria-hidden="true" /> Correo</dt>
+                    <dd>{profile.email}</dd>
+                  </div>
+                  <div>
+                    <dt><Phone aria-hidden="true" /> Teléfono</dt>
+                    <dd>{profile.phone}</dd>
+                  </div>
+                  <div>
+                    <dt><MapPin aria-hidden="true" /> Sede preferida</dt>
+                    <dd>{profile.preferredStoreName}</dd>
+                  </div>
+                </dl>
+              </section>
 
-        <section className={styles.history} aria-labelledby="history-title">
-          <div className={styles.sectionHeading}>
-            <h2 id="history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
-            {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
-              <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
-                {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
-              </button>
-            ) : null}
-          </div>
-          {orders.length > 0 ? (
-            <div className={styles.orderList}>
-              {orders.map((order) => <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />)}
+              <div className={styles.desktopIdentityActions}>
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  leadingIcon={<UserRound />}
+                  onClick={() => setDialog("edit")}
+                >
+                  Editar perfil
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth
+                  leadingIcon={<LogOut />}
+                  onClick={() => setDialog("logout")}
+                >
+                  Cerrar sesión
+                </Button>
+              </div>
+            </aside>
+
+            <div className={styles.desktopProfileContent}>
+              <section className={styles.desktopSummary} aria-labelledby="desktop-summary-title">
+                <h2 id="desktop-summary-title">Resumen</h2>
+                <div className={styles.desktopStats}>
+                  <article>
+                    <PackageCheck aria-hidden="true" />
+                    <div><span>Pedidos realizados</span><strong>{initialDashboard.stats.orderCount}</strong></div>
+                  </article>
+                  <article>
+                    <Heart aria-hidden="true" />
+                    <div><span>Favoritos</span><strong>{initialDashboard.stats.favoriteCount}</strong></div>
+                  </article>
+                  <article>
+                    <WalletCards aria-hidden="true" />
+                    <div><span>Total pagado</span><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong></div>
+                  </article>
+                </div>
+              </section>
+
+              <section className={styles.desktopHistory} aria-labelledby="desktop-history-title">
+                <div className={styles.desktopHistoryHeading}>
+                  <div>
+                    <h2 id="desktop-history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
+                    <p>Consulta el historial de tus compras en BurgerDesk.</p>
+                  </div>
+                  {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
+                    <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
+                      {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
+
+                {orders.length > 0 ? (
+                  <div className={styles.desktopOrderList}>
+                    {orders.map((order) => (
+                      <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <ReceiptText aria-hidden="true" />
+                    <h3>Aún no tienes pedidos</h3>
+                    <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
+                  </div>
+                )}
+              </section>
+
+              <div className={styles.desktopNewOrder}>
+                <Button leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
+                  Hacer nuevo pedido
+                </Button>
+              </div>
             </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <ReceiptText aria-hidden="true" />
-              <h3>Aún no tienes pedidos</h3>
-              <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
-            </div>
-          )}
+          </div>
         </section>
 
-        <div className={styles.pageActions}>
-          <Button variant="danger" fullWidth leadingIcon={<LogOut />} onClick={() => setDialog("logout")}>
-            Cerrar sesión
-          </Button>
-          <Button fullWidth leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
-            Nuevo pedido
-          </Button>
-        </div>
+        <section className={styles.mobileOnly} aria-label="Perfil del cliente">
+          <header className={styles.heading}>
+            <h1>Mi perfil</h1>
+            <p>Administra tus datos y revisa tus pedidos.</p>
+          </header>
+
+          {message ? (
+            <p className={styles.message} role="status" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
+
+          <section className={styles.profileCard} aria-label="Datos del cliente">
+            <Avatar profile={profile} version={avatarVersion} />
+            <div className={styles.profileCopy}>
+              <h2>{profile.fullName}</h2>
+              <p>{profile.email}</p>
+              <span><MapPin aria-hidden="true" /> {profile.preferredStoreName}</span>
+            </div>
+            <Button
+              size="compact"
+              variant="secondary"
+              leadingIcon={<UserRound />}
+              onClick={() => setDialog("edit")}
+            >
+              Editar
+            </Button>
+          </section>
+
+          <section className={styles.stats} aria-label="Estadísticas del cliente">
+            <article><PackageCheck aria-hidden="true" /><strong>{initialDashboard.stats.orderCount}</strong><span>Pedidos</span></article>
+            <article><Heart aria-hidden="true" /><strong>{initialDashboard.stats.favoriteCount}</strong><span>Favoritos</span></article>
+            <article><WalletCards aria-hidden="true" /><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong><span>Total pagado</span></article>
+          </section>
+
+          <section className={styles.history} aria-labelledby="history-title">
+            <div className={styles.sectionHeading}>
+              <h2 id="history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
+              {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
+                <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
+                  {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            {orders.length > 0 ? (
+              <div className={styles.orderList}>
+                {orders.map((order) => <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />)}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <ReceiptText aria-hidden="true" />
+                <h3>Aún no tienes pedidos</h3>
+                <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
+              </div>
+            )}
+          </section>
+
+          <div className={styles.pageActions}>
+            <Button variant="danger" fullWidth leadingIcon={<LogOut />} onClick={() => setDialog("logout")}>
+              Cerrar sesión
+            </Button>
+            <Button fullWidth leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
+              Nuevo pedido
+            </Button>
+          </div>
+        </section>
       </main>
       <ClientBottomNav active="profile" />
 

@@ -9,16 +9,21 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [categories, featuredProducts, promotions] = await Promise.all([
-    catalogService.listCategories("home"),
-    catalogService.listFeaturedProducts(),
-    catalogService.listPromotions(),
-  ]);
+  const [categories, featuredProducts, desktopCategories, desktopProducts, promotions] =
+    await Promise.all([
+      catalogService.listCategories("home"),
+      catalogService.listFeaturedProducts(),
+      catalogService.listCategories("menu"),
+      catalogService.listProducts({ availableOnly: true }),
+      catalogService.listPromotions(),
+    ]);
 
   return (
     <HomeScreen
       categories={categories}
       featuredProducts={featuredProducts}
+      desktopCategories={desktopCategories}
+      desktopProducts={desktopProducts}
       promotions={promotions}
     />
   );

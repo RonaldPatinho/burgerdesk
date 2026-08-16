@@ -25,6 +25,7 @@ import {
 import { browserSessionService } from "@/services/browser-session";
 import { ClientBottomNav } from "./ClientBottomNav";
 import { useClientCart } from "./ClientCartProvider";
+import { ClientDesktopTopbar } from "./ClientDesktopTopbar";
 import { ClientHeader } from "./ClientHeader";
 import styles from "./OrderConfirmationScreen.module.css";
 
@@ -253,10 +254,7 @@ export function OrderConfirmationScreen({
 
     if (!canSafelyClear) {
       browserCheckoutRepository.complete();
-      const timer = window.setTimeout(
-        () => setCartResolution("preserved"),
-        0,
-      );
+      const timer = window.setTimeout(() => setCartResolution("preserved"), 0);
       return () => window.clearTimeout(timer);
     }
 
@@ -285,6 +283,14 @@ export function OrderConfirmationScreen({
   const productCount = loaded
     ? loaded.order.lines.reduce((total, line) => total + line.quantity, 0)
     : 0;
+  const paymentMethodLabel =
+    loaded?.order.paymentMethod === "stripe"
+      ? "Pago en línea con Stripe"
+      : "Efectivo al retirar";
+  const pickupEstimateLabel = pickupStore
+    ? `${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
+    : "Por confirmar";
+  const storeLabel = pickupStore?.name ?? loaded?.order.storeId ?? "Retiro en local";
 
   return (
     <div className={styles.page}>
@@ -350,195 +356,342 @@ export function OrderConfirmationScreen({
           />
         ) : null}
 
-        {confirmed && loaded && view === "confirmation" ? (
+        {confirmed && loaded && tracking ? (
           <>
-            <header className={styles.confirmedHeading}>
-              <span className={styles.successIcon} aria-hidden="true">✓</span>
-              <h1>¡Pedido confirmado!</h1>
-              <p>
-                {loaded.order.paymentMethod === "stripe"
-                  ? "El servidor confirmó tu pago con Stripe."
-                  : "Tu pedido está listo para pagarse al retirar."}
-              </p>
-            </header>
+            <section className={styles.desktopOnly} aria-label="Vista desktop del pedido confirmado">
+              <ClientDesktopTopbar
+                title="Pedido en curso"
+                subtitle="Sigue el avance de tu orden en tiempo real"
+              />
 
-            <section className={styles.orderCard} aria-labelledby="codigo-pedido">
-              <ReceiptText aria-hidden="true" />
-              <div>
-                <p id="codigo-pedido">Código de pedido</p>
-                <strong>
-                  <span aria-hidden="true">
-                    #{shortOrderIdentifier(loaded.order.id)}
-                  </span>
-                  <span className={styles.visuallyHidden}>
-                    Identificador completo: {loaded.order.id}
-                  </span>
-                </strong>
-              </div>
-            </section>
-
-            <section className={styles.details} aria-label="Detalles del pedido">
-              <div>
-                <Clock3 aria-hidden="true" />
-                <span>Tiempo estimado</span>
-                <strong>
-                  {pickupStore
-                    ? `${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
-                    : "Por confirmar"}
-                </strong>
-              </div>
-              <div>
-                <MapPin aria-hidden="true" />
-                <span>Retiro</span>
-                <strong>{pickupStore?.name ?? loaded.order.storeId}</strong>
-              </div>
-            </section>
-
-            <section className={styles.summary} aria-labelledby="resumen-confirmado">
-              <h2 id="resumen-confirmado">Resumen del pedido</h2>
-              <ul>
-                {loaded.order.lines.map((line, index) => (
-                  <li key={`${line.productName}-${index}`}>
-                    <span>{line.quantity} × {line.productName}</span>
-                    <strong>{formatCop(line.lineTotalCop)}</strong>
-                  </li>
-                ))}
-              </ul>
-              <dl>
-                <div>
-                  <dt>Método de pago</dt>
-                  <dd>
-                    {loaded.order.paymentMethod === "stripe"
-                      ? "Pago en línea con Stripe"
-                      : "Efectivo"}
-                  </dd>
-                </div>
-                <div>
-                  <dt>Total</dt>
-                  <dd>{formatCop(loaded.order.totalCop)}</dd>
-                </div>
-              </dl>
-            </section>
-
-            {cartResolution === "preserved" ? (
-              <p className={styles.notice} role="status">
-                El carrito cambió después de iniciar el pago, por eso conservamos
-                su contenido actual.
-              </p>
-            ) : null}
-            {cartResolution === "error" ? (
-              <p className={styles.errorNotice} role="alert">
-                El pedido está confirmado, pero no pudimos vaciar el carrito local.
-              </p>
-            ) : null}
-
-            <button
-              className={styles.trackingButton}
-              type="button"
-              onClick={() => setView("tracking")}
-            >
-              Ver estado del pedido
-            </button>
-            <Link className={styles.secondaryLink} href="/">
-              Volver al inicio
-            </Link>
-
-            <aside className={styles.thanks}>
-              <strong>¡Gracias por elegir BurgerDesk!</strong>
-              <span>Te avisaremos cuando tu pedido esté listo.</span>
-            </aside>
-          </>
-        ) : null}
-
-        {confirmed && loaded && tracking && view === "tracking" ? (
-          <>
-            <header className={styles.trackingHeading}>
-              <h1>Estado del pedido</h1>
-              <p>Seguimiento actualizado de tu orden.</p>
-            </header>
-
-            <section
-              className={styles.trackingOrderCard}
-              aria-labelledby="pedido-en-seguimiento"
-            >
-              <p
-                id="pedido-en-seguimiento"
-                className={styles.trackingOrderIdentity}
-                aria-label={`Pedido ${loaded.order.id}`}
-              >
-                Pedido{" "}
-                <strong aria-hidden="true">
-                  #{shortOrderIdentifier(loaded.order.id)}
-                </strong>
-              </p>
-              <strong className={styles.trackingTotal}>
-                {formatCop(loaded.order.totalCop)}
-              </strong>
-              <p className={styles.trackingMeta}>
-                {productCount} {productCount === 1 ? "producto" : "productos"}
-                {" · Retiro en local"}
-              </p>
-              <p className={styles.statusBadge} role="status">
-                <span aria-hidden="true" />
-                {tracking.currentLabel}
-              </p>
-            </section>
-
-            <section className={styles.progress} aria-labelledby="progreso-pedido">
-              <h2 id="progreso-pedido">Progreso del pedido</h2>
-              <ol className={styles.timeline}>
-                {tracking.steps.map((step) => (
-                  <li
-                    key={step.status}
-                    className={styles.timelineStep}
-                    data-state={step.state}
-                    aria-current={step.state === "current" ? "step" : undefined}
-                  >
-                    <span className={styles.timelineMarker} aria-hidden="true">
-                      {step.state === "upcoming" ? (
-                        <Clock3 />
-                      ) : (
-                        <Check />
-                      )}
+              <div className={styles.desktopGrid}>
+                <section
+                  className={styles.desktopConfirmationCard}
+                  aria-labelledby="desktop-confirmacion-titulo"
+                >
+                  <div className={styles.desktopSuccessWrap}>
+                    <span className={styles.successIcon} aria-hidden="true">
+                      ✓
                     </span>
+                  </div>
+
+                  <div className={styles.desktopConfirmationCopy}>
+                    <h2 id="desktop-confirmacion-titulo">¡Pedido confirmado!</h2>
+                    <p>
+                      {loaded.order.paymentMethod === "stripe"
+                        ? "Tu pago fue confirmado y ya enviamos la orden a cocina."
+                        : "Tu pedido está listo para pagarse al retirar."}
+                    </p>
+                  </div>
+
+                  <section className={styles.desktopCodeCard} aria-labelledby="desktop-codigo-pedido">
+                    <div className={styles.desktopCodeCopy}>
+                      <ReceiptText aria-hidden="true" />
+                      <div>
+                        <p id="desktop-codigo-pedido">Código de pedido</p>
+                        <strong>
+                          #{shortOrderIdentifier(loaded.order.id)}
+                        </strong>
+                      </div>
+                    </div>
+                    <div className={styles.desktopEstimateCard}>
+                      <Clock3 aria-hidden="true" />
+                      <strong>{pickupEstimateLabel}</strong>
+                    </div>
+                  </section>
+
+                  <div className={styles.desktopMetaGrid}>
+                    <article className={styles.desktopMetaCard}>
+                      <ReceiptText aria-hidden="true" />
+                      <div>
+                        <span>Método de pago</span>
+                        <strong>{paymentMethodLabel}</strong>
+                      </div>
+                    </article>
+
+                    <article className={styles.desktopMetaCard}>
+                      <MapPin aria-hidden="true" />
+                      <div>
+                        <span>Retiro</span>
+                        <strong>{storeLabel}</strong>
+                      </div>
+                    </article>
+                  </div>
+
+                  <p className={styles.desktopInstruction}>
+                    Muestra el código al retirar tu pedido en caja.
+                  </p>
+
+                  <div className={styles.desktopActions}>
+                    <a className={styles.desktopPrimaryAction} href="#desktop-progreso-pedido">
+                      Ver estado del pedido
+                    </a>
+                    <Link className={styles.secondaryLink} href="/">
+                      Volver al inicio
+                    </Link>
+                  </div>
+                </section>
+
+                <section
+                  className={styles.desktopProgressCard}
+                  aria-labelledby="desktop-progreso-pedido"
+                >
+                  <header className={styles.desktopProgressHeader}>
                     <div>
-                      <h3>{step.label}</h3>
+                      <h2 id="desktop-progreso-pedido">Progreso del pedido</h2>
                       <p>
-                        {step.occurredAt ? (
-                          <>
-                            <time dateTime={step.occurredAt}>
-                              {formatOrderTime(step.occurredAt)}
-                            </time>
-                            {" · "}
-                          </>
-                        ) : null}
-                        {step.description}
+                        Pedido #{shortOrderIdentifier(loaded.order.id)} · {productCount}{" "}
+                        {productCount === 1 ? "producto" : "productos"} · {formatCop(loaded.order.totalCop)}
                       </p>
                     </div>
-                  </li>
-                ))}
-              </ol>
+                    <p className={styles.statusBadge} role="status">
+                      <span aria-hidden="true" />
+                      {tracking.currentLabel}
+                    </p>
+                  </header>
+
+                  <ol className={styles.desktopTimeline}>
+                    {tracking.steps.map((step) => (
+                      <li
+                        key={step.status}
+                        className={styles.desktopTimelineStep}
+                        data-state={step.state}
+                        aria-current={step.state === "current" ? "step" : undefined}
+                      >
+                        <span className={styles.desktopTimelineMarker} aria-hidden="true">
+                          {step.state === "upcoming" ? (
+                            <span className={styles.desktopTimelineMarkerDot} />
+                          ) : step.state === "current" ? (
+                            <Clock3 />
+                          ) : (
+                            <Check />
+                          )}
+                        </span>
+                        <div>
+                          <h3>{step.label}</h3>
+                          <p>
+                            {step.occurredAt ? (
+                              <>
+                                <time dateTime={step.occurredAt}>
+                                  {formatOrderTime(step.occurredAt)}
+                                </time>
+                                {" · "}
+                              </>
+                            ) : null}
+                            {step.description}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+
+                  <aside className={styles.desktopStoreCard}>
+                    <div className={styles.desktopStoreCopy}>
+                      <MapPin aria-hidden="true" />
+                      <div>
+                        <strong>{storeLabel}</strong>
+                        <span>Retira tu pedido cuando el estado indique que está listo.</span>
+                      </div>
+                    </div>
+                    <p className={styles.desktopStoreEstimate}>{pickupEstimateLabel}</p>
+                  </aside>
+                </section>
+              </div>
+
+              {cartResolution === "preserved" ? (
+                <p className={styles.notice} role="status">
+                  El carrito cambió después de iniciar el pago, por eso conservamos su contenido actual.
+                </p>
+              ) : null}
+              {cartResolution === "error" ? (
+                <p className={styles.errorNotice} role="alert">
+                  El pedido está confirmado, pero no pudimos vaciar el carrito local.
+                </p>
+              ) : null}
+
+              <aside className={styles.desktopSupportStrip}>
+                <div>
+                  <strong>¿Tienes una duda con tu pedido?</strong>
+                  <span>Nuestro equipo del local puede ayudarte cuando vayas a retirarlo.</span>
+                </div>
+                <Link className={styles.desktopSupportAction} href="/">
+                  Volver al inicio
+                </Link>
+              </aside>
             </section>
 
-            <aside className={styles.trackingNotice}>
-              <div className={styles.trackingNoticeHeading}>
-                <Info aria-hidden="true" />
-                <h2>Información</h2>
-              </div>
-              <p>
-                Consulta esta pantalla para verificar el avance. El estado
-                siempre aparece con texto e icono.
-              </p>
-            </aside>
+            <section className={styles.mobileOnly} aria-label="Vista móvil del pedido confirmado">
+              {view === "confirmation" ? (
+                <>
+                  <header className={styles.confirmedHeading}>
+                    <span className={styles.successIcon} aria-hidden="true">✓</span>
+                    <h1>¡Pedido confirmado!</h1>
+                    <p>
+                      {loaded.order.paymentMethod === "stripe"
+                        ? "El servidor confirmó tu pago con Stripe."
+                        : "Tu pedido está listo para pagarse al retirar."}
+                    </p>
+                  </header>
 
-            <div className={styles.trackingActions}>
-              <Link className={styles.secondaryLink} href="/menu">
-                Volver al menú
-              </Link>
-              <Link className={styles.primaryLink} href="/menu">
-                Nuevo pedido
-              </Link>
-            </div>
+                  <section className={styles.orderCard} aria-labelledby="codigo-pedido">
+                    <ReceiptText aria-hidden="true" />
+                    <div>
+                      <p id="codigo-pedido">Código de pedido</p>
+                      <strong>
+                        <span aria-hidden="true">#{shortOrderIdentifier(loaded.order.id)}</span>
+                        <span className={styles.visuallyHidden}>
+                          Identificador completo: {loaded.order.id}
+                        </span>
+                      </strong>
+                    </div>
+                  </section>
+
+                  <section className={styles.details} aria-label="Detalles del pedido">
+                    <div>
+                      <Clock3 aria-hidden="true" />
+                      <span>Tiempo estimado</span>
+                      <strong>{pickupEstimateLabel}</strong>
+                    </div>
+                    <div>
+                      <MapPin aria-hidden="true" />
+                      <span>Retiro</span>
+                      <strong>{storeLabel}</strong>
+                    </div>
+                  </section>
+
+                  <section className={styles.summary} aria-labelledby="resumen-confirmado">
+                    <h2 id="resumen-confirmado">Resumen del pedido</h2>
+                    <ul>
+                      {loaded.order.lines.map((line, index) => (
+                        <li key={`${line.productName}-${index}`}>
+                          <span>{line.quantity} × {line.productName}</span>
+                          <strong>{formatCop(line.lineTotalCop)}</strong>
+                        </li>
+                      ))}
+                    </ul>
+                    <dl>
+                      <div>
+                        <dt>Método de pago</dt>
+                        <dd>{paymentMethodLabel}</dd>
+                      </div>
+                      <div>
+                        <dt>Total</dt>
+                        <dd>{formatCop(loaded.order.totalCop)}</dd>
+                      </div>
+                    </dl>
+                  </section>
+
+                  {cartResolution === "preserved" ? (
+                    <p className={styles.notice} role="status">
+                      El carrito cambió después de iniciar el pago, por eso conservamos su contenido actual.
+                    </p>
+                  ) : null}
+                  {cartResolution === "error" ? (
+                    <p className={styles.errorNotice} role="alert">
+                      El pedido está confirmado, pero no pudimos vaciar el carrito local.
+                    </p>
+                  ) : null}
+
+                  <button
+                    className={styles.trackingButton}
+                    type="button"
+                    onClick={() => setView("tracking")}
+                  >
+                    Ver estado del pedido
+                  </button>
+                  <Link className={styles.secondaryLink} href="/">
+                    Volver al inicio
+                  </Link>
+
+                  <aside className={styles.thanks}>
+                    <strong>¡Gracias por elegir BurgerDesk!</strong>
+                    <span>Te avisaremos cuando tu pedido esté listo.</span>
+                  </aside>
+                </>
+              ) : null}
+
+              {view === "tracking" ? (
+                <>
+                  <header className={styles.trackingHeading}>
+                    <h1>Estado del pedido</h1>
+                    <p>Seguimiento actualizado de tu orden.</p>
+                  </header>
+
+                  <section
+                    className={styles.trackingOrderCard}
+                    aria-labelledby="pedido-en-seguimiento"
+                  >
+                    <p
+                      id="pedido-en-seguimiento"
+                      className={styles.trackingOrderIdentity}
+                      aria-label={`Pedido ${loaded.order.id}`}
+                    >
+                      Pedido <strong aria-hidden="true">#{shortOrderIdentifier(loaded.order.id)}</strong>
+                    </p>
+                    <strong className={styles.trackingTotal}>
+                      {formatCop(loaded.order.totalCop)}
+                    </strong>
+                    <p className={styles.trackingMeta}>
+                      {productCount} {productCount === 1 ? "producto" : "productos"}
+                      {" · Retiro en local"}
+                    </p>
+                    <p className={styles.statusBadge} role="status">
+                      <span aria-hidden="true" />
+                      {tracking.currentLabel}
+                    </p>
+                  </section>
+
+                  <section className={styles.progress} aria-labelledby="progreso-pedido">
+                    <h2 id="progreso-pedido">Progreso del pedido</h2>
+                    <ol className={styles.timeline}>
+                      {tracking.steps.map((step) => (
+                        <li
+                          key={step.status}
+                          className={styles.timelineStep}
+                          data-state={step.state}
+                          aria-current={step.state === "current" ? "step" : undefined}
+                        >
+                          <span className={styles.timelineMarker} aria-hidden="true">
+                            {step.state === "upcoming" ? <Clock3 /> : <Check />}
+                          </span>
+                          <div>
+                            <h3>{step.label}</h3>
+                            <p>
+                              {step.occurredAt ? (
+                                <>
+                                  <time dateTime={step.occurredAt}>{formatOrderTime(step.occurredAt)}</time>
+                                  {" · "}
+                                </>
+                              ) : null}
+                              {step.description}
+                            </p>
+                          </div>
+                        </li>
+                      ))}
+                    </ol>
+                  </section>
+
+                  <aside className={styles.trackingNotice}>
+                    <div className={styles.trackingNoticeHeading}>
+                      <Info aria-hidden="true" />
+                      <h2>Información</h2>
+                    </div>
+                    <p>
+                      Consulta esta pantalla para verificar el avance. El estado siempre aparece con texto e icono.
+                    </p>
+                  </aside>
+
+                  <div className={styles.trackingActions}>
+                    <Link className={styles.secondaryLink} href="/menu">
+                      Volver al menú
+                    </Link>
+                    <Link className={styles.primaryLink} href="/menu">
+                      Nuevo pedido
+                    </Link>
+                  </div>
+                </>
+              ) : null}
+            </section>
           </>
         ) : null}
       </main>

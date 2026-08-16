@@ -1,0 +1,66 @@
+.carousel {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.viewport {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: var(--space-3);
+}
+
+.controls {
+  min-height: var(--touch-target-min);
+  display: grid;
+  grid-template-columns: var(--touch-target-min) minmax(0, 1fr) var(--touch-target-min);
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.arrow {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.arrow svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.dots {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0;
+  background: color-mix(in srgb, var(--color-text) 24%, var(--color-surface));
+}
+
+.dot[data-active="true"] {
+  width: 1.4rem;
+  background: var(--color-brand-primary);
+}
+
+@media (min-width: 48rem) {
+  .carousel {
+    display: none;
+  }
+}

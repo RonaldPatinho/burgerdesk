@@ -1,0 +1,73 @@
+.progress {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .progress {
+    width: min(100%, 36rem);
+    display: block;
+  }
+
+  .progress ol {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .step {
+    position: relative;
+    display: grid;
+    justify-items: start;
+    gap: 0.45rem;
+  }
+
+  .step:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    top: 1.65rem;
+    left: 3.9rem;
+    width: calc(100% - 4.45rem);
+    border-top: 0.2rem dashed var(--color-border);
+  }
+
+  .step[data-status="complete"]:not(:last-child)::after {
+    border-top-style: solid;
+    border-top-color: var(--color-brand-primary);
+  }
+
+  .circle {
+    position: relative;
+    z-index: 1;
+    width: 3.3rem;
+    height: 3.3rem;
+    display: grid;
+    place-items: center;
+    border: 0.125rem solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    background: var(--color-surface);
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+
+  .step[data-status="complete"] .circle,
+  .step[data-status="current"] .circle {
+    border-color: var(--color-brand-primary);
+    color: var(--color-surface);
+    background: var(--color-brand-primary);
+  }
+
+  .label {
+    position: relative;
+    left: 1.65rem;
+    width: max-content;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    text-align: center;
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+  }
+}

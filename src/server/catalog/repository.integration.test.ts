@@ -35,7 +35,7 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     menuCategories.map((category) => category.name),
     ["Burgers", "Papas", "Bebidas"],
   );
-  assert.equal(products.length, 6);
+  assert.equal(products.length, 8);
   const laBendita = products.find((product) => product.id === "la-bendita");
   assert.ok(laBendita);
   assert.equal(laBendita.priceCop, 26_900);

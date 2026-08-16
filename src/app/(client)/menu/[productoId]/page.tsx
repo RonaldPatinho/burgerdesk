@@ -32,11 +32,23 @@ export default async function ProductDetailPage({
     notFound();
   }
 
-  const product = await catalogService.getProduct(productoId);
+  const [product, availableProducts] = await Promise.all([
+    catalogService.getProduct(productoId),
+    catalogService.listProducts({ availableOnly: true }),
+  ]);
 
   if (!product || !product.available) {
     notFound();
   }
 
-  return <ProductDetailScreen product={product} />;
+  const recommendations = availableProducts
+    .filter((candidate) => candidate.id !== product.id)
+    .slice(0, 4);
+
+  return (
+    <ProductDetailScreen
+      product={product}
+      recommendations={recommendations}
+    />
+  );
 }

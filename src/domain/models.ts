@@ -16,6 +16,8 @@ export const productIds = [
   "bacon-bendita",
   "papas-cheddar",
   "combo-gloria",
+  "fanta",
+  "sprite",
 ] as const;
 
 export type ProductId = string;

@@ -2,7 +2,14 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { CreditCard, MapPin, Minus, Plus, ShoppingBag } from "lucide-react";
+import {
+  CreditCard,
+  MapPin,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Trash2,
+} from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Button, Feedback, IconButton } from "@/components/ui";
 import {
@@ -14,6 +21,8 @@ import type { CartItem, Product, StoreLocation } from "@/domain/models";
 import { calculateCartPricing } from "@/domain/pricing";
 import { ClientBottomNav } from "./ClientBottomNav";
 import { useClientCart } from "./ClientCartProvider";
+import { ClientCheckoutProgress } from "./ClientCheckoutProgress";
+import { ClientDesktopTopbar } from "./ClientDesktopTopbar";
 import { ClientHeader } from "./ClientHeader";
 import styles from "./CartScreen.module.css";
 
@@ -117,6 +126,10 @@ export function CartScreen({ products, pickupStore }: CartScreenProps) {
       ),
     [pricingResult.pricing],
   );
+  const itemCount = cart.items.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
 
   async function changeQuantity(item: CartItem, direction: -1 | 1) {
     if (pendingItemRef.current) return;
@@ -153,6 +166,27 @@ export function CartScreen({ products, pickupStore }: CartScreenProps) {
     }
   }
 
+  async function removeCartItem(item: CartItem) {
+    if (pendingItemRef.current) return;
+
+    pendingItemRef.current = item.id;
+    setPendingItemId(item.id);
+    setOperationError("");
+
+    try {
+      const productName = productById.get(item.productId)?.name ?? "El producto";
+      await removeItem(item.id);
+      setMessage(`${productName} se eliminó del carrito.`);
+    } catch {
+      setOperationError(
+        "No pudimos eliminar el producto. Intenta nuevamente.",
+      );
+    } finally {
+      pendingItemRef.current = null;
+      setPendingItemId(null);
+    }
+  }
+
   function updateKitchenNote(value: string) {
     setOperationError("");
     void setKitchenNote(value).catch(() => {
@@ -167,7 +201,13 @@ export function CartScreen({ products, pickupStore }: CartScreenProps) {
   return (
     <div className={styles.page}>
       <ClientHeader homeLink />
+      <ClientDesktopTopbar
+        title="Finaliza tu pedido"
+        subtitle="Revisa los productos y completa el pago"
+      />
       <main id="contenido-principal" className={styles.main}>
+        <ClientCheckoutProgress currentStep={1} />
+
         <header className={styles.heading}>
           <h1>Tu carrito</h1>
           <p>Revisa los productos antes de continuar</p>
@@ -210,171 +250,213 @@ export function CartScreen({ products, pickupStore }: CartScreenProps) {
         ) : null}
 
         {cart.items.length > 0 && status !== "loading" ? (
-          <>
-            <section className={styles.cartItems} aria-label="Productos del carrito">
-              {cart.items.map((item) => {
-                const product = productById.get(item.productId);
-                const pricedLine = pricedLineById.get(item.id);
-                const availability = availabilityByItemId.get(item.id);
-                const visibleOptionNames =
-                  product?.options
-                    .filter(
-                      (option) =>
-                        item.optionIds.includes(option.id) && option.priceCop > 0,
-                    )
-                    .map((option) => option.name) ?? [];
-                const details =
-                  visibleOptionNames.length > 0
-                    ? visibleOptionNames.join(" · ")
-                    : product?.summary ?? "Configuración no disponible";
-                const itemPending = pendingItemId === item.id;
-
-                return (
-                  <article
-                    key={item.id}
-                    className={styles.cartItem}
-                    data-unavailable={!availability?.available || undefined}
-                  >
-                    <div className={styles.productImage}>
-                      {product ? (
-                        <Image
-                          src={product.imagePath}
-                          alt=""
-                          fill
-                          sizes="(max-width: 359px) 64px, 72px"
-                        />
-                      ) : (
-                        <ShoppingBag aria-hidden="true" />
-                      )}
-                    </div>
-                    <div className={styles.productCopy}>
-                      <h2>{product?.name ?? "Producto no disponible"}</h2>
-                      <p>{details}</p>
-                      {availability?.message ? (
-                        <p className={styles.unavailableMessage}>
-                          {availability.message}
-                        </p>
-                      ) : null}
-                      <strong>
-                        {pricedLine
-                          ? formatCop(pricedLine.lineTotalCop)
-                          : "Precio no disponible"}
-                      </strong>
-                    </div>
-                    <div className={styles.quantityControl}>
-                      <IconButton
-                        className={styles.quantityButton}
-                        variant="ghost"
-                        aria-label={
-                          item.quantity === 1
-                            ? `Eliminar ${product?.name ?? "producto"} del carrito`
-                            : `Disminuir cantidad de ${product?.name ?? "producto"}`
-                        }
-                        disabled={itemPending}
-                        onClick={() => void changeQuantity(item, -1)}
-                      >
-                        <Minus />
-                      </IconButton>
-                      <output
-                        aria-live="polite"
-                        aria-label={`${item.quantity} unidades de ${
-                          product?.name ?? "producto"
-                        }`}
-                      >
-                        {item.quantity}
-                      </output>
-                      <IconButton
-                        className={styles.quantityButton}
-                        variant="ghost"
-                        aria-label={`Aumentar cantidad de ${
-                          product?.name ?? "producto"
-                        }`}
-                        disabled={
-                          itemPending ||
-                          !availability?.available ||
-                          item.quantity >= MAX_QUANTITY_PER_CART_LINE
-                        }
-                        onClick={() => void changeQuantity(item, 1)}
-                      >
-                        <Plus />
-                      </IconButton>
-                    </div>
-                  </article>
-                );
-              })}
-            </section>
-
-            <section className={styles.noteSection} aria-labelledby="nota-cocina">
-              <label id="nota-cocina" htmlFor="nota-para-cocina">
-                Nota para cocina
-              </label>
-              <textarea
-                id="nota-para-cocina"
-                rows={1}
-                value={cart.kitchenNote}
-                placeholder="Agregar observación o alergia..."
-                onChange={(event) => updateKitchenNote(event.target.value)}
-              />
-            </section>
-
-            {hasUnavailableItems ? (
-              <div className={styles.availabilityAlert} role="alert">
-                <strong>Hay productos no disponibles.</strong>
-                <span>Elimínalos para recalcular y continuar al pago.</span>
+          <div className={styles.checkoutLayout}>
+            <div className={styles.cartColumn}>
+              <div className={styles.desktopCartHeading}>
+                <h2>Tu carrito</h2>
+                <p>
+                  {itemCount} {itemCount === 1 ? "producto" : "productos"}
+                </p>
               </div>
-            ) : null}
 
-            {blockingMessage ? (
-              <div className={styles.operationError} role="alert">
-                {blockingMessage}
-              </div>
-            ) : null}
+              <section className={styles.cartItems} aria-label="Productos del carrito">
+                {cart.items.map((item) => {
+                  const product = productById.get(item.productId);
+                  const pricedLine = pricedLineById.get(item.id);
+                  const availability = availabilityByItemId.get(item.id);
+                  const visibleOptionNames =
+                    product?.options
+                      .filter(
+                        (option) =>
+                          item.optionIds.includes(option.id) && option.priceCop > 0,
+                      )
+                      .map((option) => option.name) ?? [];
+                  const details =
+                    visibleOptionNames.length > 0
+                      ? visibleOptionNames.join(" · ")
+                      : product?.summary ?? "Configuración no disponible";
+                  const itemPending = pendingItemId === item.id;
 
-            {pricingResult.pricing ? (
-              <section className={styles.summary} aria-labelledby="resumen-carrito">
-                <h2 id="resumen-carrito">Resumen</h2>
-                <dl>
-                  <div>
-                    <dt>Subtotal</dt>
-                    <dd>{formatCop(pricingResult.pricing.subtotalCop)}</dd>
-                  </div>
-                  <div>
-                    <dt>Servicio</dt>
-                    <dd>{formatCop(pricingResult.pricing.serviceFeeCop)}</dd>
-                  </div>
-                  <div className={styles.totalRow}>
-                    <dt>Total</dt>
-                    <dd>{formatCop(pricingResult.pricing.totalCop)}</dd>
-                  </div>
-                </dl>
-                {pickupStore ? (
-                  <p className={styles.pickup}>
-                    <MapPin aria-hidden="true" />
-                    <span>
-                      Retiro en local · {pickupStore.pickupEstimateMinutes[0]}–
-                      {pickupStore.pickupEstimateMinutes[1]} min
-                    </span>
-                  </p>
-                ) : (
-                  <p className={styles.pickupUnavailable} role="alert">
-                    No hay un local de retiro disponible.
-                  </p>
-                )}
+                  return (
+                    <article
+                      key={item.id}
+                      className={styles.cartItem}
+                      data-unavailable={!availability?.available || undefined}
+                    >
+                      <div className={styles.productImage}>
+                        {product ? (
+                          <Image
+                            src={product.imagePath}
+                            alt=""
+                            fill
+                            sizes="(min-width: 48rem) 88px, (max-width: 359px) 64px, 72px"
+                          />
+                        ) : (
+                          <ShoppingBag aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className={styles.productCopy}>
+                        <h2>{product?.name ?? "Producto no disponible"}</h2>
+                        <p>{details}</p>
+                        {availability?.message ? (
+                          <p className={styles.unavailableMessage}>
+                            {availability.message}
+                          </p>
+                        ) : null}
+                        <strong>
+                          {pricedLine
+                            ? formatCop(pricedLine.lineTotalCop)
+                            : "Precio no disponible"}
+                        </strong>
+                      </div>
+                      <div className={styles.quantityControl}>
+                        <IconButton
+                          className={styles.quantityButton}
+                          variant="ghost"
+                          aria-label={
+                            item.quantity === 1
+                              ? `Eliminar ${product?.name ?? "producto"} del carrito`
+                              : `Disminuir cantidad de ${product?.name ?? "producto"}`
+                          }
+                          disabled={itemPending}
+                          onClick={() => void changeQuantity(item, -1)}
+                        >
+                          <Minus />
+                        </IconButton>
+                        <output
+                          aria-live="polite"
+                          aria-label={`${item.quantity} unidades de ${
+                            product?.name ?? "producto"
+                          }`}
+                        >
+                          {item.quantity}
+                        </output>
+                        <IconButton
+                          className={styles.quantityButton}
+                          variant="ghost"
+                          aria-label={`Aumentar cantidad de ${
+                            product?.name ?? "producto"
+                          }`}
+                          disabled={
+                            itemPending ||
+                            !availability?.available ||
+                            item.quantity >= MAX_QUANTITY_PER_CART_LINE
+                          }
+                          onClick={() => void changeQuantity(item, 1)}
+                        >
+                          <Plus />
+                        </IconButton>
+                      </div>
+                      <span className={styles.removeControl}>
+                        <IconButton
+                          className={styles.removeButton}
+                          variant="ghost"
+                          aria-label={`Eliminar ${product?.name ?? "producto"} del carrito`}
+                          disabled={itemPending}
+                          onClick={() => void removeCartItem(item)}
+                        >
+                          <Trash2 />
+                        </IconButton>
+                      </span>
+                    </article>
+                  );
+                })}
               </section>
-            ) : null}
 
-            {pricingResult.pricing && pickupStore ? (
-              <Link className={styles.checkoutLink} href="/pago" prefetch={false}>
-                <CreditCard aria-hidden="true" />
-                <span>Continuar al pago</span>
-              </Link>
-            ) : (
-              <button className={styles.checkoutLink} type="button" disabled>
-                <CreditCard aria-hidden="true" />
-                <span>Continuar al pago</span>
-              </button>
-            )}
-          </>
+              <section className={styles.noteSection} aria-labelledby="nota-cocina">
+                <label id="nota-cocina" htmlFor="nota-para-cocina">
+                  Nota para cocina
+                </label>
+                <textarea
+                  id="nota-para-cocina"
+                  rows={1}
+                  value={cart.kitchenNote}
+                  placeholder="Agregar observación o alergia..."
+                  onChange={(event) => updateKitchenNote(event.target.value)}
+                />
+              </section>
+
+              <section
+                className={styles.desktopDelivery}
+                aria-labelledby="metodo-entrega"
+              >
+                <h2 id="metodo-entrega">Método de entrega</h2>
+                <div className={styles.deliveryCard}>
+                  <span className={styles.deliveryIcon} aria-hidden="true">
+                    <MapPin />
+                  </span>
+                  <span className={styles.deliveryCopy}>
+                    <strong>Retiro en local</strong>
+                    <small>
+                      {pickupStore
+                        ? `Listo en ${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
+                        : "Local de retiro no disponible"}
+                    </small>
+                  </span>
+                </div>
+              </section>
+
+              {hasUnavailableItems ? (
+                <div className={styles.availabilityAlert} role="alert">
+                  <strong>Hay productos no disponibles.</strong>
+                  <span>Elimínalos para recalcular y continuar al pago.</span>
+                </div>
+              ) : null}
+
+              {blockingMessage ? (
+                <div className={styles.operationError} role="alert">
+                  {blockingMessage}
+                </div>
+              ) : null}
+            </div>
+
+            <aside className={styles.summaryColumn} aria-label="Resumen del carrito">
+              {pricingResult.pricing ? (
+                <section className={styles.summary} aria-labelledby="resumen-carrito">
+                  <h2 id="resumen-carrito">Resumen</h2>
+                  <dl>
+                    <div>
+                      <dt>Subtotal</dt>
+                      <dd>{formatCop(pricingResult.pricing.subtotalCop)}</dd>
+                    </div>
+                    <div>
+                      <dt>Servicio</dt>
+                      <dd>{formatCop(pricingResult.pricing.serviceFeeCop)}</dd>
+                    </div>
+                    <div className={styles.totalRow}>
+                      <dt>Total</dt>
+                      <dd>{formatCop(pricingResult.pricing.totalCop)}</dd>
+                    </div>
+                  </dl>
+                  {pickupStore ? (
+                    <p className={styles.pickup}>
+                      <MapPin aria-hidden="true" />
+                      <span>
+                        Retiro en local · {pickupStore.pickupEstimateMinutes[0]}–
+                        {pickupStore.pickupEstimateMinutes[1]} min
+                      </span>
+                    </p>
+                  ) : (
+                    <p className={styles.pickupUnavailable} role="alert">
+                      No hay un local de retiro disponible.
+                    </p>
+                  )}
+                </section>
+              ) : null}
+
+              {pricingResult.pricing && pickupStore ? (
+                <Link className={styles.checkoutLink} href="/pago" prefetch={false}>
+                  <CreditCard aria-hidden="true" />
+                  <span>Continuar al pago</span>
+                </Link>
+              ) : (
+                <button className={styles.checkoutLink} type="button" disabled>
+                  <CreditCard aria-hidden="true" />
+                  <span>Continuar al pago</span>
+                </button>
+              )}
+            </aside>
+          </div>
         ) : null}
 
         <p className={styles.srMessage} role="status" aria-live="polite">

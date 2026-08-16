@@ -52,7 +52,7 @@ test("calcula el precio seleccionado de La Bendita desde base y complementos", (
 });
 
 test("el catálogo usa identificadores únicos y referencias internas válidas", () => {
-  assert.equal(products.length, 6);
+  assert.equal(products.length, 8);
   assert.equal(new Set(products.map((product) => product.id)).size, products.length);
   assert.equal(
     new Set(categories.map((category) => category.id)).size,

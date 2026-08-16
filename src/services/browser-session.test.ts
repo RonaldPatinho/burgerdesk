@@ -40,7 +40,6 @@ test("el acceso persiste solo la sesión versionada y nunca las credenciales", a
   const service = createService(storage);
 
   const session = await service.signIn({
-    fullName: provisionalClient.fullName,
     email: provisionalClient.email,
     password: "burgerdesk-demo",
     rememberEmail: true,

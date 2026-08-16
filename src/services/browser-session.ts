@@ -201,7 +201,7 @@ async function browserRequestAuth(
         action === "signin"
           ? { email: input.email, password: input.password }
           : {
-              fullName: input.fullName,
+              fullName: "fullName" in input ? input.fullName : "",
               email: input.email,
               password: input.password,
             },

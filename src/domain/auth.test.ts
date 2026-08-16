@@ -9,7 +9,6 @@ import {
 
 test("acepta los campos documentados de acceso", () => {
   const result = validateSignIn({
-    fullName: "Gabriel Duarte",
     email: "gabriel@gmail.com",
     password: "burgerdesk-demo",
     rememberEmail: true,
@@ -20,7 +19,6 @@ test("acepta los campos documentados de acceso", () => {
 
 test("devuelve errores por campo y prioriza el primer control inválido", () => {
   const result = validateSignIn({
-    fullName: "",
     email: "correo-invalido",
     password: "corta",
     rememberEmail: false,
@@ -29,8 +27,8 @@ test("devuelve errores por campo y prioriza el primer control inválido", () => 
   assert.equal(result.valid, false);
   if (result.valid) return;
 
-  assert.equal(result.firstInvalidField, "fullName");
-  assert.equal(result.errors.fullName, "Escribe tu nombre completo.");
+  assert.equal(result.firstInvalidField, "email");
+  assert.equal(result.errors.fullName, undefined);
   assert.equal(
     result.errors.email,
     "Usa un correo con formato nombre@dominio.com.",

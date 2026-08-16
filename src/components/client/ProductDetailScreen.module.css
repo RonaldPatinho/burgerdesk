@@ -30,6 +30,10 @@
   height: 1.5rem;
 }
 
+.detailGrid {
+  display: contents;
+}
+
 .hero {
   position: relative;
   width: 100%;
@@ -51,6 +55,17 @@
   top: var(--space-3);
   left: var(--space-3);
   min-width: 7.5rem;
+}
+
+.imageNote,
+.detailBadgeWrap,
+.desktopAddWrap,
+.recommendations {
+  display: none;
+}
+
+.detailPanel {
+  display: contents;
 }
 
 .productCopy,
@@ -100,23 +115,80 @@
 }
 
 .option {
-  min-height: var(--touch-target-min);
-  border: 0.125rem solid var(--color-border);
-  border-radius: var(--radius-pill);
+  min-height: 3.5rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.15rem var(--space-2);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
   padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
   background: var(--color-surface);
   font-size: var(--font-size-xs);
   line-height: 1.2;
+  text-align: left;
 }
 
 .option[data-selected="true"] {
-  color: var(--color-surface);
-  border-color: var(--color-text);
-  background: var(--color-text);
+  color: var(--color-text);
+  border-color: var(--color-brand-primary);
+  box-shadow: inset 0 0 0 0.0625rem var(--color-brand-primary);
+  background: color-mix(
+    in srgb,
+    var(--color-surface-cream) 35%,
+    var(--color-surface)
+  );
 }
 
 .option:disabled {
   opacity: 0.55;
+}
+
+.optionIndicator {
+  grid-row: 1 / span 2;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-surface);
+}
+
+.optionIndicator svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.option[data-selected="true"] .optionIndicator {
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+}
+
+.optionName {
+  min-width: 0;
+  font-weight: 600;
+}
+
+.optionPrice {
+  grid-column: 2;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.optionPrice::before {
+  content: none;
+}
+
+.optionUnavailable {
+  grid-column: 2;
+  color: var(--color-danger);
+}
+
+.optionUnavailable::before {
+  content: none;
 }
 
 .quantitySection {
@@ -126,7 +198,7 @@
   gap: var(--space-4);
 }
 
-.quantitySection > div:first-child {
+.quantityGroup {
   display: grid;
   gap: var(--space-2);
 }
@@ -239,8 +311,320 @@
   }
 }
 
-@media (min-width: 26.876rem) {
+@media (min-width: 26.876rem) and (max-width: 47.999rem) {
   .main {
     box-shadow: var(--shadow-raised);
+  }
+}
+
+@media (min-width: 48rem) {
+  .page {
+    background: var(--color-surface);
+  }
+
+  .main {
+    max-width: none;
+    min-height: 0;
+    gap: var(--space-5);
+    margin: 0;
+    padding: var(--space-4) var(--space-8) var(--space-10);
+    box-shadow: none;
+  }
+
+  .backLink {
+    min-height: 2.75rem;
+    margin-bottom: var(--space-1);
+    font-size: var(--font-size-sm);
+  }
+
+  .backLink svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    color: var(--color-brand-primary);
+  }
+
+  .detailGrid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+    align-items: stretch;
+    gap: var(--space-6);
+  }
+
+  .hero {
+    min-height: 28rem;
+    aspect-ratio: auto;
+    border-radius: var(--radius-lg);
+  }
+
+  .productImage {
+    padding: 4.75rem var(--space-6) 4.5rem;
+    transform: scale(1.02);
+  }
+
+  .badge {
+    top: var(--space-5);
+    left: var(--space-5);
+    min-width: 9.5rem;
+  }
+
+  .imageNote {
+    position: absolute;
+    z-index: 1;
+    right: var(--space-5);
+    bottom: var(--space-5);
+    left: var(--space-5);
+    min-height: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
+    background: var(--color-surface);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  .imageNote svg {
+    width: 1.2rem;
+    height: 1.2rem;
+    flex: 0 0 auto;
+    color: var(--color-danger);
+  }
+
+  .detailPanel {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-5);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+    background: var(--color-surface);
+  }
+
+  .detailBadgeWrap {
+    display: block;
+    margin-bottom: var(--space-2);
+  }
+
+  .detailBadge {
+    width: fit-content;
+    min-width: 8rem;
+    justify-content: center;
+    text-transform: uppercase;
+  }
+
+  .productCopy {
+    gap: var(--space-3);
+  }
+
+  .titleRow h1 {
+    font-size: clamp(2rem, 2.7vw, 2.5rem);
+  }
+
+  .titleRow span {
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+  }
+
+  .productCopy > p {
+    max-width: 44rem;
+    font-size: var(--font-size-md);
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  .options {
+    gap: var(--space-4);
+    border-top: 0.0625rem solid var(--color-border);
+    padding-top: var(--space-5);
+  }
+
+  .sectionHeading h2,
+  .quantitySection h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .sectionHeading p {
+    display: none;
+  }
+
+  .optionGrid {
+    gap: var(--space-3);
+  }
+
+  .option {
+    min-height: 3.5rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    justify-content: stretch;
+    gap: var(--space-3);
+    border-width: 0.0625rem;
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-4);
+    color: var(--color-text);
+    background: var(--color-surface);
+    font-size: var(--font-size-sm);
+    text-align: left;
+  }
+
+  .option[data-selected="true"] {
+    color: var(--color-text);
+    border-color: var(--color-brand-primary);
+    box-shadow: inset 0 0 0 0.0625rem var(--color-brand-primary);
+    background: color-mix(
+      in srgb,
+      var(--color-surface-cream) 35%,
+      var(--color-surface)
+    );
+  }
+
+  .optionIndicator {
+    width: 1.35rem;
+    height: 1.35rem;
+    display: grid;
+    place-items: center;
+    border: 0.125rem solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-surface);
+    background: var(--color-surface);
+  }
+
+  .optionIndicator svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+
+  .option[data-selected="true"] .optionIndicator {
+    border-color: var(--color-brand-primary);
+    background: var(--color-brand-primary);
+  }
+
+  .optionName {
+    min-width: 0;
+  }
+
+  .optionPrice {
+    white-space: nowrap;
+  }
+
+  .optionPrice::before,
+  .optionUnavailable::before {
+    content: none;
+  }
+
+  .optionUnavailable {
+    grid-column: 2 / -1;
+    color: var(--color-danger);
+    font-size: var(--font-size-xs);
+  }
+
+  .quantitySection {
+    display: grid;
+    grid-template-columns: minmax(0, auto) minmax(12rem, 1fr);
+    align-items: center;
+    gap: var(--space-5);
+    border-top: 0.0625rem solid var(--color-border);
+    padding-top: var(--space-5);
+  }
+
+  .quantityGroup {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .quantityControl {
+    min-height: 3.25rem;
+    grid-template-columns: repeat(3, 2.75rem);
+    border-width: 0.0625rem;
+    border-radius: var(--radius-md);
+    padding: 0.15rem;
+  }
+
+  .total {
+    display: none;
+  }
+
+  .desktopAddWrap {
+    display: block;
+  }
+
+  .desktopAddButton {
+    min-height: 3.25rem;
+    border-radius: var(--radius-md);
+  }
+
+  .message {
+    grid-column: 1 / -1;
+    min-height: 0;
+    padding: 0;
+    text-align: left;
+  }
+
+  .message:not(:empty) {
+    min-height: 2.5rem;
+    padding: var(--space-2) var(--space-3);
+  }
+
+  .addBar {
+    display: none;
+  }
+
+  .recommendations {
+    display: grid;
+    gap: var(--space-4);
+    margin-top: var(--space-1);
+  }
+
+  .recommendationHeading {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .recommendationHeading h2 {
+    font-size: clamp(1.5rem, 2.2vw, 2rem);
+    line-height: var(--line-height-tight);
+  }
+
+  .recommendationHeading p {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+  }
+
+  .recommendationGrid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+  }
+}
+
+@media (min-width: 64rem) {
+  .main {
+    padding-inline: var(--space-10);
+  }
+
+  .detailGrid {
+    gap: var(--space-8);
+  }
+
+  .detailPanel {
+    padding: var(--space-8);
+  }
+
+  .recommendationGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 80rem) {
+  .main {
+    max-width: 84rem;
+    margin-inline: auto;
+    padding-inline: var(--space-10);
+  }
+
+  .hero {
+    min-height: 29.5rem;
   }
 }

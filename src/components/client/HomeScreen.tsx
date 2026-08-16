@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import {
   Clock3,
@@ -16,13 +15,20 @@ import type {
   Promotion,
 } from "@/domain/models";
 import { ClientBottomNav } from "./ClientBottomNav";
+import { ClientDesktopMenuHero } from "./ClientDesktopMenuHero";
+import { ClientPromotionCarousel } from "./ClientPromotionCarousel";
+import { ClientDesktopTopbar } from "./ClientDesktopTopbar";
+import { DesktopProductExplorer } from "./DesktopProductExplorer";
+import { DesktopOrderPanel } from "./DesktopOrderPanel";
 import { ClientHeader } from "./ClientHeader";
-import { ProductCard } from "./ProductCard";
+import { MobileProductCarousel } from "./MobileProductCarousel";
 import styles from "./HomeScreen.module.css";
 
 export interface HomeScreenProps {
   categories: readonly Category[];
   featuredProducts: readonly Product[];
+  desktopCategories: readonly Category[];
+  desktopProducts: readonly Product[];
   promotions: readonly Promotion[];
 }
 
@@ -33,20 +39,54 @@ const categoryIcons: Partial<Record<CategoryId, LucideIcon>> = {
   bebidas: Clock3,
 };
 
+function menuCategoryTarget(categoryId: CategoryId): CategoryId {
+  if (categoryId === "clasicas" || categoryId === "especiales") {
+    return "burgers";
+  }
+
+  return categoryId;
+}
+
 export function HomeScreen({
   categories,
   featuredProducts,
+  desktopCategories,
+  desktopProducts,
   promotions,
 }: HomeScreenProps) {
   const promotion = promotions[0];
   const promotionProduct = promotion
     ? featuredProducts.find((product) => product.id === promotion.productId)
     : null;
+  const featuredIds = new Set(featuredProducts.map((product) => product.id));
+  const mobileProducts = [
+    ...featuredProducts,
+    ...desktopProducts.filter((product) => !featuredIds.has(product.id)),
+  ];
 
   return (
     <div className={styles.page}>
       <ClientHeader />
+      <ClientDesktopTopbar
+        title="Menú"
+        subtitle="Elige, personaliza y paga sin filas"
+      />
       <main id="contenido-principal" className={styles.main}>
+        <div className={styles.desktopOverview}>
+          <ClientDesktopMenuHero
+            promotion={promotion}
+            promotionProduct={promotionProduct}
+          />
+          <div className={styles.desktopContentGrid}>
+            <DesktopProductExplorer
+              categories={desktopCategories}
+              products={desktopProducts}
+              title="Favoritos de la casa"
+              subtitle="Encuentra tu próxima favorita"
+            />
+            <DesktopOrderPanel products={desktopProducts} />
+          </div>
+        </div>
         {promotion ? (
           <section className={styles.hero} aria-labelledby="promocion-principal">
             <div className={styles.heroCopy}>
@@ -59,35 +99,44 @@ export function HomeScreen({
               </Link>
             </div>
             <div className={styles.promotionImage}>
-              {promotionProduct ? (
-                <span className={styles.promotionLabel}>
-                  {promotionProduct.name}
-                </span>
-              ) : null}
-              <Image
-                src={promotion.imagePath}
-                alt={
-                  promotionProduct
-                    ? `Promoción ${promotionProduct.name}`
-                    : "Promoción BurgerDesk"
-                }
-                fill
-                sizes="(max-width: 430px) 43vw, 185px"
+              <ClientPromotionCarousel
+                variant="mobile"
                 priority
+                slides={[
+                  {
+                    src: promotion.imagePath,
+                    alt: promotionProduct
+                      ? `Promoción ${promotionProduct.name}`
+                      : "Promoción BurgerDesk",
+                    label: promotionProduct?.name ?? "Combo recomendado",
+                  },
+                  {
+                    src: "/images/promotions/combo2.webp",
+                    alt: "Segundo combo recomendado de BurgerDesk",
+                    label: "Combo especial",
+                  },
+                  {
+                    src: "/images/products/cheddar.png",
+                    alt: "Papas cheddar de BurgerDesk",
+                    label: "Papas cheddar",
+                  },
+                ]}
               />
             </div>
           </section>
         ) : (
-          <Feedback
-            variant="empty"
-            title="No hay promociones disponibles"
-            description="Puedes explorar el menú completo."
-            action={
-              <Link className={styles.feedbackLink} href="/menu">
-                Ver menú
-              </Link>
-            }
-          />
+          <div className={styles.mobilePromotionFeedback}>
+            <Feedback
+              variant="empty"
+              title="No hay promociones disponibles"
+              description="Puedes explorar el menú completo."
+              action={
+                <Link className={styles.feedbackLink} href="/menu">
+                  Ver menú
+                </Link>
+              }
+            />
+          </div>
         )}
 
         <section className={styles.categories} aria-labelledby="categorias-inicio">
@@ -99,11 +148,17 @@ export function HomeScreen({
             {categories.map((category) => {
               const Icon = categoryIcons[category.id] ?? LayoutGrid;
               return (
-                <li key={category.id} className={styles.categoryCard}>
-                  <span className={styles.categoryIcon} aria-hidden="true">
-                    <Icon />
-                  </span>
-                  <span>{category.name}</span>
+                <li key={category.id} className={styles.categoryItem}>
+                  <Link
+                    className={styles.categoryCard}
+                    href={`/menu?categoria=${encodeURIComponent(menuCategoryTarget(category.id))}`}
+                    aria-label={`Ver productos de ${category.name}`}
+                  >
+                    <span className={styles.categoryIcon} aria-hidden="true">
+                      <Icon />
+                    </span>
+                    <span>{category.name}</span>
+                  </Link>
                 </li>
               );
             })}
@@ -115,12 +170,11 @@ export function HomeScreen({
             <h2 id="favoritos-inicio">Favoritos de la casa</h2>
             <Link href="/menu">Ver todo →</Link>
           </div>
-          {featuredProducts.length > 0 ? (
-            <div className={styles.productGrid}>
-              {featuredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
+          {mobileProducts.length > 0 ? (
+            <MobileProductCarousel
+              products={mobileProducts}
+              ariaLabel="Favoritos y productos destacados"
+            />
           ) : (
             <Feedback
               variant="empty"

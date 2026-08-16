@@ -137,3 +137,63 @@
     box-shadow: var(--shadow-raised);
   }
 }
+.desktopOverview {
+  display: none;
+}
+
+@media (min-width: 48rem) {
+  .page {
+    background: var(--color-surface);
+  }
+
+  .main {
+    max-width: none;
+    min-height: auto;
+    margin: 0;
+    gap: 0;
+    padding: var(--space-6) var(--space-8) var(--space-10);
+    background: var(--color-surface);
+    box-shadow: none;
+  }
+
+  .desktopOverview {
+    min-width: 0;
+    width: 100%;
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .heading,
+  .searchField,
+  .filters,
+  .results {
+    display: none;
+  }
+}
+
+@media (min-width: 80rem) {
+  .main {
+    padding-inline: var(--space-10);
+  }
+}
+
+@media (min-width: 48rem) {
+  .desktopContentGrid {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 72rem) {
+  .desktopContentGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(22rem, 24rem);
+    align-items: start;
+  }
+}
+
+@media (min-width: 86rem) {
+  .desktopContentGrid {
+    grid-template-columns: minmax(0, 1fr) minmax(21rem, 25rem);
+  }
+}

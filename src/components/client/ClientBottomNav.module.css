@@ -60,3 +60,9 @@
     font-size: 0.6875rem;
   }
 }
+
+@media (min-width: 48rem) {
+  .nav {
+    display: none;
+  }
+}
