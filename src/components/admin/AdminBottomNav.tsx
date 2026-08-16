@@ -30,7 +30,7 @@ const items: readonly NavigationItem[] = [
     label: "Productos",
     href: "/administrador/productos",
     icon: <Boxes />,
-    available: false,
+    available: true,
   },
   {
     label: "Ventas",

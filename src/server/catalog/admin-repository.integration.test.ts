@@ -84,6 +84,12 @@ test("lee y actualiza preservando relaciones y campos omitidos", async () => {
   ]);
   assert.deepEqual(updated.defaultOptionIds, ["extra-a6a"]);
 
+  const searchResults = await listAdminProducts({
+    search: "A6A actualizado",
+    includeArchived: false,
+  });
+  assert.ok(searchResults.some((product) => product.id === productId));
+
   const [imageRows] = await pool.execute(
     `SELECT content_sha256 FROM catalog_product_images WHERE product_id = ?`,
     [productId],
