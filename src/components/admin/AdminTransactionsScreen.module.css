@@ -521,3 +521,31 @@
     text-align: center;
   }
 }
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain {
+    max-width: 80rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.65rem;
+  }
+
+  .filters,
+  .totalCard {
+    width: 100%;
+  }
+}
+
+@media (min-width: 48rem) {
+  .transactionList,
+  .loadingRows {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .transactionCard {
+    min-height: 5rem;
+  }
+}

@@ -256,6 +256,8 @@ export function AdminProductForm({
                 src={previewUrl}
                 alt={`Vista previa de ${name.trim() || "producto"}`}
                 fill
+                sizes="(max-width: 767px) calc(100vw - 2rem), (max-width: 1023px) 38vw, 28rem"
+                loading="eager"
                 unoptimized={previewUrl.startsWith("blob:")}
                 className={styles.previewImage}
               />

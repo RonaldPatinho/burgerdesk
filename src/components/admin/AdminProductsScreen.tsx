@@ -191,10 +191,11 @@ export function AdminProductsScreen({
       {visibleProducts.length > 0 ? (
         <section aria-label="Catálogo activo">
           <ul className={styles.grid}>
-            {visibleProducts.map((product) => (
+            {visibleProducts.map((product, index) => (
               <li key={product.id}>
                 <AdminProductCard
                   product={product}
+                  eager={index < 4}
                   categoryName={
                     (product.primaryCategoryId &&
                       categoryNames[product.primaryCategoryId]) ||

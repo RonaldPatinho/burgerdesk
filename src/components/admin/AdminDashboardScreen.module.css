@@ -405,3 +405,64 @@
     gap: 0.5rem;
   }
 }
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain {
+    max-width: 80rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.65rem;
+  }
+
+  .metrics {
+    gap: var(--space-3);
+  }
+
+  .metricCard {
+    min-height: 6rem;
+    padding: 1rem;
+  }
+
+  .metricCard h2 {
+    font-size: var(--font-size-sm);
+  }
+
+  .metricCard strong {
+    font-size: 1.55rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .main {
+    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.85fr);
+    gap: 1.25rem;
+  }
+
+  .headingRow,
+  .metrics {
+    grid-column: 1 / -1;
+  }
+
+  .chartCard {
+    min-height: 22rem;
+  }
+
+  .chart {
+    height: 17.25rem;
+  }
+
+  .quickSection {
+    align-content: start;
+  }
+
+  .quickList {
+    gap: var(--space-3);
+  }
+
+  .quickAction {
+    min-height: 4.25rem;
+  }
+}

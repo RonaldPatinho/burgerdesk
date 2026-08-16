@@ -81,3 +81,28 @@
     font-size: var(--font-size-xs);
   }
 }
+
+@media (min-width: 37.5rem) {
+  .headerInner {
+    padding-inline: clamp(1.5rem, 4vw, 3rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  .header {
+    position: relative;
+    z-index: 1;
+    color: var(--color-text);
+    background: var(--color-surface);
+  }
+
+  .headerInner {
+    min-height: 5.25rem;
+    justify-content: flex-end;
+    padding: var(--space-4) clamp(1.5rem, 4vw, 3rem) 0;
+  }
+
+  .brand {
+    display: none;
+  }
+}

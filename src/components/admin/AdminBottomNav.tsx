@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -57,6 +58,26 @@ export function AdminBottomNav() {
 
   return (
     <nav className={styles.nav} aria-label="Navegación del administrador">
+      <Link
+        className={styles.desktopBrand}
+        href="/administrador"
+        aria-label="BurgerDesk, ir al resumen administrativo"
+      >
+        <span className={styles.logoFrame}>
+          <Image
+            src="/branding/logo-bd.svg"
+            alt=""
+            width={48}
+            height={48}
+            priority
+          />
+        </span>
+        <span className={styles.wordmark} aria-hidden="true">
+          <span>Burger</span>
+          <span>Desk</span>
+        </span>
+      </Link>
+
       <ul className={styles.list}>
         {items.map((item) => {
           const active =

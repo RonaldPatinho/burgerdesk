@@ -272,3 +272,44 @@
     padding-inline: 0.55rem;
   }
 }
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain,
+  .errorState {
+    max-width: 80rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.65rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .main {
+    grid-template-columns: minmax(0, 1.45fr) minmax(16rem, 0.8fr);
+    align-items: start;
+    column-gap: clamp(1.5rem, 3vw, 2.5rem);
+  }
+
+  .heading,
+  .tabs,
+  .updatedAt,
+  .feedback,
+  .main > button {
+    grid-column: 1 / -1;
+  }
+
+  .main > section:first-of-type {
+    grid-column: 1;
+  }
+
+  .ranking {
+    grid-column: 2;
+  }
+
+  .tabs {
+    width: min(100%, 28rem);
+  }
+}

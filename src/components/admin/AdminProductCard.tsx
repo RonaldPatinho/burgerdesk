@@ -10,6 +10,7 @@ type PendingAction = "availability" | "archive" | null;
 export function AdminProductCard({
   product,
   categoryName,
+  eager,
   pendingAction,
   actionsDisabled,
   onToggleAvailability,
@@ -17,6 +18,7 @@ export function AdminProductCard({
 }: {
   product: AdminProduct;
   categoryName: string;
+  eager: boolean;
   pendingAction: PendingAction;
   actionsDisabled: boolean;
   onToggleAvailability: () => void;
@@ -29,7 +31,8 @@ export function AdminProductCard({
           src={product.imagePath}
           alt={product.name}
           fill
-          sizes="(max-width: 430px) 42vw, 180px"
+          sizes="(max-width: 599px) 42vw, (max-width: 1023px) 29vw, (max-width: 1279px) 24vw, (max-width: 1679px) 20vw, 16vw"
+          loading={eager ? "eager" : "lazy"}
           className={styles.productImage}
         />
         <span

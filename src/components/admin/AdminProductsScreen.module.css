@@ -487,3 +487,49 @@
     font-size: 0.56rem;
   }
 }
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain {
+    max-width: 90rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.65rem;
+  }
+
+  .searchForm {
+    width: min(100%, 44rem);
+  }
+
+  .newProductLink {
+    width: fit-content;
+    min-width: 13rem;
+  }
+
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .cardHeading h2,
+  .cardFooter strong {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 105rem) {
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}

@@ -239,6 +239,43 @@
   }
 }
 
+@media (min-width: 37.5rem) {
+  .main {
+    max-width: 72rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.75rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .form {
+    grid-template-columns: minmax(0, 1.2fr) minmax(18rem, 0.8fr);
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
+  }
+
+  .success {
+    grid-column: 1 / -1;
+  }
+
+  .form > .field,
+  .form > .hours {
+    grid-column: 1;
+  }
+
+  .options {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+  }
+
+  .form > button {
+    grid-column: 2;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .switchTrack,
   .switchTrack > span {
