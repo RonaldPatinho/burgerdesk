@@ -6,6 +6,7 @@ import type {
   OrderLine,
   Product,
   ProductId,
+  ProductOption,
   ProductOptionId,
   Promotion,
   StoreLocation,
@@ -16,6 +17,37 @@ export const SERVICE_FEE_COP = 2_900;
 // El inventario no define existencias ni un máximo. Este límite funcional es
 // provisional y vive aquí para poder sustituirlo junto con la fuente de datos.
 export const MAX_QUANTITY_PER_CART_LINE = 10;
+
+const standardBurgerOptions = [
+  {
+    id: "cheddar-extra",
+    name: "Cheddar extra",
+    priceCop: 3_500,
+    available: true,
+  },
+  {
+    id: "tocineta",
+    name: "Tocineta",
+    priceCop: 4_500,
+    available: true,
+  },
+  {
+    id: "cebolla",
+    name: "Cebolla",
+    priceCop: 2_500,
+    available: true,
+  },
+  {
+    id: "salsa-incluida",
+    name: "Salsa incluida",
+    priceCop: 0,
+    available: true,
+  },
+] as const satisfies readonly ProductOption[];
+
+const standardBurgerDefaultOptionIds = [
+  "salsa-incluida",
+] as const satisfies readonly ProductOptionId[];
 
 export const categories = [
   {
@@ -74,32 +106,7 @@ export const products = [
     categoryIds: ["burgers", "clasicas"],
     available: true,
     badge: "Más vendida",
-    options: [
-      {
-        id: "cheddar-extra",
-        name: "Cheddar extra",
-        priceCop: 3_500,
-        available: true,
-      },
-      {
-        id: "tocineta",
-        name: "Tocineta",
-        priceCop: 4_500,
-        available: true,
-      },
-      {
-        id: "cebolla",
-        name: "Cebolla",
-        priceCop: 2_500,
-        available: true,
-      },
-      {
-        id: "salsa-incluida",
-        name: "Salsa incluida",
-        priceCop: 0,
-        available: true,
-      },
-    ],
+    options: standardBurgerOptions,
     defaultOptionIds: ["cheddar-extra", "salsa-incluida"],
   },
   {
@@ -111,8 +118,8 @@ export const products = [
     categoryIds: ["burgers", "clasicas"],
     available: true,
     badge: "Doble sabor",
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "santa-pollo",
@@ -123,8 +130,8 @@ export const products = [
     categoryIds: ["burgers", "especiales"],
     available: true,
     badge: "Nuevo",
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "bacon-bendita",
@@ -135,8 +142,8 @@ export const products = [
     categoryIds: ["burgers", "especiales"],
     available: true,
     badge: "Ahorra 10%",
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "papas-cheddar",
@@ -193,8 +200,8 @@ export const products = [
     imagePath: "/images/products/triple_bacon.png",
     categoryIds: ["burgers", "especiales"],
     available: true,
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "doble-crispy-pollo",
@@ -206,8 +213,8 @@ export const products = [
     imagePath: "/images/products/doble_crispy_pollo.png",
     categoryIds: ["burgers", "especiales"],
     available: true,
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "doble-crispy-bacon",
@@ -217,8 +224,8 @@ export const products = [
     imagePath: "/images/products/doble_crispy_bacon.png",
     categoryIds: ["burgers", "especiales"],
     available: true,
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "doble-bacon",
@@ -228,8 +235,8 @@ export const products = [
     imagePath: "/images/products/doble_bacon.png",
     categoryIds: ["burgers", "clasicas"],
     available: true,
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "cheddar-explosiva",
@@ -239,8 +246,8 @@ export const products = [
     imagePath: "/images/products/cheddar_explosiva.png",
     categoryIds: ["burgers", "especiales"],
     available: true,
-    options: [],
-    defaultOptionIds: [],
+    options: standardBurgerOptions,
+    defaultOptionIds: standardBurgerDefaultOptionIds,
   },
   {
     id: "papas-rusticas",
