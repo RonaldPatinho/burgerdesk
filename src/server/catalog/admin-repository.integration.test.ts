@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { after, test } from "node:test";
+import type { RowDataPacket } from "mysql2/promise";
 import { closeMySqlPool, getMySqlPool } from "../database/mysql";
 import {
   archiveAdminProduct,
@@ -20,8 +21,19 @@ const productId = `a6a-product-${runId}`;
 const createdProductName = `Producto A6C ${runId}`;
 const createdProductId = createAdminProductId(createdProductName);
 const imagePath = "/images/products/la_bendita.png";
+const historicalOrderId = randomUUID();
+const historicalOrderLineId = randomUUID();
+
+interface HistoricalOrderLineRow extends RowDataPacket {
+  product_id: string;
+  product_name: string;
+  unit_price_cop: number | string;
+}
 
 after(async () => {
+  await getMySqlPool().execute("DELETE FROM orders WHERE id = ?", [
+    historicalOrderId,
+  ]);
   await getMySqlPool().execute(
     "DELETE FROM catalog_products WHERE id IN (?, ?)",
     [productId, createdProductId],
@@ -203,12 +215,46 @@ test("lee y actualiza preservando relaciones y campos omitidos", async () => {
       error.code === "STALE_PRODUCT",
   );
 
+  await pool.execute(
+    `INSERT INTO orders (
+       id, creation_idempotency_key, request_fingerprint_sha256,
+       client_session_id, store_id, payment_method, order_status,
+       operational_status, payment_status, currency, subtotal_cop,
+       service_fee_cop, total_cop, kitchen_note, confirmed_at
+     ) VALUES (?, ?, ?, ?, 'sede-centro', 'efectivo', 'confirmado',
+       'recibido', 'pagado', 'COP', 23500, 0, 23500, '', CURRENT_TIMESTAMP(3))`,
+    [
+      historicalOrderId,
+      `a6d-order-${runId}`,
+      "b".repeat(64),
+      `a6d-session-${runId}`,
+    ],
+  );
+  await pool.execute(
+    `INSERT INTO order_lines (
+       id, order_id, line_position, product_id, product_name, quantity,
+       unit_base_price_cop, unit_price_cop, line_total_cop
+     ) VALUES (?, ?, 1, ?, 'Producto histórico A6D', 1, 23500, 23500, 23500)`,
+    [historicalOrderLineId, historicalOrderId, productId],
+  );
+
   const unavailable = await setAdminProductAvailability({
     productId,
     expectedUpdatedAt: updated.updatedAt,
     available: false,
   });
   assert.equal(unavailable.available, false);
+  assert.equal(unavailable.badge, "Badge preservado");
+  assert.deepEqual(unavailable.categoryIds, ["bebidas", "clasicas"]);
+  assert.deepEqual(unavailable.options, [
+    { id: "extra-a6a", name: "Extra A6A", priceCop: 1_700, available: true },
+  ]);
+  assert.deepEqual(unavailable.defaultOptionIds, ["extra-a6a"]);
+  assert.equal(
+    (await getCatalogProductImage(productId))?.etag,
+    "a".repeat(64),
+  );
+  assert.equal((await getCatalogProduct(productId))?.available, false);
   assert.ok(
     !(await listCatalogProducts({ availableOnly: true })).some(
       (product) => product.id === productId,
@@ -221,6 +267,16 @@ test("lee y actualiza preservando relaciones y campos omitidos", async () => {
   });
   assert.equal(archived.available, false);
   assert.ok(archived.archivedAt);
+  assert.equal(archived.badge, "Badge preservado");
+  assert.deepEqual(archived.categoryIds, ["bebidas", "clasicas"]);
+  assert.deepEqual(archived.options, [
+    { id: "extra-a6a", name: "Extra A6A", priceCop: 1_700, available: true },
+  ]);
+  assert.deepEqual(archived.defaultOptionIds, ["extra-a6a"]);
+  assert.equal(
+    (await getCatalogProductImage(productId))?.etag,
+    "a".repeat(64),
+  );
   assert.equal(await getCatalogProduct(productId), null);
   assert.ok((await listAdminProducts()).some((product) => product.id === productId));
   assert.ok(
@@ -228,4 +284,13 @@ test("lee y actualiza preservando relaciones y campos omitidos", async () => {
       (product) => product.id === productId,
     ),
   );
+  const [historicalRows] = await pool.execute<HistoricalOrderLineRow[]>(
+    `SELECT product_id, product_name, unit_price_cop
+     FROM order_lines
+     WHERE id = ?`,
+    [historicalOrderLineId],
+  );
+  assert.equal(historicalRows[0]?.product_id, productId);
+  assert.equal(historicalRows[0]?.product_name, "Producto histórico A6D");
+  assert.equal(Number(historicalRows[0]?.unit_price_cop), 23_500);
 });

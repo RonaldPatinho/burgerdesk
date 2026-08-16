@@ -1,6 +1,8 @@
 import {
   AdminProductValidationError,
   MAX_ADMIN_PRODUCT_IMAGE_BYTES,
+  normalizeAdminProductArchiveInput,
+  normalizeAdminProductAvailabilityInput,
   normalizeAdminProductCreate,
   normalizeAdminProductPatch,
   type AdminProductPatch,
@@ -8,7 +10,9 @@ import {
 import { isProductId } from "../../domain/validation";
 import {
   AdminProductRepositoryError,
+  archiveAdminProduct,
   createAdminProduct,
+  setAdminProductAvailability,
   updateAdminProduct,
   type AdminProductImageInput,
 } from "./admin-repository";
@@ -19,6 +23,7 @@ import {
 
 const MAX_MULTIPART_BYTES = 5_600_000;
 const MAX_PRODUCT_JSON_BYTES = 8_192;
+const MAX_ACTION_JSON_BYTES = 1_024;
 const NO_STORE_HEADERS = {
   "Cache-Control": "no-store",
   Vary: "Cookie",
@@ -99,6 +104,31 @@ async function readMultipartProduct(
   const bytes = Buffer.from(await imageValue.arrayBuffer());
   validateProductImageBytes(imageValue.type, bytes);
   return { value, image: { mimeType: imageValue.type, bytes } };
+}
+
+async function readActionJson(request: Request): Promise<unknown> {
+  const declaredLength = Number(request.headers.get("content-length") ?? 0);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_ACTION_JSON_BYTES) {
+    throw new AdminProductValidationError(
+      "product",
+      "La solicitud del producto es demasiado grande.",
+    );
+  }
+  const text = await request.text();
+  if (text.length < 2 || text.length > MAX_ACTION_JSON_BYTES) {
+    throw new AdminProductValidationError(
+      "product",
+      "La solicitud del producto no es válida.",
+    );
+  }
+  try {
+    return JSON.parse(text) as unknown;
+  } catch {
+    throw new AdminProductValidationError(
+      "product",
+      "La solicitud del producto no contiene JSON válido.",
+    );
+  }
 }
 
 function parseUpdateValue(value: unknown): {
@@ -206,5 +236,57 @@ export async function updateAdminProductResponse(
       return repositoryErrorResponse(error);
     }
     return errorResponse(500, "No fue posible guardar el producto.");
+  }
+}
+
+export async function setAdminProductAvailabilityResponse(
+  request: Request,
+  productId: string,
+  session: AdministratorSession,
+): Promise<Response> {
+  if (!session) {
+    return errorResponse(401, "La sesión administrativa no es válida.");
+  }
+  try {
+    const input = normalizeAdminProductAvailabilityInput(
+      productId,
+      await readActionJson(request),
+    );
+    const product = await setAdminProductAvailability(input);
+    return Response.json({ product }, { headers: NO_STORE_HEADERS });
+  } catch (error: unknown) {
+    if (error instanceof AdminProductValidationError) {
+      return errorResponse(400, error.message, { [error.field]: error.message });
+    }
+    if (error instanceof AdminProductRepositoryError) {
+      return repositoryErrorResponse(error);
+    }
+    return errorResponse(500, "No fue posible cambiar la disponibilidad.");
+  }
+}
+
+export async function archiveAdminProductResponse(
+  request: Request,
+  productId: string,
+  session: AdministratorSession,
+): Promise<Response> {
+  if (!session) {
+    return errorResponse(401, "La sesión administrativa no es válida.");
+  }
+  try {
+    const input = normalizeAdminProductArchiveInput(
+      productId,
+      await readActionJson(request),
+    );
+    const product = await archiveAdminProduct(input);
+    return Response.json({ product }, { headers: NO_STORE_HEADERS });
+  } catch (error: unknown) {
+    if (error instanceof AdminProductValidationError) {
+      return errorResponse(400, error.message, { [error.field]: error.message });
+    }
+    if (error instanceof AdminProductRepositoryError) {
+      return repositoryErrorResponse(error);
+    }
+    return errorResponse(500, "No fue posible archivar el producto.");
   }
 }

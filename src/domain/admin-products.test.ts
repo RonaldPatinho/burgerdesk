@@ -4,6 +4,8 @@ import {
   AdminProductValidationError,
   assertAdminProductMutationIdentity,
   createAdminProductId,
+  normalizeAdminProductArchiveInput,
+  normalizeAdminProductAvailabilityInput,
   normalizeAdminProductCreate,
   normalizeAdminProductPatch,
 } from "./admin-products";
@@ -93,5 +95,47 @@ test("valida identidad dinámica y versión de la mutación", () => {
       productId: "Producto inseguro",
       expectedUpdatedAt: "sin-fecha",
     }),
+  );
+});
+
+test("normaliza disponibilidad y archivo sin aceptar campos adicionales", () => {
+  assert.deepEqual(
+    normalizeAdminProductAvailabilityInput("producto-dinamico", {
+      expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+      available: false,
+    }),
+    {
+      productId: "producto-dinamico",
+      expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+      available: false,
+    },
+  );
+  assert.deepEqual(
+    normalizeAdminProductArchiveInput("producto-dinamico", {
+      expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+    }),
+    {
+      productId: "producto-dinamico",
+      expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+    },
+  );
+  assert.throws(
+    () =>
+      normalizeAdminProductAvailabilityInput("producto-dinamico", {
+        expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+        available: true,
+        badge: "No permitido",
+      }),
+    (error: unknown) =>
+      error instanceof AdminProductValidationError && error.field === "badge",
+  );
+  assert.throws(
+    () =>
+      normalizeAdminProductArchiveInput("producto-dinamico", {
+        expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+        delete: true,
+      }),
+    (error: unknown) =>
+      error instanceof AdminProductValidationError && error.field === "delete",
   );
 });

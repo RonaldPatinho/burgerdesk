@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  archiveAdminProductResponse,
   createAdminProductResponse,
+  setAdminProductAvailabilityResponse,
   updateAdminProductResponse,
 } from "./admin-product-response";
 
@@ -9,6 +11,14 @@ function multipartRequest(body: FormData, method: "POST" | "PATCH"): Request {
   return new Request("http://localhost/api/administrador/products", {
     method,
     body,
+  });
+}
+
+function jsonRequest(value: unknown, method: "PATCH" | "POST"): Request {
+  return new Request("http://localhost/api/administrador/products/producto", {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(value),
   });
 }
 
@@ -24,6 +34,55 @@ test("rechaza creación y edición sin sesión administrativa", async () => {
   );
   assert.equal(createResponse.status, 401);
   assert.equal(updateResponse.status, 401);
+});
+
+test("rechaza disponibilidad y archivo sin sesión administrativa", async () => {
+  const availabilityResponse = await setAdminProductAvailabilityResponse(
+    jsonRequest(
+      { expectedUpdatedAt: "2026-08-16T12:00:00.000Z", available: false },
+      "PATCH",
+    ),
+    "producto-valido",
+    null,
+  );
+  const archiveResponse = await archiveAdminProductResponse(
+    jsonRequest(
+      { expectedUpdatedAt: "2026-08-16T12:00:00.000Z" },
+      "POST",
+    ),
+    "producto-valido",
+    null,
+  );
+  assert.equal(availabilityResponse.status, 401);
+  assert.equal(archiveResponse.status, 401);
+});
+
+test("rechaza campos ajenos en acciones administrativas", async () => {
+  const availabilityResponse = await setAdminProductAvailabilityResponse(
+    jsonRequest(
+      {
+        expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+        available: false,
+        priceCop: 1,
+      },
+      "PATCH",
+    ),
+    "producto-valido",
+    { userId: "administrador-prueba" },
+  );
+  const archiveResponse = await archiveAdminProductResponse(
+    jsonRequest(
+      {
+        expectedUpdatedAt: "2026-08-16T12:00:00.000Z",
+        physicalDelete: true,
+      },
+      "POST",
+    ),
+    "producto-valido",
+    { userId: "administrador-prueba" },
+  );
+  assert.equal(availabilityResponse.status, 400);
+  assert.equal(archiveResponse.status, 400);
 });
 
 test("rechaza una imagen cuya firma no coincide con el MIME", async () => {

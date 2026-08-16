@@ -252,3 +252,65 @@ export function assertAdminProductMutationIdentity(input: {
     );
   }
 }
+
+function assertOnlyMutationFields(
+  value: Record<string, unknown>,
+  allowedFields: ReadonlySet<string>,
+): void {
+  const unexpectedField = Object.keys(value).find(
+    (field) => !allowedFields.has(field),
+  );
+  if (unexpectedField) {
+    throw new AdminProductValidationError(
+      unexpectedField,
+      "El campo no forma parte de esta acción.",
+    );
+  }
+}
+
+export function normalizeAdminProductAvailabilityInput(
+  productId: unknown,
+  value: unknown,
+): AdminProductAvailabilityInput {
+  if (!isRecord(value)) {
+    throw new AdminProductValidationError(
+      "product",
+      "La disponibilidad del producto no es válida.",
+    );
+  }
+  assertOnlyMutationFields(
+    value,
+    new Set(["expectedUpdatedAt", "available"]),
+  );
+  const input = {
+    productId,
+    expectedUpdatedAt: value.expectedUpdatedAt,
+  };
+  assertAdminProductMutationIdentity(input);
+  if (typeof value.available !== "boolean") {
+    throw new AdminProductValidationError(
+      "available",
+      "La disponibilidad del producto no es válida.",
+    );
+  }
+  return { ...input, available: value.available };
+}
+
+export function normalizeAdminProductArchiveInput(
+  productId: unknown,
+  value: unknown,
+): AdminProductArchiveInput {
+  if (!isRecord(value)) {
+    throw new AdminProductValidationError(
+      "product",
+      "La solicitud de archivo no es válida.",
+    );
+  }
+  assertOnlyMutationFields(value, new Set(["expectedUpdatedAt"]));
+  const input = {
+    productId,
+    expectedUpdatedAt: value.expectedUpdatedAt,
+  };
+  assertAdminProductMutationIdentity(input);
+  return input;
+}

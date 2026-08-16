@@ -92,6 +92,21 @@
   height: 1.45rem;
 }
 
+.actionFeedback {
+  border: 0.0625rem solid color-mix(in srgb, var(--color-brand-secondary) 55%, var(--color-border));
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-brand-secondary) 14%, var(--color-surface));
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.actionFeedback[data-error] {
+  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
+}
+
 .grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -219,10 +234,8 @@
 
 .cardFooter {
   min-width: 0;
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 0.35rem;
+  display: grid;
+  gap: 0.55rem;
   align-self: end;
   padding-top: 0.35rem;
 }
@@ -246,9 +259,80 @@
   background: var(--color-text);
 }
 
-.editLink svg {
+.cardActions {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.availabilityButton,
+.archiveButton {
+  min-height: var(--touch-target-min);
+  border: 0.0625rem solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.availabilityButton {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border-radius: var(--radius-md);
+  padding-inline: 0.4rem;
+  font: inherit;
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.archiveButton {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+}
+
+.cardActions .editLink {
+  width: 100%;
+}
+
+.availabilityButton:disabled,
+.archiveButton:disabled {
+  opacity: 0.55;
+}
+
+.availabilityButton svg,
+.editLink svg,
+.archiveButton svg {
   width: 1.15rem;
   height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+.archiveCopy {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .availabilityButton:not(:disabled):hover,
+  .archiveButton:not(:disabled):hover {
+    border-color: var(--color-brand-primary);
+    background: var(--color-surface-cream);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
 }
 
 .emptyState {
@@ -397,5 +481,9 @@
 
   .cardFooter strong {
     font-size: 0.98rem;
+  }
+
+  .availabilityButton {
+    font-size: 0.56rem;
   }
 }

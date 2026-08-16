@@ -1,16 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Pencil } from "lucide-react";
+import { Archive, Eye, EyeOff, LoaderCircle, Pencil } from "lucide-react";
 import type { AdminProduct } from "@/domain/admin-products";
 import { formatCop } from "@/domain/currency";
 import styles from "./AdminProductsScreen.module.css";
 
+type PendingAction = "availability" | "archive" | null;
+
 export function AdminProductCard({
   product,
   categoryName,
+  pendingAction,
+  actionsDisabled,
+  onToggleAvailability,
+  onRequestArchive,
 }: {
   product: AdminProduct;
   categoryName: string;
+  pendingAction: PendingAction;
+  actionsDisabled: boolean;
+  onToggleAvailability: () => void;
+  onRequestArchive: () => void;
 }) {
   return (
     <article className={styles.card}>
@@ -43,14 +53,48 @@ export function AdminProductCard({
 
         <div className={styles.cardFooter}>
           <strong>{formatCop(product.priceCop)}</strong>
-          <Link
-            href={`/administrador/productos/${product.id}/editar`}
-            className={styles.editLink}
-            aria-label={`Editar ${product.name}`}
-            title={`Editar ${product.name}`}
-          >
-            <Pencil aria-hidden="true" />
-          </Link>
+          <div className={styles.cardActions}>
+            <button
+              type="button"
+              className={styles.availabilityButton}
+              disabled={actionsDisabled}
+              aria-label={`${product.available ? "Desactivar" : "Activar"} ${product.name}`}
+              aria-busy={pendingAction === "availability" || undefined}
+              onClick={onToggleAvailability}
+            >
+              {pendingAction === "availability" ? (
+                <LoaderCircle aria-hidden="true" className={styles.spinner} />
+              ) : product.available ? (
+                <EyeOff aria-hidden="true" />
+              ) : (
+                <Eye aria-hidden="true" />
+              )}
+              <span>{product.available ? "Desactivar" : "Activar"}</span>
+            </button>
+            <Link
+              href={`/administrador/productos/${product.id}/editar`}
+              className={styles.editLink}
+              aria-label={`Editar ${product.name}`}
+              title={`Editar ${product.name}`}
+            >
+              <Pencil aria-hidden="true" />
+            </Link>
+            <button
+              type="button"
+              className={styles.archiveButton}
+              disabled={actionsDisabled}
+              aria-label={`Archivar ${product.name}`}
+              aria-busy={pendingAction === "archive" || undefined}
+              title={`Archivar ${product.name}`}
+              onClick={onRequestArchive}
+            >
+              {pendingAction === "archive" ? (
+                <LoaderCircle aria-hidden="true" className={styles.spinner} />
+              ) : (
+                <Archive aria-hidden="true" />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </article>
