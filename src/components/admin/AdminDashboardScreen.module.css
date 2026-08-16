@@ -122,6 +122,10 @@
   color: color-mix(in srgb, var(--color-text) 65%, transparent);
 }
 
+.variation[data-tone="value"] {
+  color: var(--color-danger);
+}
+
 .chartWrap {
   min-height: 0;
   position: relative;

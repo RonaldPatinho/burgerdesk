@@ -42,7 +42,7 @@ const items: readonly NavigationItem[] = [
     label: "Reportes",
     href: "/administrador/reportes",
     icon: <ChartNoAxesCombined />,
-    available: false,
+    available: true,
   },
   {
     label: "Ajustes",
