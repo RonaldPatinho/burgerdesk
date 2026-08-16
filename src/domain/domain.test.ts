@@ -22,7 +22,7 @@ import {
   updateCartKitchenNote,
 } from "./cart";
 import { formatCop } from "./currency";
-import type { Cart, Product } from "./models";
+import { productIds, type Cart, type Product } from "./models";
 import { CLIENT_STORAGE_VERSION } from "./persistence";
 import {
   DomainRuleError,
@@ -52,7 +52,10 @@ test("calcula el precio seleccionado de La Bendita desde base y complementos", (
 });
 
 test("el catálogo usa identificadores únicos y referencias internas válidas", () => {
-  assert.equal(products.length, 8);
+  assert.deepEqual(
+    products.map((product) => product.id),
+    productIds,
+  );
   assert.equal(new Set(products.map((product) => product.id)).size, products.length);
   assert.equal(
     new Set(categories.map((category) => category.id)).size,
@@ -75,6 +78,61 @@ test("el catálogo usa identificadores únicos y referencias internas válidas",
       `${product.name} tiene un complemento predeterminado inexistente.`,
     );
   }
+});
+
+test("los productos ampliados conservan precios, categorías y recursos canónicos", () => {
+  const expectedProducts = [
+    ["triple-bacon", 39_900, "burgers", "/images/products/triple_bacon.png"],
+    [
+      "doble-crispy-pollo",
+      34_900,
+      "burgers",
+      "/images/products/doble_crispy_pollo.png",
+    ],
+    [
+      "doble-crispy-bacon",
+      36_900,
+      "burgers",
+      "/images/products/doble_crispy_bacon.png",
+    ],
+    ["doble-bacon", 36_900, "burgers", "/images/products/doble_bacon.png"],
+    [
+      "cheddar-explosiva",
+      31_900,
+      "burgers",
+      "/images/products/cheddar_explosiva.png",
+    ],
+    ["papas-rusticas", 9_900, "papas", "/images/products/papas_rusticas.webp"],
+    ["papas-rejilla", 11_900, "papas", "/images/products/papas_rejilla.webp"],
+    [
+      "papas-corte-grueso",
+      10_900,
+      "papas",
+      "/images/products/papas_corte_grueso.webp",
+    ],
+    ["coca-cola", 6_900, "bebidas", "/images/products/coca_cola.png"],
+    [
+      "coca-cola-zero",
+      6_900,
+      "bebidas",
+      "/images/products/coca_cola_zero.png",
+    ],
+    ["agua", 4_900, "bebidas", "/images/products/agua.png"],
+    ["jugo-naranja", 7_900, "bebidas", "/images/products/jugo_naranja.png"],
+  ] as const;
+
+  for (const [id, priceCop, categoryId, imagePath] of expectedProducts) {
+    const product = getProduct(id);
+    assert.equal(product.priceCop, priceCop);
+    assert.ok(product.categoryIds.includes(categoryId));
+    assert.equal(product.imagePath, imagePath);
+    assert.equal(product.available, true);
+    assert.deepEqual(product.options, []);
+    assert.deepEqual(product.defaultOptionIds, []);
+  }
+
+  assert.equal(getProduct("fanta").imagePath, "/images/products/fanta.png");
+  assert.equal(getProduct("sprite").imagePath, "/images/products/sprite.png");
 });
 
 test("reconcilia el carrito de referencia con subtotal, servicio y total", () => {

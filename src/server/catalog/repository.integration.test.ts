@@ -35,7 +35,30 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     menuCategories.map((category) => category.name),
     ["Burgers", "Papas", "Bebidas"],
   );
-  assert.equal(products.length, 8);
+  const productsById = new Map(products.map((product) => [product.id, product]));
+  const expectedExtendedCatalog = [
+    ["triple-bacon", 39_900, "/images/products/triple_bacon.png"],
+    ["doble-crispy-pollo", 34_900, "/images/products/doble_crispy_pollo.png"],
+    ["doble-crispy-bacon", 36_900, "/images/products/doble_crispy_bacon.png"],
+    ["doble-bacon", 36_900, "/images/products/doble_bacon.png"],
+    ["cheddar-explosiva", 31_900, "/images/products/cheddar_explosiva.png"],
+    ["papas-rusticas", 9_900, "/images/products/papas_rusticas.webp"],
+    ["papas-rejilla", 11_900, "/images/products/papas_rejilla.webp"],
+    ["papas-corte-grueso", 10_900, "/images/products/papas_corte_grueso.webp"],
+    ["coca-cola", 6_900, "/images/products/coca_cola.png"],
+    ["coca-cola-zero", 6_900, "/images/products/coca_cola_zero.png"],
+    ["agua", 4_900, "/images/products/agua.png"],
+    ["jugo-naranja", 7_900, "/images/products/jugo_naranja.png"],
+  ] as const;
+
+  for (const [id, priceCop, imagePath] of expectedExtendedCatalog) {
+    const product = productsById.get(id);
+    assert.ok(product, `Falta el producto persistido ${id}.`);
+    assert.equal(product.priceCop, priceCop);
+    assert.equal(product.imagePath, imagePath);
+    assert.equal(product.available, true);
+  }
+
   const laBendita = products.find((product) => product.id === "la-bendita");
   assert.ok(laBendita);
   assert.equal(laBendita.priceCop, 26_900);
@@ -52,6 +75,8 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     featured.map((product) => product.id),
     ["la-bendita", "combo-gloria"],
   );
+  assert.equal(productsById.get("fanta")?.imagePath, "/images/products/fanta.png");
+  assert.equal(productsById.get("sprite")?.imagePath, "/images/products/sprite.png");
 });
 
 test("acepta identificadores dinámicos y reconstruye categorías, opciones y predeterminados", async () => {
