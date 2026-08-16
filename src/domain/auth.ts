@@ -1,5 +1,4 @@
 export interface SignInInput {
-  fullName: string;
   email: string;
   password: string;
   rememberEmail: boolean;
@@ -26,16 +25,11 @@ export type AuthValidationResult =
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-function validateIdentityFields(input: {
-  fullName: string;
+function validateCredentialFields(input: {
   email: string;
   password: string;
 }): AuthFieldErrors {
   const errors: AuthFieldErrors = {};
-
-  if (!input.fullName.trim()) {
-    errors.fullName = "Escribe tu nombre completo.";
-  }
 
   const email = input.email.trim();
   if (!email) {
@@ -48,6 +42,20 @@ function validateIdentityFields(input: {
     errors.password = "Escribe tu contraseña.";
   } else if (input.password.length < 8) {
     errors.password = "Usa al menos 8 caracteres.";
+  }
+
+  return errors;
+}
+
+function validateIdentityFields(input: {
+  fullName: string;
+  email: string;
+  password: string;
+}): AuthFieldErrors {
+  const errors = validateCredentialFields(input);
+
+  if (!input.fullName.trim()) {
+    errors.fullName = "Escribe tu nombre completo.";
   }
 
   return errors;
@@ -68,7 +76,7 @@ function toValidationResult(errors: AuthFieldErrors): AuthValidationResult {
 }
 
 export function validateSignIn(input: SignInInput): AuthValidationResult {
-  return toValidationResult(validateIdentityFields(input));
+  return toValidationResult(validateCredentialFields(input));
 }
 
 export function validateRegistration(

@@ -35,7 +35,83 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     menuCategories.map((category) => category.name),
     ["Burgers", "Papas", "Bebidas"],
   );
-  assert.equal(products.length, 6);
+  const productsById = new Map(products.map((product) => [product.id, product]));
+  const expectedBurgerIds = [
+    "la-bendita",
+    "doble-pecado",
+    "santa-pollo",
+    "bacon-bendita",
+    "triple-bacon",
+    "doble-crispy-pollo",
+    "doble-crispy-bacon",
+    "doble-bacon",
+    "cheddar-explosiva",
+  ];
+  const burgerProducts = products.filter((product) =>
+    product.categoryIds.includes("burgers"),
+  );
+
+  assert.deepEqual(
+    burgerProducts.map((product) => product.id),
+    expectedBurgerIds,
+  );
+
+  for (const burger of burgerProducts) {
+    assert.deepEqual(
+      burger.options.map((option) => [option.id, option.priceCop]),
+      [
+        ["cheddar-extra", 3_500],
+        ["tocineta", 4_500],
+        ["cebolla", 2_500],
+        ["salsa-incluida", 0],
+      ],
+    );
+    assert.deepEqual(
+      burger.defaultOptionIds,
+      burger.id === "la-bendita"
+        ? ["cheddar-extra", "salsa-incluida"]
+        : ["salsa-incluida"],
+    );
+  }
+
+  for (const productIdWithoutOptions of [
+    "papas-cheddar",
+    "papas-rusticas",
+    "fanta",
+    "sprite",
+    "coca-cola",
+    "agua",
+    "combo-gloria",
+  ]) {
+    const product = productsById.get(productIdWithoutOptions);
+    assert.ok(product);
+    assert.deepEqual(product.options, []);
+    assert.deepEqual(product.defaultOptionIds, []);
+  }
+
+  const expectedExtendedCatalog = [
+    ["triple-bacon", 39_900, "/images/products/triple_bacon.png"],
+    ["doble-crispy-pollo", 34_900, "/images/products/doble_crispy_pollo.png"],
+    ["doble-crispy-bacon", 36_900, "/images/products/doble_crispy_bacon.png"],
+    ["doble-bacon", 36_900, "/images/products/doble_bacon.png"],
+    ["cheddar-explosiva", 31_900, "/images/products/cheddar_explosiva.png"],
+    ["papas-rusticas", 9_900, "/images/products/papas_rusticas.webp"],
+    ["papas-rejilla", 11_900, "/images/products/papas_rejilla.webp"],
+    ["papas-corte-grueso", 10_900, "/images/products/papas_corte_grueso.webp"],
+    ["coca-cola", 6_900, "/images/products/coca_cola.png"],
+    ["coca-cola-zero", 6_900, "/images/products/coca_cola_zero.png"],
+    ["agua", 4_900, "/images/products/agua.png"],
+    ["jugo-naranja", 7_900, "/images/products/jugo_naranja.png"],
+  ] as const;
+
+  for (const [id, priceCop, imagePath] of expectedExtendedCatalog) {
+    const product = productsById.get(id);
+    assert.ok(product, `Falta el producto persistido ${id}.`);
+    assert.equal(product.priceCop, priceCop);
+    assert.equal(product.imagePath, imagePath);
+    assert.equal(product.available, true);
+  }
+
   const laBendita = products.find((product) => product.id === "la-bendita");
   assert.ok(laBendita);
   assert.equal(laBendita.priceCop, 26_900);
@@ -52,6 +128,8 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     featured.map((product) => product.id),
     ["la-bendita", "combo-gloria"],
   );
+  assert.equal(productsById.get("fanta")?.imagePath, "/images/products/fanta.png");
+  assert.equal(productsById.get("sprite")?.imagePath, "/images/products/sprite.png");
 });
 
 test("acepta identificadores dinámicos y reconstruye categorías, opciones y predeterminados", async () => {

@@ -9,15 +9,18 @@ import {
   Clock3,
   Heart,
   LogOut,
+  Mail,
   MapPin,
+  Phone,
   PackageCheck,
   ReceiptText,
   RotateCcw,
   ShoppingBag,
+  Trash2,
   UserRound,
   WalletCards,
 } from "lucide-react";
-import { type FormEvent, useMemo, useState } from "react";
+import { type FormEvent, useMemo, useRef, useState } from "react";
 import { MAX_QUANTITY_PER_CART_LINE, products } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
 import { buildProfileReorder } from "@/domain/profile-reorder";
@@ -43,6 +46,7 @@ interface ProfileScreenProps {
 }
 
 type DialogName = "edit" | "order" | "logout" | null;
+const PROFILE_UPDATED_EVENT = "burgerdesk:profile-updated";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -65,6 +69,12 @@ function initials(fullName: string): string {
     .slice(0, 2)
     .map((part) => part[0]?.toUpperCase())
     .join("");
+}
+
+function notifyProfileUpdated(hasAvatar: boolean) {
+  window.dispatchEvent(
+    new CustomEvent(PROFILE_UPDATED_EVENT, { detail: { hasAvatar } }),
+  );
 }
 
 function Avatar({ profile, version }: { profile: ClientProfileView; version: number }) {
@@ -126,22 +136,30 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
   const [detailPending, setDetailPending] = useState(false);
   const [historyPending, setHistoryPending] = useState(false);
   const [profilePending, setProfilePending] = useState(false);
+  const [avatarDeletePending, setAvatarDeletePending] = useState(false);
   const [logoutPending, setLogoutPending] = useState(false);
   const [profileErrors, setProfileErrors] = useState<ClientProfileFieldErrors>({});
   const [message, setMessage] = useState<string | null>(null);
   const [detailMessage, setDetailMessage] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarVersion, setAvatarVersion] = useState(0);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const avatarInputAccept = useMemo(() => acceptedAvatarMimeTypes.join(","), []);
+  const profileMutationPending = profilePending || avatarDeletePending;
+
+  function clearAvatarSelection() {
+    setAvatarFile(null);
+    if (avatarInputRef.current) avatarInputRef.current.value = "";
+  }
 
   function closeDialog() {
-    if (profilePending || logoutPending) return;
+    if (profileMutationPending || logoutPending) return;
     setDialog(null);
     setDetail(null);
     setDetailMessage(null);
     setProfileErrors({});
-    setAvatarFile(null);
+    clearAvatarSelection();
   }
 
   async function loadAllOrders() {
@@ -214,6 +232,7 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
 
   async function saveProfile(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (avatarDeletePending) return;
     setProfilePending(true);
     setProfileErrors({});
     const form = new FormData(event.currentTarget);
@@ -244,16 +263,56 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
       if (!isRecord(value) || !isRecord(value.profile)) {
         throw new Error("El servidor devolvió un perfil inválido.");
       }
-      setProfile(value.profile as unknown as ClientProfileView);
+      const nextProfile = value.profile as unknown as ClientProfileView;
+      setProfile(nextProfile);
       if (avatarFile) setAvatarVersion((current) => current + 1);
+      notifyProfileUpdated(nextProfile.hasAvatar);
       setMessage("Tus datos se guardaron correctamente.");
       setDialog(null);
-      setAvatarFile(null);
+      clearAvatarSelection();
       router.refresh();
     } catch (error: unknown) {
       setMessage(error instanceof Error ? error.message : "No fue posible guardar el perfil.");
     } finally {
       setProfilePending(false);
+    }
+  }
+
+  async function removeAvatar() {
+    if (!profile.hasAvatar || profileMutationPending) return;
+    setAvatarDeletePending(true);
+    setProfileErrors((current) => ({ ...current, avatar: undefined }));
+    try {
+      const response = await fetch("/api/profile/avatar", { method: "DELETE" });
+      const value: unknown = await response.json();
+      if (!response.ok) {
+        throw new Error(
+          isRecord(value) && typeof value.message === "string"
+            ? value.message
+            : "No fue posible eliminar la foto de perfil.",
+        );
+      }
+      if (!isRecord(value) || !isRecord(value.profile)) {
+        throw new Error("El servidor devolvió un perfil inválido.");
+      }
+      const nextProfile = value.profile as unknown as ClientProfileView;
+      if (nextProfile.hasAvatar) {
+        throw new Error("No fue posible confirmar la eliminación de la foto.");
+      }
+      setProfile(nextProfile);
+      clearAvatarSelection();
+      setAvatarVersion((current) => current + 1);
+      notifyProfileUpdated(false);
+      setMessage("La foto de perfil se eliminó correctamente.");
+      router.refresh();
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "No fue posible eliminar la foto de perfil.";
+      setProfileErrors((current) => ({ ...current, avatar: errorMessage }));
+    } finally {
+      setAvatarDeletePending(false);
     }
   }
 
@@ -304,70 +363,186 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
     <div className={styles.page}>
       <ClientHeader homeLink />
       <main id="contenido-principal" className={styles.main} tabIndex={-1}>
-        <header className={styles.heading}>
-          <h1>Mi perfil</h1>
-          <p>Administra tus datos y revisa tus pedidos.</p>
-        </header>
+        <section className={styles.desktopOnly} aria-label="Perfil del cliente en escritorio">
+          <header className={styles.desktopHeading}>
+            <h1>Mi perfil</h1>
+            <p>Administra tus datos y revisa pedidos anteriores</p>
+          </header>
 
-        {message ? (
-          <p className={styles.message} role="status" aria-live="polite">
-            {message}
-          </p>
-        ) : null}
+          {message ? (
+            <p className={styles.message} role="status" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
 
-        <section className={styles.profileCard} aria-label="Datos del cliente">
-          <Avatar profile={profile} version={avatarVersion} />
-          <div className={styles.profileCopy}>
-            <h2>{profile.fullName}</h2>
-            <p>{profile.email}</p>
-            <span><MapPin aria-hidden="true" /> {profile.preferredStoreName}</span>
-          </div>
-          <Button
-            size="compact"
-            variant="secondary"
-            leadingIcon={<UserRound />}
-            onClick={() => setDialog("edit")}
-          >
-            Editar
-          </Button>
-        </section>
+          <div className={styles.desktopProfileLayout}>
+            <aside className={styles.desktopIdentityPanel} aria-label="Información del cliente">
+              <section className={styles.desktopIdentityHero}>
+                <Avatar profile={profile} version={avatarVersion} />
+                <h2>{profile.fullName}</h2>
+                <p>Cliente BurgerDesk</p>
+              </section>
 
-        <section className={styles.stats} aria-label="Estadísticas del cliente">
-          <article><PackageCheck aria-hidden="true" /><strong>{initialDashboard.stats.orderCount}</strong><span>Pedidos</span></article>
-          <article><Heart aria-hidden="true" /><strong>{initialDashboard.stats.favoriteCount}</strong><span>Favoritos</span></article>
-          <article><WalletCards aria-hidden="true" /><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong><span>Total pagado</span></article>
-        </section>
+              <section className={styles.desktopPersonalInfo} aria-labelledby="desktop-personal-info">
+                <h3 id="desktop-personal-info">Información personal</h3>
+                <dl>
+                  <div>
+                    <dt><Mail aria-hidden="true" /> Correo</dt>
+                    <dd>{profile.email}</dd>
+                  </div>
+                  <div>
+                    <dt><Phone aria-hidden="true" /> Teléfono</dt>
+                    <dd>{profile.phone}</dd>
+                  </div>
+                  <div>
+                    <dt><MapPin aria-hidden="true" /> Sede preferida</dt>
+                    <dd>{profile.preferredStoreName}</dd>
+                  </div>
+                </dl>
+              </section>
 
-        <section className={styles.history} aria-labelledby="history-title">
-          <div className={styles.sectionHeading}>
-            <h2 id="history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
-            {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
-              <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
-                {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
-              </button>
-            ) : null}
-          </div>
-          {orders.length > 0 ? (
-            <div className={styles.orderList}>
-              {orders.map((order) => <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />)}
+              <div className={styles.desktopIdentityActions}>
+                <Button
+                  variant="secondary"
+                  fullWidth
+                  leadingIcon={<UserRound />}
+                  onClick={() => setDialog("edit")}
+                >
+                  Editar perfil
+                </Button>
+                <Button
+                  variant="danger"
+                  fullWidth
+                  leadingIcon={<LogOut />}
+                  onClick={() => setDialog("logout")}
+                >
+                  Cerrar sesión
+                </Button>
+              </div>
+            </aside>
+
+            <div className={styles.desktopProfileContent}>
+              <section className={styles.desktopSummary} aria-labelledby="desktop-summary-title">
+                <h2 id="desktop-summary-title">Resumen</h2>
+                <div className={styles.desktopStats}>
+                  <article>
+                    <PackageCheck aria-hidden="true" />
+                    <div><span>Pedidos realizados</span><strong>{initialDashboard.stats.orderCount}</strong></div>
+                  </article>
+                  <article>
+                    <Heart aria-hidden="true" />
+                    <div><span>Favoritos</span><strong>{initialDashboard.stats.favoriteCount}</strong></div>
+                  </article>
+                  <article>
+                    <WalletCards aria-hidden="true" />
+                    <div><span>Total pagado</span><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong></div>
+                  </article>
+                </div>
+              </section>
+
+              <section className={styles.desktopHistory} aria-labelledby="desktop-history-title">
+                <div className={styles.desktopHistoryHeading}>
+                  <div>
+                    <h2 id="desktop-history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
+                    <p>Consulta el historial de tus compras en BurgerDesk.</p>
+                  </div>
+                  {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
+                    <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
+                      {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
+                    </button>
+                  ) : null}
+                </div>
+
+                {orders.length > 0 ? (
+                  <div className={styles.desktopOrderList}>
+                    {orders.map((order) => (
+                      <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.emptyState}>
+                    <ReceiptText aria-hidden="true" />
+                    <h3>Aún no tienes pedidos</h3>
+                    <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
+                  </div>
+                )}
+              </section>
+
+              <div className={styles.desktopNewOrder}>
+                <Button leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
+                  Hacer nuevo pedido
+                </Button>
+              </div>
             </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <ReceiptText aria-hidden="true" />
-              <h3>Aún no tienes pedidos</h3>
-              <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
-            </div>
-          )}
+          </div>
         </section>
 
-        <div className={styles.pageActions}>
-          <Button variant="danger" fullWidth leadingIcon={<LogOut />} onClick={() => setDialog("logout")}>
-            Cerrar sesión
-          </Button>
-          <Button fullWidth leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
-            Nuevo pedido
-          </Button>
-        </div>
+        <section className={styles.mobileOnly} aria-label="Perfil del cliente">
+          <header className={styles.heading}>
+            <h1>Mi perfil</h1>
+            <p>Administra tus datos y revisa tus pedidos.</p>
+          </header>
+
+          {message ? (
+            <p className={styles.message} role="status" aria-live="polite">
+              {message}
+            </p>
+          ) : null}
+
+          <section className={styles.profileCard} aria-label="Datos del cliente">
+            <Avatar profile={profile} version={avatarVersion} />
+            <div className={styles.profileCopy}>
+              <h2>{profile.fullName}</h2>
+              <p>{profile.email}</p>
+              <span><MapPin aria-hidden="true" /> {profile.preferredStoreName}</span>
+            </div>
+            <Button
+              size="compact"
+              variant="secondary"
+              leadingIcon={<UserRound />}
+              onClick={() => setDialog("edit")}
+            >
+              Editar
+            </Button>
+          </section>
+
+          <section className={styles.stats} aria-label="Estadísticas del cliente">
+            <article><PackageCheck aria-hidden="true" /><strong>{initialDashboard.stats.orderCount}</strong><span>Pedidos</span></article>
+            <article><Heart aria-hidden="true" /><strong>{initialDashboard.stats.favoriteCount}</strong><span>Favoritos</span></article>
+            <article><WalletCards aria-hidden="true" /><strong>{formatCop(initialDashboard.stats.totalPaidCop)}</strong><span>Total pagado</span></article>
+          </section>
+
+          <section className={styles.history} aria-labelledby="history-title">
+            <div className={styles.sectionHeading}>
+              <h2 id="history-title">{showingAll ? "Todos tus pedidos" : "Pedidos recientes"}</h2>
+              {!showingAll && initialDashboard.totalOrderCount > orders.length ? (
+                <button type="button" disabled={historyPending} onClick={() => void loadAllOrders()}>
+                  {historyPending ? "Cargando…" : "Ver todo"} <ArrowRight aria-hidden="true" />
+                </button>
+              ) : null}
+            </div>
+            {orders.length > 0 ? (
+              <div className={styles.orderList}>
+                {orders.map((order) => <OrderRow key={order.id} order={order} onOpen={(id) => void openOrder(id)} />)}
+              </div>
+            ) : (
+              <div className={styles.emptyState}>
+                <ReceiptText aria-hidden="true" />
+                <h3>Aún no tienes pedidos</h3>
+                <p>Tu historial aparecerá aquí después de confirmar tu primer pedido.</p>
+              </div>
+            )}
+          </section>
+
+          <div className={styles.pageActions}>
+            <Button variant="danger" fullWidth leadingIcon={<LogOut />} onClick={() => setDialog("logout")}>
+              Cerrar sesión
+            </Button>
+            <Button fullWidth leadingIcon={<ShoppingBag />} onClick={() => router.push("/menu")}>
+              Nuevo pedido
+            </Button>
+          </div>
+        </section>
       </main>
       <ClientBottomNav active="profile" />
 
@@ -381,8 +556,8 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
         density="compact"
         actions={
           <>
-            <Button variant="secondary" disabled={profilePending} onClick={closeDialog}>Cancelar</Button>
-            <Button type="submit" form="profile-form" loading={profilePending} loadingLabel="Guardando…">Guardar cambios</Button>
+            <Button variant="secondary" disabled={profileMutationPending} onClick={closeDialog}>Cancelar</Button>
+            <Button type="submit" form="profile-form" disabled={avatarDeletePending} loading={profilePending} loadingLabel="Guardando…">Guardar cambios</Button>
           </>
         }
       >
@@ -390,14 +565,29 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
           <div className={styles.avatarEditor}>
             <Avatar profile={profile} version={avatarVersion} />
             <div>
-              <label className={styles.fileButton} htmlFor="profile-avatar"><Camera aria-hidden="true" /> Cambiar foto</label>
+              <div className={styles.avatarActions}>
+                <label className={styles.fileButton} htmlFor="profile-avatar"><Camera aria-hidden="true" /> Cambiar foto</label>
+                {profile.hasAvatar ? (
+                  <button
+                    type="button"
+                    className={styles.removeAvatarButton}
+                    disabled={profileMutationPending}
+                    aria-busy={avatarDeletePending || undefined}
+                    onClick={() => void removeAvatar()}
+                  >
+                    <Trash2 aria-hidden="true" />
+                    {avatarDeletePending ? "Eliminando…" : "Eliminar foto"}
+                  </button>
+                ) : null}
+              </div>
               <input
+                ref={avatarInputRef}
                 id="profile-avatar"
                 className={styles.fileInput}
                 type="file"
                 name="avatar"
                 accept={avatarInputAccept}
-                disabled={profilePending}
+                disabled={profileMutationPending}
                 aria-describedby="profile-avatar-help profile-avatar-error"
                 onChange={(event) => handleAvatarChange(event.currentTarget.files?.[0] ?? null)}
               />
@@ -406,20 +596,20 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
               {profileErrors.avatar ? <p id="profile-avatar-error" className={styles.fieldError} role="alert">{profileErrors.avatar}</p> : null}
             </div>
           </div>
-          <Field id="profile-full-name" name="fullName" label="Nombre completo" defaultValue={profile.fullName} error={profileErrors.fullName} maxLength={120} disabled={profilePending} size="compact" />
-          <Field id="profile-phone" name="phone" type="tel" label="Teléfono" defaultValue={profile.phone} error={profileErrors.phone} maxLength={32} disabled={profilePending} size="compact" />
-          <Field id="profile-email" name="email" type="email" label="Correo electrónico" defaultValue={profile.email} error={profileErrors.email} maxLength={254} disabled={profilePending} size="compact" />
+          <Field id="profile-full-name" name="fullName" label="Nombre completo" defaultValue={profile.fullName} error={profileErrors.fullName} maxLength={120} disabled={profileMutationPending} size="compact" />
+          <Field id="profile-phone" name="phone" type="tel" label="Teléfono" defaultValue={profile.phone} error={profileErrors.phone} maxLength={32} disabled={profileMutationPending} size="compact" />
+          <Field id="profile-email" name="email" type="email" label="Correo electrónico" defaultValue={profile.email} error={profileErrors.email} maxLength={254} disabled={profileMutationPending} size="compact" />
           <label className={styles.selectField} htmlFor="profile-store">
             <span>Sede preferida</span>
-            <select id="profile-store" name="preferredStoreId" defaultValue={profile.preferredStoreId} disabled={profilePending} aria-invalid={Boolean(profileErrors.preferredStoreId) || undefined} aria-describedby={profileErrors.preferredStoreId ? "profile-store-error" : undefined}>
+            <select id="profile-store" name="preferredStoreId" defaultValue={profile.preferredStoreId} disabled={profileMutationPending} aria-invalid={Boolean(profileErrors.preferredStoreId) || undefined} aria-describedby={profileErrors.preferredStoreId ? "profile-store-error" : undefined}>
               {stores.map((store) => <option key={store.id} value={store.id}>{store.name}</option>)}
             </select>
             {profileErrors.preferredStoreId ? <span id="profile-store-error" className={styles.fieldError}>{profileErrors.preferredStoreId}</span> : null}
           </label>
           <fieldset className={styles.preferences}>
             <legend>Preferencias de contacto</legend>
-            <Checkbox id="profile-whatsapp" name="contactWhatsapp" label="WhatsApp" defaultChecked={profile.contactWhatsapp} disabled={profilePending} />
-            <Checkbox id="profile-email-contact" name="contactEmail" label="Correo electrónico" defaultChecked={profile.contactEmail} disabled={profilePending} />
+            <Checkbox id="profile-whatsapp" name="contactWhatsapp" label="WhatsApp" defaultChecked={profile.contactWhatsapp} disabled={profileMutationPending} />
+            <Checkbox id="profile-email-contact" name="contactEmail" label="Correo electrónico" defaultChecked={profile.contactEmail} disabled={profileMutationPending} />
           </fieldset>
           <p className={styles.infoBox}>Usaremos estos canales solo para avisos relacionados con tus pedidos.</p>
         </form>

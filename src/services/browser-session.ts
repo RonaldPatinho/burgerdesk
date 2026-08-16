@@ -116,6 +116,7 @@ export class LocalStorageSessionService implements SessionService {
           startedAt: this.now(),
         };
 
+    this.clearActiveShoppingState();
     this.saveSession(session);
     return session;
   }
@@ -134,6 +135,7 @@ export class LocalStorageSessionService implements SessionService {
           startedAt: this.now(),
         };
 
+    this.clearActiveShoppingState();
     this.saveSession(session);
     return session;
   }
@@ -147,6 +149,7 @@ export class LocalStorageSessionService implements SessionService {
       startedAt: this.now(),
     };
 
+    this.clearActiveShoppingState();
     this.saveSession(session);
     return session;
   }
@@ -163,7 +166,16 @@ export class LocalStorageSessionService implements SessionService {
     if (this.requestLogout) {
       await this.requestLogout();
     }
-    this.getStorage().removeItem(clientStorageKeys.session);
+    const storage = this.getStorage();
+    storage.removeItem(clientStorageKeys.session);
+    this.clearActiveShoppingState(storage);
+  }
+
+  private clearActiveShoppingState(
+    storage: SessionStoragePort = this.getStorage(),
+  ): void {
+    storage.removeItem(clientStorageKeys.cart);
+    storage.removeItem(clientStorageKeys.checkout);
   }
 
   private saveSession(session: ClientSession): void {
@@ -201,7 +213,7 @@ async function browserRequestAuth(
         action === "signin"
           ? { email: input.email, password: input.password }
           : {
-              fullName: input.fullName,
+              fullName: "fullName" in input ? input.fullName : "",
               email: input.email,
               password: input.password,
             },

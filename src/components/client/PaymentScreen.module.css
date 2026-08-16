@@ -37,6 +37,16 @@
   font-size: var(--font-size-sm);
 }
 
+.checkoutLayout,
+.paymentPanel {
+  display: contents;
+}
+
+.desktopOrderOverview,
+.desktopPaymentHeading {
+  display: none;
+}
+
 .methods {
   min-width: 0;
   display: grid;
@@ -312,5 +322,321 @@
 @media (min-width: 26.876rem) {
   .main {
     box-shadow: var(--shadow-raised);
+  }
+}
+
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .main {
+    max-width: 40rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .page {
+    background: var(--color-surface);
+  }
+
+  .main {
+    max-width: none;
+    min-height: auto;
+    margin: 0;
+    gap: var(--space-6);
+    padding: var(--space-5) var(--space-8) var(--space-10);
+    background: var(--color-surface);
+    box-shadow: none;
+  }
+
+  .heading {
+    display: none;
+  }
+
+  .checkoutLayout {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .desktopOrderOverview {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-5);
+  }
+
+  .orderOverviewHeading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .orderOverviewHeading > div {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .orderOverviewHeading h2 {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-tight);
+  }
+
+  .orderOverviewHeading p {
+    color: color-mix(in srgb, var(--color-text) 72%, transparent);
+    font-size: var(--font-size-sm);
+  }
+
+  .orderOverviewHeading a {
+    color: var(--color-brand-primary);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+  }
+
+  .orderItems {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .orderItem {
+    min-width: 0;
+    min-height: 6.75rem;
+    display: grid;
+    grid-template-columns: 5rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    background: var(--color-surface);
+  }
+
+  .orderImage {
+    position: relative;
+    width: 5rem;
+    height: 5rem;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    color: var(--color-brand-primary);
+    background: var(--color-surface-cream);
+  }
+
+  .orderImage img {
+    object-fit: contain;
+    padding: var(--space-1);
+  }
+
+  .orderImage svg {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  .orderCopy {
+    min-width: 0;
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .orderCopy h3 {
+    font-size: var(--font-size-lg);
+  }
+
+  .orderCopy p,
+  .orderCopy small {
+    font-size: var(--font-size-sm);
+  }
+
+  .orderItem > strong {
+    text-align: right;
+    font-size: var(--font-size-md);
+  }
+
+  .kitchenNote {
+    display: grid;
+    gap: var(--space-2);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--color-surface-muted);
+  }
+
+  .kitchenNote p {
+    font-size: var(--font-size-sm);
+  }
+
+  .deliveryCard {
+    min-height: 6rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    border: 0.125rem solid var(--color-brand-primary);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4);
+    background: var(--color-surface-cream);
+  }
+
+  .deliveryIcon {
+    width: 2.75rem;
+    height: 2.75rem;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    background: var(--color-brand-secondary);
+  }
+
+  .deliveryIcon svg {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .deliveryCopy {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .deliveryCopy strong {
+    font-size: var(--font-size-md);
+  }
+
+  .deliveryCopy small {
+    font-size: var(--font-size-sm);
+  }
+
+  .paymentPanel {
+    min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-5);
+    border: 0.0625rem solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-5);
+    background: var(--color-surface);
+  }
+
+  .desktopPaymentHeading {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: var(--space-4);
+  }
+
+  .desktopPaymentHeading > div {
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .desktopPaymentHeading h2 {
+    font-size: var(--font-size-2xl);
+    line-height: var(--line-height-tight);
+  }
+
+  .desktopPaymentHeading p {
+    font-size: var(--font-size-sm);
+  }
+
+  .desktopPaymentHeading > svg {
+    width: 1.6rem;
+    height: 1.6rem;
+    color: var(--color-brand-primary);
+  }
+
+  .methods {
+    gap: var(--space-3);
+  }
+
+  .methods legend {
+    margin-bottom: var(--space-3);
+    font-size: var(--font-size-sm);
+    font-weight: 700;
+  }
+
+  .method {
+    min-height: 3.25rem;
+    grid-template-columns: auto minmax(0, 1fr);
+    justify-items: start;
+    align-content: center;
+    align-items: center;
+    gap: var(--space-2);
+    border-width: 0.0625rem;
+    border-radius: var(--radius-pill);
+    padding: var(--space-2) var(--space-4);
+    text-align: left;
+  }
+
+  .method[data-selected="true"] {
+    border-color: var(--color-brand-primary);
+    color: var(--color-text);
+    background: var(--color-surface-cream);
+  }
+
+  .methodIcon {
+    width: 1.75rem;
+    height: 1.75rem;
+    color: currentColor;
+    background: transparent;
+  }
+
+  .methodIcon svg {
+    width: 1.2rem;
+    height: 1.2rem;
+  }
+
+  .method small {
+    display: none;
+  }
+
+  .stripeNotice {
+    border: 0.0625rem solid var(--color-border);
+    color: var(--color-text);
+    background: var(--color-surface-muted);
+  }
+
+  .stripeNotice svg {
+    color: var(--color-brand-primary);
+  }
+
+  .paymentPanel > button {
+    min-height: 3.75rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  .checkoutLayout {
+    width: 100%;
+    grid-template-columns: minmax(0, 1fr) 22rem;
+    gap: var(--space-6);
+    justify-content: stretch;
+    align-items: start;
+  }
+
+  .desktopOrderOverview {
+    padding-top: var(--space-5);
+  }
+
+  .orderItem {
+    min-height: 5.75rem;
+  }
+
+  .orderImage {
+    width: 4.25rem;
+    height: 4.25rem;
+  }
+
+  .deliveryCard {
+    min-height: 5.25rem;
+    padding-block: var(--space-3);
+  }
+
+  .paymentPanel {
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
+@media (min-width: 80rem) {
+  .main {
+    padding-inline: var(--space-10);
   }
 }

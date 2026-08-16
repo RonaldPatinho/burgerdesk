@@ -25,6 +25,15 @@
   padding-top: var(--space-2);
 }
 
+.mobileOnly {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.desktopOnly {
+  display: none;
+}
+
 .visuallyHidden {
   position: absolute;
   width: 0.0625rem;
@@ -169,7 +178,9 @@
 
 .primaryLink,
 .secondaryLink,
-.trackingButton {
+.trackingButton,
+.desktopBackLink,
+.desktopSupportAction {
   width: 100%;
   min-height: var(--touch-target-min);
   display: inline-flex;
@@ -182,7 +193,8 @@
 }
 
 .primaryLink,
-.trackingButton {
+.trackingButton,
+.desktopSupportAction {
   color: var(--color-surface);
   background: var(--color-brand-primary);
 }
@@ -191,9 +203,16 @@
   opacity: 0.55;
 }
 
-.secondaryLink {
+.secondaryLink,
+.desktopBackLink {
   color: var(--color-brand-primary);
   background: var(--color-surface);
+}
+
+.desktopBackLink {
+  color: var(--color-surface);
+  background: var(--color-text);
+  border-color: var(--color-text);
 }
 
 .thanks {
@@ -284,6 +303,7 @@
   color: var(--color-text);
   background: var(--color-surface-cream);
   font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .statusBadge span {
@@ -291,7 +311,7 @@
   height: 0.5rem;
   flex: 0 0 auto;
   border-radius: var(--radius-pill);
-  background: var(--color-danger);
+  background: var(--color-brand-secondary);
 }
 
 .progress {
@@ -414,6 +434,326 @@
   padding-inline: var(--space-2);
 }
 
+.desktopGrid,
+.desktopConfirmationCard,
+.desktopConfirmationCopy,
+.desktopCodeCard,
+.desktopCodeCopy,
+.desktopMetaGrid,
+.desktopMetaCard,
+.desktopProgressCard,
+.desktopProgressHeader,
+.desktopTimeline,
+.desktopSupportStrip,
+.desktopStoreCard,
+.desktopStoreCopy,
+.desktopActions {
+  display: grid;
+}
+
+.desktopSuccessWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.desktopConfirmationCopy {
+  justify-items: center;
+  gap: var(--space-2);
+  text-align: center;
+}
+
+.desktopConfirmationCopy h2 {
+  font-size: clamp(2rem, 2vw, 2.45rem);
+  line-height: var(--line-height-tight);
+}
+
+.desktopConfirmationCopy p {
+  max-width: 20rem;
+  font-size: 1rem;
+}
+
+.desktopCodeCard {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border-radius: 1.5rem;
+  padding: var(--space-4) var(--space-5);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.desktopCodeCopy {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.desktopCodeCopy svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  color: var(--color-brand-secondary);
+}
+
+.desktopCodeCard p {
+  color: var(--color-brand-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  text-transform: uppercase;
+}
+
+.desktopCodeCard strong {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--color-surface);
+  font-size: clamp(1.8rem, 2vw, 2.35rem);
+  line-height: 1;
+}
+
+.desktopEstimateCard {
+  min-height: 3.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: 1rem;
+  padding: var(--space-2) var(--space-3);
+  color: var(--color-text);
+  background: var(--color-surface-cream);
+}
+
+.desktopEstimateCard svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
+.desktopEstimateCard strong {
+  color: var(--color-text);
+  font-size: var(--font-size-base);
+}
+
+.desktopMetaGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.desktopMetaCard {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.desktopMetaCard svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-brand-primary);
+}
+
+.desktopMetaCard span {
+  display: block;
+  color: color-mix(in srgb, var(--color-text) 75%, var(--color-surface));
+  font-size: var(--font-size-sm);
+}
+
+.desktopMetaCard strong {
+  display: block;
+  margin-top: 0.125rem;
+  font-size: var(--font-size-lg);
+}
+
+.desktopInstruction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  padding-inline: var(--space-3);
+  color: color-mix(in srgb, var(--color-text) 84%, var(--color-surface));
+  font-size: var(--font-size-base);
+  text-align: center;
+}
+
+.desktopActions {
+  gap: var(--space-3);
+}
+
+.desktopPrimaryAction {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0.125rem solid var(--color-brand-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-5);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  text-align: center;
+}
+
+.desktopProgressHeader {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-3);
+}
+
+.desktopProgressHeader h2 {
+  font-size: clamp(1.8rem, 2vw, 2.25rem);
+  line-height: var(--line-height-tight);
+}
+
+.desktopProgressHeader p {
+  margin-top: var(--space-2);
+  font-size: var(--font-size-base);
+}
+
+.desktopTimeline {
+  display: grid;
+  gap: 0;
+  list-style: none;
+}
+
+.desktopTimelineStep {
+  position: relative;
+  min-width: 0;
+  min-height: 6.25rem;
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-4);
+}
+
+.desktopTimelineStep:last-child {
+  min-height: 3.75rem;
+}
+
+.desktopTimelineStep:not(:last-child)::after {
+  position: absolute;
+  top: 2.65rem;
+  bottom: 0;
+  left: 1.4375rem;
+  width: 0.1875rem;
+  background: var(--color-border);
+  content: "";
+}
+
+.desktopTimelineStep[data-state="completed"]:not(:last-child)::after,
+.desktopTimelineStep[data-state="current"]:not(:last-child)::after {
+  background: var(--color-brand-primary);
+}
+
+.desktopTimelineMarker {
+  z-index: 1;
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.desktopTimelineStep[data-state="current"] .desktopTimelineMarker {
+  color: var(--color-surface);
+  background: var(--color-brand-secondary);
+  border-color: var(--color-brand-secondary);
+}
+
+.desktopTimelineStep[data-state="upcoming"] .desktopTimelineMarker {
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.desktopTimelineMarker svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.desktopTimelineMarkerDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-text);
+}
+
+.desktopTimelineStep > div {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-1);
+  padding-top: 0.15rem;
+}
+
+.desktopTimelineStep h3 {
+  font-size: clamp(1.35rem, 1.4vw, 1.8rem);
+  line-height: 1.2;
+}
+
+.desktopTimelineStep p {
+  color: color-mix(in srgb, var(--color-text) 78%, var(--color-surface));
+  font-size: 1rem;
+}
+
+.desktopStoreCard {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  border-radius: 1.5rem;
+  padding: var(--space-4) var(--space-5);
+  background: color-mix(in srgb, var(--color-brand-secondary) 62%, var(--color-surface));
+}
+
+.desktopStoreCopy {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.desktopStoreCopy svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--color-danger);
+}
+
+.desktopStoreCopy strong {
+  display: block;
+  font-size: var(--font-size-lg);
+}
+
+.desktopStoreCopy span,
+.desktopStoreEstimate {
+  font-size: var(--font-size-base);
+}
+
+.desktopSupportStrip {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-4);
+  border-radius: 1.75rem;
+  padding: var(--space-5) var(--space-6);
+  background: color-mix(in srgb, var(--color-brand-secondary) 88%, var(--color-text) 12%);
+}
+
+.desktopSupportStrip strong {
+  display: block;
+  font-size: clamp(1.4rem, 1.4vw, 1.75rem);
+}
+
+.desktopSupportStrip span {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: var(--font-size-base);
+}
+
+.desktopSupportAction {
+  width: auto;
+  min-width: 12rem;
+  color: var(--color-surface);
+  background: var(--color-text);
+  border-color: var(--color-text);
+}
+
 @media (max-width: 359px) {
   .main {
     padding-inline: var(--space-3);
@@ -426,11 +766,91 @@
   .trackingOrderCard {
     padding: var(--space-3);
   }
-
 }
 
 @media (min-width: 26.876rem) {
   .main {
     box-shadow: var(--shadow-raised);
+  }
+}
+
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .main {
+    max-width: 40rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .page {
+    min-height: 100dvh;
+    background: var(--color-surface);
+  }
+
+  .main {
+    max-width: none;
+    min-height: 100dvh;
+    margin-inline: 0;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-6) var(--space-8);
+    background: var(--color-surface);
+    box-shadow: none;
+  }
+
+  .main[data-view="tracking"] {
+    gap: var(--space-6);
+    padding-top: var(--space-6);
+  }
+
+  .desktopOnly {
+    display: grid;
+    gap: var(--space-6);
+  }
+
+  .mobileOnly {
+    display: none;
+  }
+
+  .desktopGrid {
+    grid-template-columns: minmax(22rem, 28rem) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-6);
+  }
+
+  .desktopConfirmationCard,
+  .desktopProgressCard {
+    gap: var(--space-5);
+    border: 0.125rem solid var(--color-border);
+    border-radius: 2rem;
+    overflow: hidden;
+    padding: var(--space-6);
+    background: var(--color-surface);
+  }
+
+  .desktopConfirmationCard {
+    align-content: start;
+  }
+
+  .desktopProgressCard {
+    align-content: start;
+  }
+
+  .notice,
+  .errorNotice {
+    max-width: 50rem;
+  }
+}
+
+@media (min-width: 72rem) {
+  .main {
+    padding-inline: 3rem;
+  }
+
+  .desktopGrid {
+    grid-template-columns: minmax(24rem, 29rem) minmax(0, 1fr);
+  }
+
+  .desktopConfirmationCard,
+  .desktopProgressCard {
+    padding: 2.25rem;
   }
 }

@@ -22,7 +22,7 @@ import {
   updateCartKitchenNote,
 } from "./cart";
 import { formatCop } from "./currency";
-import type { Cart, Product } from "./models";
+import { productIds, type Cart, type Product } from "./models";
 import { CLIENT_STORAGE_VERSION } from "./persistence";
 import {
   DomainRuleError,
@@ -51,8 +51,18 @@ test("calcula el precio seleccionado de La Bendita desde base y complementos", (
   );
 });
 
+const expectedStandardBurgerOptions = [
+  { id: "cheddar-extra", name: "Cheddar extra", priceCop: 3_500 },
+  { id: "tocineta", name: "Tocineta", priceCop: 4_500 },
+  { id: "cebolla", name: "Cebolla", priceCop: 2_500 },
+  { id: "salsa-incluida", name: "Salsa incluida", priceCop: 0 },
+] as const;
+
 test("el catálogo usa identificadores únicos y referencias internas válidas", () => {
-  assert.equal(products.length, 6);
+  assert.deepEqual(
+    products.map((product) => product.id),
+    productIds,
+  );
   assert.equal(new Set(products.map((product) => product.id)).size, products.length);
   assert.equal(
     new Set(categories.map((category) => category.id)).size,
@@ -75,6 +85,200 @@ test("el catálogo usa identificadores únicos y referencias internas válidas",
       `${product.name} tiene un complemento predeterminado inexistente.`,
     );
   }
+});
+
+test("los productos ampliados conservan precios, categorías y recursos canónicos", () => {
+  const expectedProducts = [
+    ["triple-bacon", 39_900, "burgers", "/images/products/triple_bacon.png"],
+    [
+      "doble-crispy-pollo",
+      34_900,
+      "burgers",
+      "/images/products/doble_crispy_pollo.png",
+    ],
+    [
+      "doble-crispy-bacon",
+      36_900,
+      "burgers",
+      "/images/products/doble_crispy_bacon.png",
+    ],
+    ["doble-bacon", 36_900, "burgers", "/images/products/doble_bacon.png"],
+    [
+      "cheddar-explosiva",
+      31_900,
+      "burgers",
+      "/images/products/cheddar_explosiva.png",
+    ],
+    ["papas-rusticas", 9_900, "papas", "/images/products/papas_rusticas.webp"],
+    ["papas-rejilla", 11_900, "papas", "/images/products/papas_rejilla.webp"],
+    [
+      "papas-corte-grueso",
+      10_900,
+      "papas",
+      "/images/products/papas_corte_grueso.webp",
+    ],
+    ["coca-cola", 6_900, "bebidas", "/images/products/coca_cola.png"],
+    [
+      "coca-cola-zero",
+      6_900,
+      "bebidas",
+      "/images/products/coca_cola_zero.png",
+    ],
+    ["agua", 4_900, "bebidas", "/images/products/agua.png"],
+    ["jugo-naranja", 7_900, "bebidas", "/images/products/jugo_naranja.png"],
+  ] as const;
+
+  for (const [id, priceCop, categoryId, imagePath] of expectedProducts) {
+    const product = getProduct(id);
+    assert.equal(product.priceCop, priceCop);
+    assert.ok(product.categoryIds.includes(categoryId));
+    assert.equal(product.imagePath, imagePath);
+    assert.equal(product.available, true);
+
+    if (categoryId !== "burgers") {
+      assert.deepEqual(product.options, []);
+      assert.deepEqual(product.defaultOptionIds, []);
+    }
+  }
+
+  assert.equal(getProduct("fanta").imagePath, "/images/products/fanta.png");
+  assert.equal(getProduct("sprite").imagePath, "/images/products/sprite.png");
+});
+
+test("todas las burgers disponibles comparten complementos estándar", () => {
+  const expectedBurgerIds = [
+    "la-bendita",
+    "doble-pecado",
+    "santa-pollo",
+    "bacon-bendita",
+    "triple-bacon",
+    "doble-crispy-pollo",
+    "doble-crispy-bacon",
+    "doble-bacon",
+    "cheddar-explosiva",
+  ];
+  const availableBurgers = products.filter(
+    (product) =>
+      product.available &&
+      product.categoryIds.some((categoryId) => categoryId === "burgers"),
+  );
+
+  assert.deepEqual(
+    availableBurgers.map((product) => product.id),
+    expectedBurgerIds,
+  );
+
+  for (const burger of availableBurgers) {
+    assert.deepEqual(
+      burger.options.map(({ id, name, priceCop, available }) => ({
+        id,
+        name,
+        priceCop,
+        available,
+      })),
+      expectedStandardBurgerOptions.map((option) => ({
+        ...option,
+        available: true,
+      })),
+    );
+
+    if (burger.id === "la-bendita") {
+      assert.deepEqual(burger.defaultOptionIds, [
+        "cheddar-extra",
+        "salsa-incluida",
+      ]);
+    } else {
+      assert.deepEqual(burger.defaultOptionIds, ["salsa-incluida"]);
+      assert.equal(
+        calculateProductUnitPrice(burger, burger.defaultOptionIds),
+        burger.priceCop,
+      );
+    }
+  }
+});
+
+test("papas, bebidas y combos no reciben complementos estándar", () => {
+  const productsWithoutBurgerCategory = products.filter(
+    (product) =>
+      !product.categoryIds.some((categoryId) => categoryId === "burgers"),
+  );
+
+  for (const product of productsWithoutBurgerCategory) {
+    assert.deepEqual(product.options, []);
+    assert.deepEqual(product.defaultOptionIds, []);
+  }
+});
+
+test("los complementos alteran y revierten el precio de otra burger", () => {
+  const doblePecado = getProduct("doble-pecado");
+
+  assert.equal(calculateProductUnitPrice(doblePecado, []), 34_900);
+  assert.equal(
+    calculateProductUnitPrice(doblePecado, ["cheddar-extra"]),
+    38_400,
+  );
+  assert.equal(calculateProductUnitPrice(doblePecado, ["tocineta"]), 39_400);
+  assert.equal(calculateProductUnitPrice(doblePecado, ["cebolla"]), 37_400);
+  assert.equal(
+    calculateProductUnitPrice(doblePecado, ["salsa-incluida"]),
+    doblePecado.priceCop,
+  );
+
+  const pricing = calculateCartPricing(
+    {
+      items: [
+        {
+          id: "doble-pecado__cheddar-extra+salsa-incluida+tocineta",
+          productId: "doble-pecado",
+          optionIds: ["cheddar-extra", "tocineta", "salsa-incluida"],
+          quantity: 2,
+        },
+      ],
+      kitchenNote: "",
+    },
+    products,
+    0,
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+
+  assert.equal(pricing.lines[0]?.unitPriceCop, 42_900);
+  assert.equal(pricing.lines[0]?.lineTotalCop, 85_800);
+  assert.equal(pricing.totalCop, 85_800);
+});
+
+test("otra burger conserva configuraciones distintas como líneas separadas", () => {
+  const result = mergeCartItems(
+    { items: [], kitchenNote: "" },
+    [
+      {
+        id: "temporal-cheddar",
+        productId: "triple-bacon",
+        optionIds: ["cheddar-extra", "salsa-incluida"],
+        quantity: 1,
+      },
+      {
+        id: "temporal-tocineta",
+        productId: "triple-bacon",
+        optionIds: ["tocineta", "salsa-incluida"],
+        quantity: 1,
+      },
+    ],
+    MAX_QUANTITY_PER_CART_LINE,
+  );
+
+  assert.deepEqual(
+    result.cart.items.map((item) => ({ id: item.id, optionIds: item.optionIds })),
+    [
+      {
+        id: "triple-bacon__cheddar-extra+salsa-incluida",
+        optionIds: ["cheddar-extra", "salsa-incluida"],
+      },
+      {
+        id: "triple-bacon__salsa-incluida+tocineta",
+        optionIds: ["salsa-incluida", "tocineta"],
+      },
+    ],
+  );
 });
 
 test("reconcilia el carrito de referencia con subtotal, servicio y total", () => {

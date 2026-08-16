@@ -1,0 +1,17 @@
+.shell {
+  min-height: 100dvh;
+  width: 100%;
+}
+
+.content {
+  min-width: 0;
+  min-height: 100dvh;
+}
+
+@media (min-width: 64rem) {
+  .shell {
+    display: grid;
+    grid-template-columns: 15.5rem minmax(0, 1fr);
+    align-items: stretch;
+  }
+}

@@ -4,6 +4,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
   CircleCheck,
+  Eye,
+  EyeOff,
+  ReceiptText,
   ShieldCheck,
   ShoppingBag,
   UserRound,
@@ -29,7 +32,8 @@ import {
   BrowserSessionError,
   browserSessionService,
 } from "../../services/browser-session";
-import { Button, Checkbox, Dialog, Field } from "../ui";
+import { ClientDesktopSidebar } from "../client/ClientDesktopSidebar";
+import { Button, Checkbox, Dialog, Field, SkipLink } from "../ui";
 import styles from "./AccessScreen.module.css";
 
 type AccessMode = "signin" | "register";
@@ -40,9 +44,8 @@ type PageMessage = {
   description: string;
 };
 
-const fieldIds: Record<AccessMode, Record<"fullName" | "email" | "password", string>> = {
+const fieldIds = {
   signin: {
-    fullName: "signin-full-name",
     email: "signin-email",
     password: "signin-password",
   },
@@ -51,7 +54,7 @@ const fieldIds: Record<AccessMode, Record<"fullName" | "email" | "password", str
     email: "register-email",
     password: "register-password",
   },
-};
+} as const;
 
 function readText(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -79,6 +82,7 @@ export function AccessScreen() {
   const [resetPending, setResetPending] = useState(false);
   const [resetError, setResetError] = useState<string>();
   const [resetSent, setResetSent] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const pendingRef = useRef(false);
   const navigationTimerRef = useRef<number | null>(null);
   const fullNameRef = useRef<HTMLInputElement>(null);
@@ -135,14 +139,20 @@ export function AccessScreen() {
     setMode(nextMode);
     setErrors({});
     setMessage(null);
-    window.requestAnimationFrame(() => fullNameRef.current?.focus());
+    setPasswordVisible(false);
+    window.requestAnimationFrame(() => {
+      if (nextMode === "signin") {
+        emailRef.current?.focus();
+      } else {
+        fullNameRef.current?.focus();
+      }
+    });
   }
 
   async function handleSignIn(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const formData = new FormData(event.currentTarget);
     const input: SignInInput = {
-      fullName: readText(formData, "fullName"),
       email: readText(formData, "email"),
       password: readText(formData, "password"),
       rememberEmail: formData.get("rememberEmail") === "on",
@@ -272,10 +282,13 @@ export function AccessScreen() {
   }
 
   const formDisabled = pendingAction !== null;
-  const activeIds = fieldIds[mode];
 
   return (
     <div className={styles.page}>
+      <SkipLink href="#contenido-principal">Saltar al contenido</SkipLink>
+      <ClientDesktopSidebar navigationEnabled={false} />
+
+      <div className={styles.content}>
       <header className={styles.header}>
         <div className={styles.headerInner}>
           <div className={styles.headerBrand}>
@@ -286,23 +299,80 @@ export function AccessScreen() {
               height={44}
               priority
             />
-            <span>BurgerDesk</span>
-          </div>
-          <div className={styles.headerActions} aria-hidden="true">
-            <span className={styles.profileIcon}>
-              <UserRound />
-            </span>
-            <span className={styles.cartIcon}>
-              <ShoppingBag />
-              <span className={styles.cartCount}>0</span>
+            <span className={styles.headerWordmark} aria-hidden="true">
+              <span>Burger</span>
+              <span>Desk</span>
             </span>
           </div>
         </div>
       </header>
 
       <main id="contenido-principal" className={styles.main}>
+        <div className={styles.desktopTopbar}>
+          <div>
+            <h1>Acceso de clientes</h1>
+            <p>Inicia sesión o crea una cuenta para continuar</p>
+          </div>
+          <div className={styles.desktopSecurityBadge}>
+            <span aria-hidden="true">
+              <ShieldCheck />
+            </span>
+            <p>
+              Acceso protegido
+              <small>BurgerDesk</small>
+            </p>
+          </div>
+        </div>
+
+        <div className={styles.desktopLayout}>
+          <section className={styles.storyPanel} aria-label="Beneficios de tu cuenta BurgerDesk">
+            <p className={styles.storyEyebrow}>TU CUENTA BURGERDESK</p>
+            <h2>Pide, paga y sigue tu pedido sin filas.</h2>
+            <p className={styles.storyCopy}>
+              Una experiencia rápida para disfrutar lo importante: tu hamburguesa.
+            </p>
+
+            <div className={styles.storyImage}>
+              <span>Hecha al momento</span>
+              <Image
+                src="/images/promotions/combo2.webp"
+                alt="Hamburguesa con papas y bebida"
+                width={1200}
+                height={780}
+                sizes="(min-width: 1120px) 28vw, 0px"
+              />
+            </div>
+
+            <div className={styles.storyFeatures}>
+              <article>
+                <span aria-hidden="true"><ShoppingBag /></span>
+                <div>
+                  <h3>Pedidos guardados</h3>
+                  <p>Repite tus favoritos fácilmente.</p>
+                </div>
+              </article>
+              <article>
+                <span aria-hidden="true"><ReceiptText /></span>
+                <div>
+                  <h3>Estado en vivo</h3>
+                  <p>Consulta cada etapa del pedido.</p>
+                </div>
+              </article>
+              <article>
+                <span aria-hidden="true"><ShieldCheck /></span>
+                <div>
+                  <h3>Pago seguro</h3>
+                  <p>Tus datos permanecen protegidos.</p>
+                </div>
+              </article>
+            </div>
+
+            <p className={styles.storyFooter}>BurgerDesk · Tu pedido, a tu ritmo.</p>
+          </section>
+
+          <section className={styles.accessPanel} aria-labelledby="client-access-title">
         <div className={styles.heading}>
-          <h1>Acceso</h1>
+          <h1 id="client-access-title">Acceso</h1>
           <p>Inicia sesión o crea una cuenta</p>
         </div>
 
@@ -383,21 +453,8 @@ export function AccessScreen() {
             onSubmit={handleSignIn}
           >
             <Field
-              ref={fullNameRef}
-              id={activeIds.fullName}
-              name="fullName"
-              label="Nombre completo"
-              autoComplete="name"
-              error={errors.fullName}
-              leadingIcon={<UserRound />}
-              disabled={formDisabled}
-              maxLength={120}
-              size="compact"
-              className={styles.fieldInput}
-            />
-            <Field
               ref={emailRef}
-              id={activeIds.email}
+              id={fieldIds.signin.email}
               name="email"
               type="email"
               inputMode="email"
@@ -411,14 +468,25 @@ export function AccessScreen() {
             />
             <Field
               ref={passwordRef}
-              id={activeIds.password}
+              id={fieldIds.signin.password}
               name="password"
-              type="password"
+              type={passwordVisible ? "text" : "password"}
               label="Contraseña"
               autoComplete="current-password"
               placeholder="••••••••"
               error={errors.password}
               leadingIcon={<ShieldCheck />}
+              trailingAction={
+                <button
+                  type="button"
+                  aria-label={passwordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-pressed={passwordVisible}
+                  disabled={formDisabled}
+                  onClick={() => setPasswordVisible((visible) => !visible)}
+                >
+                  {passwordVisible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              }
               disabled={formDisabled}
               maxLength={72}
               size="compact"
@@ -450,8 +518,21 @@ export function AccessScreen() {
               loading={pendingAction === "signin"}
               loadingLabel="Iniciando sesión..."
               disabled={formDisabled}
+              className={styles.submitButton}
             >
               Continuar
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              loading={pendingAction === "guest"}
+              loadingLabel="Preparando acceso..."
+              disabled={formDisabled}
+              className={styles.desktopGuestButton}
+              onClick={handleGuestAccess}
+            >
+              Seguir como invitado
             </Button>
           </form>
         ) : (
@@ -466,7 +547,7 @@ export function AccessScreen() {
           >
             <Field
               ref={fullNameRef}
-              id={activeIds.fullName}
+              id={fieldIds.register.fullName}
               name="fullName"
               label="Nombre completo"
               autoComplete="name"
@@ -479,7 +560,7 @@ export function AccessScreen() {
             />
             <Field
               ref={emailRef}
-              id={activeIds.email}
+              id={fieldIds.register.email}
               name="email"
               type="email"
               inputMode="email"
@@ -493,14 +574,25 @@ export function AccessScreen() {
             />
             <Field
               ref={passwordRef}
-              id={activeIds.password}
+              id={fieldIds.register.password}
               name="password"
-              type="password"
+              type={passwordVisible ? "text" : "password"}
               label="Contraseña"
               autoComplete="new-password"
               placeholder="Mínimo 8 caracteres"
               error={errors.password}
               leadingIcon={<ShieldCheck />}
+              trailingAction={
+                <button
+                  type="button"
+                  aria-label={passwordVisible ? "Ocultar contraseña" : "Mostrar contraseña"}
+                  aria-pressed={passwordVisible}
+                  disabled={formDisabled}
+                  onClick={() => setPasswordVisible((visible) => !visible)}
+                >
+                  {passwordVisible ? <EyeOff aria-hidden="true" /> : <Eye aria-hidden="true" />}
+                </button>
+              }
               disabled={formDisabled}
               maxLength={72}
               size="compact"
@@ -513,26 +605,36 @@ export function AccessScreen() {
               loading={pendingAction === "register"}
               loadingLabel="Creando cuenta..."
               disabled={formDisabled}
+              className={styles.submitButton}
             >
               Continuar
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              fullWidth
+              loading={pendingAction === "guest"}
+              loadingLabel="Preparando acceso..."
+              disabled={formDisabled}
+              className={styles.desktopGuestButton}
+              onClick={handleGuestAccess}
+            >
+              Seguir como invitado
             </Button>
           </form>
         )}
 
-        <Button
-          variant="secondary"
-          fullWidth
-          loading={pendingAction === "guest"}
-          loadingLabel="Preparando acceso..."
-          disabled={formDisabled}
-          onClick={handleGuestAccess}
-        >
-          Seguir como invitado
-        </Button>
 
         <p className={styles.terms}>
           Al continuar aceptas términos y condiciones.
         </p>
+
+        <div className={styles.desktopSecurityStrip}>
+          <ShieldCheck aria-hidden="true" />
+          <span>Acceso protegido · Datos editables · Pago seguro</span>
+        </div>
+          </section>
+        </div>
       </main>
 
       <Dialog
@@ -588,6 +690,7 @@ export function AccessScreen() {
           </form>
         )}
       </Dialog>
+      </div>
     </div>
   );
 }

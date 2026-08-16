@@ -16,6 +16,20 @@ export const productIds = [
   "bacon-bendita",
   "papas-cheddar",
   "combo-gloria",
+  "fanta",
+  "sprite",
+  "triple-bacon",
+  "doble-crispy-pollo",
+  "doble-crispy-bacon",
+  "doble-bacon",
+  "cheddar-explosiva",
+  "papas-rusticas",
+  "papas-rejilla",
+  "papas-corte-grueso",
+  "coca-cola",
+  "coca-cola-zero",
+  "agua",
+  "jugo-naranja",
 ] as const;
 
 export type ProductId = string;

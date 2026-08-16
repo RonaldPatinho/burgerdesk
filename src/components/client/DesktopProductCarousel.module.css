@@ -1,0 +1,107 @@
+.carousel {
+  display: none;
+}
+
+.pageStatus {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (min-width: 64rem) {
+  .carousel {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .viewport {
+    min-width: 0;
+    min-height: calc(28.5rem + var(--space-4));
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: repeat(2, minmax(14.25rem, auto));
+    align-items: stretch;
+    gap: var(--space-4);
+  }
+
+  .controls {
+    min-height: var(--touch-target-min);
+    justify-self: center;
+    display: grid;
+    grid-template-columns:
+      var(--touch-target-min)
+      minmax(0, auto)
+      var(--touch-target-min);
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .arrow {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    display: grid;
+    place-items: center;
+    border: 0.125rem solid var(--color-border);
+    border-radius: var(--radius-pill);
+    color: var(--color-text);
+    background: var(--color-surface);
+    cursor: pointer;
+  }
+
+  .arrow:hover {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
+  }
+
+  .arrow:focus-visible,
+  .dot:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .arrow svg {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .dots {
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .dot {
+    width: var(--touch-target-min);
+    height: var(--touch-target-min);
+    display: grid;
+    place-items: center;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .dot::before {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: var(--radius-pill);
+    background: color-mix(
+      in srgb,
+      var(--color-text) 24%,
+      var(--color-surface)
+    );
+    content: "";
+  }
+
+  .dot[data-active="true"]::before {
+    width: 1.5rem;
+    background: var(--color-brand-primary);
+  }
+}

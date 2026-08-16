@@ -2,8 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ShoppingBag, UserRound } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useClientCart } from "./ClientCartProvider";
+import { ClientProfileAvatar } from "./ClientProfileAvatar";
 import styles from "./ClientHeader.module.css";
 
 export interface ClientHeaderProps {
@@ -27,7 +28,10 @@ export function ClientHeader({ homeLink = false }: ClientHeaderProps) {
           priority
         />
       </span>
-      <span className={styles.wordmark}>BurgerDesk</span>
+      <span className={styles.wordmark} aria-hidden="true">
+        <span>Burger</span>
+        <span>Desk</span>
+      </span>
     </>
   );
 
@@ -45,7 +49,7 @@ export function ClientHeader({ homeLink = false }: ClientHeaderProps) {
         )}
         <nav className={styles.actions} aria-label="Acciones del cliente">
           <Link className={styles.profileLink} href="/perfil" aria-label="Perfil">
-            <UserRound aria-hidden="true" />
+            <ClientProfileAvatar />
           </Link>
           <Link className={styles.cartLink} href="/carrito" aria-label={countLabel}>
             <ShoppingBag aria-hidden="true" />

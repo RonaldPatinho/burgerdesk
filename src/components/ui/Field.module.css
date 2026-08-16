@@ -86,3 +86,35 @@
 .message[data-tone="success"] {
   color: var(--color-text);
 }
+
+.trailingAction {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  margin-right: calc(var(--space-2) * -1);
+}
+
+.trailingAction > button {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  padding: 0;
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+}
+
+.trailingAction > button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.trailingAction > button svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}

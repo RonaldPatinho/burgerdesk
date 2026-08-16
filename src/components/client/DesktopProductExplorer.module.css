@@ -1,0 +1,102 @@
+.explorer {
+  display: none;
+}
+
+@media (min-width: 64rem) {
+  .explorer {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .headingRow {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem);
+    align-items: start;
+    gap: var(--space-5);
+  }
+
+  .heading {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+
+  .heading h2 {
+    font-size: clamp(1.5rem, 2.5vw, 2rem);
+    line-height: var(--line-height-tight);
+  }
+
+  .heading p {
+    font-size: var(--font-size-sm);
+  }
+
+  .searchField {
+    position: relative;
+    min-height: 3.25rem;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--space-3);
+    border: 0.125rem solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding-inline: var(--space-4);
+    background: var(--color-surface);
+  }
+
+  .searchField:focus-within {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .searchField svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .searchField input {
+    min-width: 0;
+    width: 100%;
+    border: 0;
+    outline: 0;
+    background: transparent;
+  }
+
+  .searchField input::placeholder {
+    color: color-mix(in srgb, var(--color-text) 65%, transparent);
+    opacity: 1;
+  }
+
+  .searchLabel {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .filters {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+
+  .filters button {
+    width: 5.5rem;
+    min-width: 5.5rem;
+    justify-content: center;
+  }
+
+  .count {
+    margin-left: auto;
+    color: color-mix(in srgb, var(--color-text) 70%, transparent);
+    font-size: var(--font-size-xs);
+  }
+
+  .results {
+    min-width: 0;
+  }
+}

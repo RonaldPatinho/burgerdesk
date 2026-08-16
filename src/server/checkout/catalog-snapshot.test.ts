@@ -72,3 +72,38 @@ test("un snapshot persistente no cae al seed provisional ante un producto ausent
       error.code === "CART_INVALID",
   );
 });
+
+test("checkout conserva complementos de una burger distinta a La Bendita", () => {
+  const canonical = buildCanonicalCheckout({
+    requestId: "request-standard-burger-123",
+    paymentMethod: "efectivo",
+    termsAccepted: true,
+    clientSession: { sessionId: "session-standard-burger", clientId: null },
+    cart: {
+      items: [
+        {
+          productId: "doble-pecado",
+          optionIds: ["cheddar-extra", "tocineta", "salsa-incluida"],
+          quantity: 2,
+        },
+      ],
+      kitchenNote: "",
+    },
+    retryOrderId: null,
+  });
+
+  assert.equal(canonical.draft.lines[0]?.unitBasePriceCop, 34_900);
+  assert.equal(canonical.draft.lines[0]?.unitPriceCop, 42_900);
+  assert.equal(canonical.draft.lines[0]?.lineTotalCop, 85_800);
+  assert.deepEqual(canonical.draft.lines[0]?.options, [
+    {
+      optionId: "cheddar-extra",
+      optionName: "Cheddar extra",
+      priceCop: 3_500,
+    },
+    { optionId: "salsa-incluida", optionName: "Salsa incluida", priceCop: 0 },
+    { optionId: "tocineta", optionName: "Tocineta", priceCop: 4_500 },
+  ]);
+  assert.equal(canonical.draft.subtotalCop, 85_800);
+  assert.equal(canonical.draft.totalCop, 88_700);
+});

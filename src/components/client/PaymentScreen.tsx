@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import {
   Banknote,
@@ -7,6 +8,8 @@ import {
   ExternalLink,
   LockKeyhole,
   MapPin,
+  ShieldCheck,
+  ShoppingBag,
 } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Button, Checkbox, Dialog, Feedback } from "@/components/ui";
@@ -29,6 +32,8 @@ import {
 import { browserSessionService } from "@/services/browser-session";
 import { ClientBottomNav } from "./ClientBottomNav";
 import { useClientCart } from "./ClientCartProvider";
+import { ClientCheckoutProgress } from "./ClientCheckoutProgress";
+import { ClientDesktopTopbar } from "./ClientDesktopTopbar";
 import { ClientHeader } from "./ClientHeader";
 import styles from "./PaymentScreen.module.css";
 
@@ -134,6 +139,22 @@ export function PaymentScreen({
     }
   }, [cart, products]);
 
+  const productById = useMemo(
+    () => new Map(products.map((product) => [product.id, product])),
+    [products],
+  );
+  const pricedLineById = useMemo(
+    () =>
+      new Map(
+        pricingResult.pricing?.lines.map((line) => [line.itemId, line]) ?? [],
+      ),
+    [pricingResult.pricing],
+  );
+  const itemCount = cart.items.reduce(
+    (total, item) => total + item.quantity,
+    0,
+  );
+
   const forceNewAttempt =
     returnState === "expirado" || returnState === "fallido";
 
@@ -150,7 +171,7 @@ export function PaymentScreen({
     }
     if (method === "efectivo") {
       if (!cashChoice) {
-      setError("Indica si llevarás el monto exacto o necesitas cambio.");
+        setError("Indica si llevarás el monto exacto o necesitas cambio.");
         return;
       }
       if (
@@ -262,14 +283,20 @@ export function PaymentScreen({
           ? {
               title: "El pago no se completo",
               description:
-              "Tu carrito se conservó. Puedes crear un nuevo intento de pago.",
+                "Tu carrito se conservó. Puedes crear un nuevo intento de pago.",
             }
           : null;
 
   return (
     <div className={styles.page}>
       <ClientHeader homeLink />
+      <ClientDesktopTopbar
+        title="Finaliza tu pedido"
+        subtitle="Revisa los productos y completa el pago"
+      />
       <main id="contenido-principal" className={styles.main}>
+        <ClientCheckoutProgress currentStep={2} />
+
         <header className={styles.heading}>
           <p>Finaliza tu pedido</p>
           <h1>Pago seguro</h1>
@@ -306,140 +333,233 @@ export function PaymentScreen({
         ) : null}
 
         {status !== "loading" && cart.items.length > 0 ? (
-          <>
-            <fieldset className={styles.methods} disabled={submitting}>
-              <legend>Método de pago</legend>
-              <label className={styles.method} data-selected={paymentMethod === "stripe"}>
-                <input
-                  type="radio"
-                  name="payment-method"
-                  value="stripe"
-                  checked={paymentMethod === "stripe"}
-                  onChange={() => setPaymentMethod("stripe")}
-                />
-                <span className={styles.methodIcon}>
-                  <CreditCard aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>Pago en línea</strong>
-                  <small>Checkout alojado por Stripe</small>
-                </span>
-              </label>
-              <label className={styles.method} data-selected={paymentMethod === "efectivo"}>
-                <input
-                  type="radio"
-                  name="payment-method"
-                  value="efectivo"
-                  checked={paymentMethod === "efectivo"}
-                  onChange={() => setPaymentMethod("efectivo")}
-                />
-                <span className={styles.methodIcon}>
-                  <Banknote aria-hidden="true" />
-                </span>
-                <span>
-                  <strong>Efectivo</strong>
-                  <small>Paga al retirar en el local</small>
-                </span>
-              </label>
-            </fieldset>
-
-            {paymentMethod === "stripe" ? (
-              <section className={styles.stripeNotice} aria-label="Seguridad de Stripe">
-                <LockKeyhole aria-hidden="true" />
-                <p>
-                  Serás redirigido al Checkout seguro de Stripe. BurgerDesk no
-                  recibe ni almacena los datos de tu tarjeta.
-                </p>
-                <ExternalLink aria-hidden="true" />
-              </section>
-            ) : null}
-
-            {pricingResult.error ? (
-              <Feedback
-                variant="error"
-                title="No pudimos calcular el pedido"
-                description={pricingResult.error}
-              />
-            ) : null}
-
-            {pricingResult.pricing ? (
-              <section className={styles.summary} aria-labelledby="resumen-pago">
-                <div className={styles.summaryHeader}>
-                  <div>
-                    <p>Tu pedido</p>
-                    <h2 id="resumen-pago">Resumen</h2>
-                  </div>
-                  <span>{cart.items.reduce((total, item) => total + item.quantity, 0)} items</span>
-                </div>
-                <ul>
-                  {pricingResult.pricing.lines.map((line) => (
-                    <li key={line.itemId}>
-                      <span>{line.quantity} × {line.productName}</span>
-                      <strong>{formatCop(line.lineTotalCop)}</strong>
-                    </li>
-                  ))}
-                </ul>
-                <dl>
-                  <div>
-                    <dt>Subtotal</dt>
-                    <dd>{formatCop(pricingResult.pricing.subtotalCop)}</dd>
-                  </div>
-                  <div>
-                    <dt>Servicio</dt>
-                    <dd>{formatCop(pricingResult.pricing.serviceFeeCop)}</dd>
-                  </div>
-                  <div className={styles.totalRow}>
-                    <dt>Total</dt>
-                    <dd>{formatCop(pricingResult.pricing.totalCop)}</dd>
-                  </div>
-                </dl>
-                <p className={styles.pickup}>
-                  <MapPin aria-hidden="true" />
-                  {pickupStore
-                    ? `Retiro en ${pickupStore.name} · ${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
-                    : "No hay un local de retiro disponible"}
-                </p>
-              </section>
-            ) : null}
-
-            <Checkbox
-              ref={termsRef}
-              id="payment-terms"
-              label="Acepto los términos del pedido y la política de pagos"
-              checked={termsAccepted}
-              disabled={submitting}
-              aria-describedby={error ? "payment-error" : undefined}
-              onChange={(event) => {
-                setTermsAccepted(event.target.checked);
-                setError("");
-              }}
-            />
-
-            {error ? (
-              <p id="payment-error" className={styles.error} role="alert">
-                {error}
-              </p>
-            ) : null}
-
-            <Button
-              fullWidth
-              loading={submitting}
-              loadingLabel="Preparando pedido"
-              disabled={
-                !pricingResult.pricing || !pickupStore || session === null
-              }
-              leadingIcon={paymentMethod === "stripe" ? <LockKeyhole /> : <Banknote />}
-              onClick={handlePrimaryAction}
+          <div className={styles.checkoutLayout}>
+            <section
+              className={styles.desktopOrderOverview}
+              aria-labelledby="pedido-a-pagar"
             >
-              {paymentMethod === "stripe" ? "Pagar con Stripe" : "Pagar en el local"}
-            </Button>
+              <div className={styles.orderOverviewHeading}>
+                <div>
+                  <h2 id="pedido-a-pagar">Tu pedido</h2>
+                  <p>
+                    {itemCount} {itemCount === 1 ? "producto" : "productos"}
+                  </p>
+                </div>
+                <Link href="/carrito" prefetch={false}>
+                  Editar carrito
+                </Link>
+              </div>
 
-            {session === null ? (
-              <p className={styles.sessionNotice} role="alert">
-                Necesitas una sesión para crear el pedido. <Link href="/acceso">Ir a acceso</Link>
-              </p>
-            ) : null}
-          </>
+              <div className={styles.orderItems}>
+                {cart.items.map((item) => {
+                  const product = productById.get(item.productId);
+                  const pricedLine = pricedLineById.get(item.id);
+                  const visibleOptionNames =
+                    product?.options
+                      .filter(
+                        (option) =>
+                          item.optionIds.includes(option.id) && option.priceCop > 0,
+                      )
+                      .map((option) => option.name) ?? [];
+                  const details =
+                    visibleOptionNames.length > 0
+                      ? visibleOptionNames.join(" · ")
+                      : product?.summary ?? "Configuración no disponible";
+
+                  return (
+                    <article key={item.id} className={styles.orderItem}>
+                      <div className={styles.orderImage}>
+                        {product ? (
+                          <Image
+                            src={product.imagePath}
+                            alt=""
+                            fill
+                            sizes="80px"
+                          />
+                        ) : (
+                          <ShoppingBag aria-hidden="true" />
+                        )}
+                      </div>
+                      <div className={styles.orderCopy}>
+                        <h3>{product?.name ?? "Producto no disponible"}</h3>
+                        <p>{details}</p>
+                        <small>Cantidad: {item.quantity}</small>
+                      </div>
+                      <strong>
+                        {pricedLine
+                          ? formatCop(pricedLine.lineTotalCop)
+                          : "—"}
+                      </strong>
+                    </article>
+                  );
+                })}
+              </div>
+
+              {cart.kitchenNote ? (
+                <div className={styles.kitchenNote}>
+                  <strong>Nota para cocina</strong>
+                  <p>{cart.kitchenNote}</p>
+                </div>
+              ) : null}
+
+              <div className={styles.deliveryCard}>
+                <span className={styles.deliveryIcon} aria-hidden="true">
+                  <MapPin />
+                </span>
+                <span className={styles.deliveryCopy}>
+                  <strong>Retiro en local</strong>
+                  <small>
+                    {pickupStore
+                      ? `Listo en ${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
+                      : "Local de retiro no disponible"}
+                  </small>
+                </span>
+              </div>
+            </section>
+
+            <section className={styles.paymentPanel} aria-labelledby="pago-seguro-desktop">
+              <div className={styles.desktopPaymentHeading}>
+                <div>
+                  <h2 id="pago-seguro-desktop">Pago seguro</h2>
+                  <p>Selecciona un método</p>
+                </div>
+                <ShieldCheck aria-hidden="true" />
+              </div>
+
+              <fieldset className={styles.methods} disabled={submitting}>
+                <legend>Método de pago</legend>
+                <label className={styles.method} data-selected={paymentMethod === "stripe"}>
+                  <input
+                    type="radio"
+                    name="payment-method"
+                    value="stripe"
+                    checked={paymentMethod === "stripe"}
+                    onChange={() => setPaymentMethod("stripe")}
+                  />
+                  <span className={styles.methodIcon}>
+                    <CreditCard aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Pago en línea</strong>
+                    <small>Checkout alojado por Stripe</small>
+                  </span>
+                </label>
+                <label className={styles.method} data-selected={paymentMethod === "efectivo"}>
+                  <input
+                    type="radio"
+                    name="payment-method"
+                    value="efectivo"
+                    checked={paymentMethod === "efectivo"}
+                    onChange={() => setPaymentMethod("efectivo")}
+                  />
+                  <span className={styles.methodIcon}>
+                    <Banknote aria-hidden="true" />
+                  </span>
+                  <span>
+                    <strong>Efectivo</strong>
+                    <small>Paga al retirar en el local</small>
+                  </span>
+                </label>
+              </fieldset>
+
+              {paymentMethod === "stripe" ? (
+                <section className={styles.stripeNotice} aria-label="Seguridad de Stripe">
+                  <LockKeyhole aria-hidden="true" />
+                  <p>
+                    Serás redirigido al Checkout seguro de Stripe. BurgerDesk no
+                    recibe ni almacena los datos de tu tarjeta.
+                  </p>
+                  <ExternalLink aria-hidden="true" />
+                </section>
+              ) : null}
+
+              {pricingResult.error ? (
+                <Feedback
+                  variant="error"
+                  title="No pudimos calcular el pedido"
+                  description={pricingResult.error}
+                />
+              ) : null}
+
+              {pricingResult.pricing ? (
+                <section className={styles.summary} aria-labelledby="resumen-pago">
+                  <div className={styles.summaryHeader}>
+                    <div>
+                      <p>Tu pedido</p>
+                      <h2 id="resumen-pago">Resumen</h2>
+                    </div>
+                    <span>{itemCount} items</span>
+                  </div>
+                  <ul>
+                    {pricingResult.pricing.lines.map((line) => (
+                      <li key={line.itemId}>
+                        <span>{line.quantity} × {line.productName}</span>
+                        <strong>{formatCop(line.lineTotalCop)}</strong>
+                      </li>
+                    ))}
+                  </ul>
+                  <dl>
+                    <div>
+                      <dt>Subtotal</dt>
+                      <dd>{formatCop(pricingResult.pricing.subtotalCop)}</dd>
+                    </div>
+                    <div>
+                      <dt>Servicio</dt>
+                      <dd>{formatCop(pricingResult.pricing.serviceFeeCop)}</dd>
+                    </div>
+                    <div className={styles.totalRow}>
+                      <dt>Total</dt>
+                      <dd>{formatCop(pricingResult.pricing.totalCop)}</dd>
+                    </div>
+                  </dl>
+                  <p className={styles.pickup}>
+                    <MapPin aria-hidden="true" />
+                    {pickupStore
+                      ? `Retiro en ${pickupStore.name} · ${pickupStore.pickupEstimateMinutes[0]}–${pickupStore.pickupEstimateMinutes[1]} min`
+                      : "No hay un local de retiro disponible"}
+                  </p>
+                </section>
+              ) : null}
+
+              <Checkbox
+                ref={termsRef}
+                id="payment-terms"
+                label="Acepto los términos del pedido y la política de pagos"
+                checked={termsAccepted}
+                disabled={submitting}
+                aria-describedby={error ? "payment-error" : undefined}
+                onChange={(event) => {
+                  setTermsAccepted(event.target.checked);
+                  setError("");
+                }}
+              />
+
+              {error ? (
+                <p id="payment-error" className={styles.error} role="alert">
+                  {error}
+                </p>
+              ) : null}
+
+              <Button
+                fullWidth
+                loading={submitting}
+                loadingLabel="Preparando pedido"
+                disabled={
+                  !pricingResult.pricing || !pickupStore || session === null
+                }
+                leadingIcon={paymentMethod === "stripe" ? <LockKeyhole /> : <Banknote />}
+                onClick={handlePrimaryAction}
+              >
+                {paymentMethod === "stripe" ? "Pagar con Stripe" : "Pagar en el local"}
+              </Button>
+
+              {session === null ? (
+                <p className={styles.sessionNotice} role="alert">
+                  Necesitas una sesión para crear el pedido. <Link href="/acceso">Ir a acceso</Link>
+                </p>
+              ) : null}
+            </section>
+          </div>
         ) : null}
       </main>
 

@@ -33,6 +33,7 @@ export interface FieldProps
   hint?: string;
   error?: string;
   leadingIcon?: ReactNode;
+  trailingAction?: ReactNode;
   size?: FieldSize;
 }
 
@@ -43,6 +44,7 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
     hint,
     error,
     leadingIcon,
+    trailingAction,
     size = "default",
     className,
     "aria-describedby": ariaDescribedBy,
@@ -76,6 +78,9 @@ export const Field = forwardRef<HTMLInputElement, FieldProps>(function Field(
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={describedBy || undefined}
         />
+        {trailingAction ? (
+          <span className={styles.trailingAction}>{trailingAction}</span>
+        ) : null}
       </div>
       {error ? (
         <FieldMessage id={errorId} tone="error">
