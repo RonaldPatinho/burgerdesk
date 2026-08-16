@@ -4,23 +4,115 @@ import { after, test } from "node:test";
 import { closeMySqlPool, getMySqlPool } from "../database/mysql";
 import {
   archiveAdminProduct,
+  createAdminProduct,
+  getCatalogProductImage,
   getAdminProduct,
   listAdminProducts,
   setAdminProductAvailability,
   updateAdminProduct,
   AdminProductRepositoryError,
 } from "./admin-repository";
+import { createAdminProductId } from "../../domain/admin-products";
 import { getCatalogProduct, listCatalogProducts } from "./repository";
 
 const runId = randomUUID().replaceAll("-", "").slice(0, 12);
 const productId = `a6a-product-${runId}`;
+const createdProductName = `Producto A6C ${runId}`;
+const createdProductId = createAdminProductId(createdProductName);
 const imagePath = "/images/products/la_bendita.png";
 
 after(async () => {
-  await getMySqlPool().execute("DELETE FROM catalog_products WHERE id = ?", [
-    productId,
-  ]);
+  await getMySqlPool().execute(
+    "DELETE FROM catalog_products WHERE id IN (?, ?)",
+    [productId, createdProductId],
+  );
   await closeMySqlPool();
+});
+
+test("crea, evita slugs duplicados y edita preservando relaciones", async () => {
+  const firstImage = Buffer.from([
+    0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0,
+  ]);
+  const created = await createAdminProduct(
+    {
+      name: createdProductName,
+      summary: "Producto controlado de prueba",
+      priceCop: 18_900,
+      primaryCategoryId: "papas",
+      available: true,
+    },
+    { mimeType: "image/png", bytes: firstImage },
+  );
+  assert.equal(created.id, createdProductId);
+  assert.equal(created.imagePath, `/api/catalog/products/${createdProductId}/image`);
+  assert.deepEqual(created.categoryIds, ["papas"]);
+  assert.deepEqual(created.options, []);
+
+  await assert.rejects(
+    createAdminProduct(
+      {
+        name: createdProductName,
+        summary: "No debe duplicarse",
+        priceCop: 19_900,
+        primaryCategoryId: "papas",
+        available: true,
+      },
+      { mimeType: "image/png", bytes: firstImage },
+    ),
+    (error: unknown) =>
+      error instanceof AdminProductRepositoryError &&
+      error.code === "PRODUCT_ALREADY_EXISTS",
+  );
+
+  const pool = getMySqlPool();
+  await pool.execute(
+    `UPDATE catalog_products SET badge = 'Preservado' WHERE id = ?`,
+    [createdProductId],
+  );
+  await pool.execute(
+    `INSERT INTO catalog_product_categories (product_id, category_id, sort_order)
+     VALUES (?, 'clasicas', 2)`,
+    [createdProductId],
+  );
+  await pool.execute(
+    `INSERT INTO catalog_product_options (
+       product_id, id, name, price_cop, available, sort_order
+     ) VALUES (?, 'extra-prueba', 'Extra preservado', 1200, TRUE, 1)`,
+    [createdProductId],
+  );
+  await pool.execute(
+    `INSERT INTO catalog_product_default_options (product_id, option_id, sort_order)
+     VALUES (?, 'extra-prueba', 1)`,
+    [createdProductId],
+  );
+
+  const beforeEdit = await getAdminProduct(createdProductId);
+  assert.ok(beforeEdit);
+  const imageBeforeEdit = await getCatalogProductImage(createdProductId);
+  assert.ok(imageBeforeEdit);
+  const edited = await updateAdminProduct({
+    productId: createdProductId,
+    expectedUpdatedAt: beforeEdit.updatedAt,
+    patch: {
+      summary: "Resumen editado sin perder relaciones",
+      primaryCategoryId: "burgers",
+      available: false,
+    },
+  });
+
+  assert.equal(edited.name, createdProductName);
+  assert.equal(edited.badge, "Preservado");
+  assert.deepEqual(edited.categoryIds, ["burgers", "clasicas"]);
+  assert.deepEqual(edited.options, [
+    {
+      id: "extra-prueba",
+      name: "Extra preservado",
+      priceCop: 1_200,
+      available: true,
+    },
+  ]);
+  assert.deepEqual(edited.defaultOptionIds, ["extra-prueba"]);
+  assert.equal((await getCatalogProductImage(createdProductId))?.etag, imageBeforeEdit.etag);
 });
 
 test("lee y actualiza preservando relaciones y campos omitidos", async () => {

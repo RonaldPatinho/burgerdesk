@@ -1,6 +1,15 @@
 import type { CategoryId, Product, ProductId } from "./models";
 import { isCategoryId, isProductId } from "./validation";
 
+export const MAX_ADMIN_PRODUCT_IMAGE_BYTES = 5 * 1024 * 1024;
+export const acceptedAdminProductImageMimeTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+export type AcceptedAdminProductImageMimeType =
+  (typeof acceptedAdminProductImageMimeTypes)[number];
+
 export interface AdminProduct extends Product {
   primaryCategoryId: CategoryId | null;
   sortOrder: number;
@@ -12,6 +21,14 @@ export interface AdminProduct extends Product {
 export interface AdminProductQuery {
   search?: string;
   includeArchived?: boolean;
+}
+
+export interface AdminProductCreateInput {
+  name: string;
+  summary: string;
+  priceCop: number;
+  primaryCategoryId: CategoryId;
+  available: boolean;
 }
 
 export interface AdminProductPatch {
@@ -47,6 +64,14 @@ export class AdminProductValidationError extends Error {
 }
 
 const mutableFields = new Set([
+  "name",
+  "summary",
+  "priceCop",
+  "primaryCategoryId",
+  "available",
+]);
+
+const createFields = new Set([
   "name",
   "summary",
   "priceCop",
@@ -149,6 +174,58 @@ export function normalizeAdminProductPatch(
   }
 
   return patch;
+}
+
+export function normalizeAdminProductCreate(
+  value: unknown,
+): AdminProductCreateInput {
+  if (!isRecord(value)) {
+    throw new AdminProductValidationError(
+      "product",
+      "Los datos del producto no son válidos.",
+    );
+  }
+
+  const unexpectedField = Object.keys(value).find(
+    (field) => !createFields.has(field),
+  );
+  if (unexpectedField) {
+    throw new AdminProductValidationError(
+      unexpectedField,
+      "El campo no forma parte del nuevo producto.",
+    );
+  }
+
+  for (const field of createFields) {
+    if (value[field] === undefined) {
+      throw new AdminProductValidationError(
+        field,
+        "Completa este campo antes de guardar.",
+      );
+    }
+  }
+
+  const normalized = normalizeAdminProductPatch(value);
+  return normalized as AdminProductCreateInput;
+}
+
+export function createAdminProductId(name: string): ProductId {
+  const productId = name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 64)
+    .replace(/-+$/g, "");
+
+  if (!isProductId(productId)) {
+    throw new AdminProductValidationError(
+      "name",
+      "El nombre debe contener letras o números para generar el identificador.",
+    );
+  }
+  return productId;
 }
 
 export function assertAdminProductMutationIdentity(input: {

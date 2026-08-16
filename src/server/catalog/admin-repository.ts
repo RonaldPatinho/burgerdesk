@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
   Pool,
   PoolConnection,
@@ -6,15 +7,23 @@ import type {
 } from "mysql2/promise";
 import {
   assertAdminProductMutationIdentity,
+  createAdminProductId,
+  normalizeAdminProductCreate,
   normalizeAdminProductPatch,
   type AdminProduct,
   type AdminProductArchiveInput,
   type AdminProductAvailabilityInput,
+  type AdminProductCreateInput,
+  type AcceptedAdminProductImageMimeType,
   type AdminProductPatch,
   type AdminProductQuery,
   type AdminProductUpdateInput,
 } from "../../domain/admin-products";
-import { getMySqlPool, withMySqlTransaction } from "../database/mysql";
+import {
+  getMySqlPool,
+  hasMySqlErrorCode,
+  withMySqlTransaction,
+} from "../database/mysql";
 import { loadCatalogProductRelations } from "./repository";
 
 interface AdminProductRow extends RowDataPacket {
@@ -42,6 +51,28 @@ interface ActiveCategoryRow extends RowDataPacket {
   id: string;
 }
 
+interface SortOrderRow extends RowDataPacket {
+  next_sort_order: number | string;
+}
+
+interface ProductImageRow extends RowDataPacket {
+  mime_type: AcceptedAdminProductImageMimeType;
+  image_data: Buffer;
+  size_bytes: number | string;
+  content_sha256: string;
+}
+
+export interface AdminProductImageInput {
+  mimeType: AcceptedAdminProductImageMimeType;
+  bytes: Buffer;
+}
+
+export interface CatalogProductImage {
+  mimeType: AcceptedAdminProductImageMimeType;
+  bytes: Buffer;
+  etag: string;
+}
+
 type AdminCatalogExecutor = Pool | PoolConnection;
 
 export class AdminProductRepositoryError extends Error {
@@ -49,6 +80,7 @@ export class AdminProductRepositoryError extends Error {
     public readonly code:
       | "PRODUCT_NOT_FOUND"
       | "PRODUCT_ARCHIVED"
+      | "PRODUCT_ALREADY_EXISTS"
       | "CATEGORY_NOT_FOUND"
       | "STALE_PRODUCT",
     message: string,
@@ -56,6 +88,10 @@ export class AdminProductRepositoryError extends Error {
     super(message);
     this.name = "AdminProductRepositoryError";
   }
+}
+
+function uploadedImagePath(productId: string): string {
+  return `/api/catalog/products/${productId}/image`;
 }
 
 function safeNonNegativeInteger(
@@ -280,6 +316,90 @@ async function replacePrimaryCategory(
   );
 }
 
+async function saveProductImage(
+  connection: PoolConnection,
+  productId: string,
+  image: AdminProductImageInput,
+): Promise<void> {
+  const contentSha256 = createHash("sha256").update(image.bytes).digest("hex");
+  await connection.execute<ResultSetHeader>(
+    `INSERT INTO catalog_product_images (
+       product_id, mime_type, image_data, size_bytes, content_sha256
+     ) VALUES (?, ?, ?, ?, ?)
+     ON DUPLICATE KEY UPDATE
+       mime_type = VALUES(mime_type),
+       image_data = VALUES(image_data),
+       size_bytes = VALUES(size_bytes),
+       content_sha256 = VALUES(content_sha256)`,
+    [
+      productId,
+      image.mimeType,
+      image.bytes,
+      image.bytes.byteLength,
+      contentSha256,
+    ],
+  );
+  await connection.execute<ResultSetHeader>(
+    `UPDATE catalog_products
+     SET image_path = ?, updated_at = CURRENT_TIMESTAMP(3)
+     WHERE id = ?`,
+    [uploadedImagePath(productId), productId],
+  );
+}
+
+export async function createAdminProduct(
+  input: AdminProductCreateInput,
+  image: AdminProductImageInput,
+): Promise<AdminProduct> {
+  const normalized = normalizeAdminProductCreate(input);
+  const productId = createAdminProductId(normalized.name);
+
+  return withMySqlTransaction(async (connection) => {
+    await assertActiveCategory(connection, normalized.primaryCategoryId);
+    const [sortRows] = await connection.execute<SortOrderRow[]>(
+      "SELECT COALESCE(MAX(sort_order), 0) + 1 AS next_sort_order FROM catalog_products",
+    );
+    const sortOrder = safeNonNegativeInteger(
+      sortRows[0]?.next_sort_order ?? 1,
+      "catalog_product_sort_order",
+    );
+
+    try {
+      await connection.execute<ResultSetHeader>(
+        `INSERT INTO catalog_products (
+           id, name, summary, detail_description, price_cop, image_path,
+           available, badge, sort_order, featured_order
+         ) VALUES (?, ?, ?, NULL, ?, ?, ?, NULL, ?, NULL)`,
+        [
+          productId,
+          normalized.name,
+          normalized.summary,
+          normalized.priceCop,
+          uploadedImagePath(productId),
+          normalized.available,
+          sortOrder,
+        ],
+      );
+    } catch (error: unknown) {
+      if (hasMySqlErrorCode(error, "ER_DUP_ENTRY")) {
+        throw new AdminProductRepositoryError(
+          "PRODUCT_ALREADY_EXISTS",
+          "Ya existe un producto con ese identificador.",
+        );
+      }
+      throw error;
+    }
+
+    await connection.execute<ResultSetHeader>(
+      `INSERT INTO catalog_product_categories (product_id, category_id, sort_order)
+       VALUES (?, ?, 1)`,
+      [productId, normalized.primaryCategoryId],
+    );
+    await saveProductImage(connection, productId, image);
+    return readMutatedProduct(connection, productId);
+  });
+}
+
 export async function listAdminProducts(
   query: AdminProductQuery = {},
 ): Promise<readonly AdminProduct[]> {
@@ -295,6 +415,7 @@ export async function getAdminProduct(
 
 export async function updateAdminProduct(
   input: AdminProductUpdateInput,
+  image?: AdminProductImageInput,
 ): Promise<AdminProduct> {
   assertAdminProductMutationIdentity(input);
   const patch = normalizeAdminProductPatch(input.patch);
@@ -317,8 +438,35 @@ export async function updateAdminProduct(
       );
     }
     await applyScalarPatch(connection, input.productId, patch);
+    if (image) {
+      await saveProductImage(connection, input.productId, image);
+    }
     return readMutatedProduct(connection, input.productId);
   });
+}
+
+export async function getCatalogProductImage(
+  productId: string,
+): Promise<CatalogProductImage | null> {
+  const [rows] = await getMySqlPool().execute<ProductImageRow[]>(
+    `SELECT mime_type, image_data, size_bytes, content_sha256
+     FROM catalog_product_images
+     WHERE product_id = ?
+     LIMIT 1`,
+    [productId],
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const sizeBytes = safeNonNegativeInteger(
+    row.size_bytes,
+    "catalog_product_image_size_bytes",
+  );
+  if (row.image_data.byteLength !== sizeBytes) return null;
+  return {
+    mimeType: row.mime_type,
+    bytes: row.image_data,
+    etag: row.content_sha256,
+  };
 }
 
 export async function setAdminProductAvailability(
