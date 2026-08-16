@@ -27,6 +27,7 @@ export interface StaffOrderInboxItem {
   itemCount: number;
   firstProductId: string | null;
   firstProductName: string | null;
+  firstProductImagePath: string | null;
   fulfillmentLabel: "Retiro";
 }
 
@@ -53,6 +54,7 @@ export interface StaffOrderDetailLine {
   id: string;
   productId: string;
   productName: string;
+  imagePath: string | null;
   quantity: number;
   unitPriceCop: number;
   lineTotalCop: number;

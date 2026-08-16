@@ -24,6 +24,7 @@ const orders: StaffOrderInboxItem[] = [
     itemCount: 1,
     firstProductId: "la-bendita",
     firstProductName: "La Bendita",
+    firstProductImagePath: "/images/products/la_bendita.png",
     fulfillmentLabel: "Retiro",
   },
   {
@@ -36,6 +37,7 @@ const orders: StaffOrderInboxItem[] = [
     itemCount: 3,
     firstProductId: "doble-pecado",
     firstProductName: "Doble Pecado",
+    firstProductImagePath: "/images/products/doble_pecado.png",
     fulfillmentLabel: "Retiro",
   },
   {
@@ -48,6 +50,7 @@ const orders: StaffOrderInboxItem[] = [
     itemCount: 2,
     firstProductId: "clasica-90",
     firstProductName: "Clásica 90",
+    firstProductImagePath: null,
     fulfillmentLabel: "Retiro",
   },
 ];

@@ -51,7 +51,7 @@ interface DefaultOptionRow extends RowDataPacket {
   option_id: string;
 }
 
-type CatalogExecutor = Pick<Pool, "execute">;
+export type CatalogExecutor = Pick<Pool, "execute">;
 
 function toSafeInteger(value: number | string, fieldName: string): number {
   const parsed = typeof value === "number" ? value : Number(value);
@@ -125,7 +125,7 @@ export async function listCatalogCategories(
   }));
 }
 
-async function loadProductRelations(
+export async function loadCatalogProductRelations(
   executor: CatalogExecutor,
   productIds: readonly string[],
 ): Promise<{
@@ -257,7 +257,7 @@ async function queryCatalogProducts(input: {
   );
 
   const ids = rows.map((row) => row.id);
-  const relations = await loadProductRelations(pool, ids);
+  const relations = await loadCatalogProductRelations(pool, ids);
 
   return rows.map((row) => {
     const product: Product = {

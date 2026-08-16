@@ -17,7 +17,6 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui";
-import { products } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
 import {
   filterStaffOrders,
@@ -56,6 +55,8 @@ function isInboxItem(value: unknown): value is StaffOrderInboxItem {
     (typeof value.firstProductId === "string" || value.firstProductId === null) &&
     (typeof value.firstProductName === "string" ||
       value.firstProductName === null) &&
+    (typeof value.firstProductImagePath === "string" ||
+      value.firstProductImagePath === null) &&
     value.fulfillmentLabel === "Retiro"
   );
 }
@@ -87,11 +88,6 @@ function timeLabel(isoDate: string): string {
 function itemSummary(order: StaffOrderInboxItem): string {
   const count = order.itemCount;
   return `${count} ${count === 1 ? "producto" : "productos"} · ${order.fulfillmentLabel}`;
-}
-
-function productImagePath(productId: string | null): string | null {
-  if (!productId) return null;
-  return products.find((product) => product.id === productId)?.imagePath ?? null;
 }
 
 function emptyCopy(filter: StaffInboxFilter): {
@@ -320,7 +316,7 @@ export function StaffOrderInbox({
           {visibleOrders.length > 0 ? (
             <div className={styles.orderList}>
               {visibleOrders.map((order) => {
-                const imagePath = productImagePath(order.firstProductId);
+                const imagePath = order.firstProductImagePath;
                 const statusLabel = staffOrderStatusLabel(
                   order.operationalStatus,
                 );

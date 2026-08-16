@@ -9,6 +9,7 @@ import { createInternalOrder } from "../orders/mysql-order-repository";
 import type { RecalculatedOrderDraft } from "../orders/types";
 import {
   getStaffOrderDetail,
+  getStaffOrderInboxSnapshot,
   StaffOrderRepositoryError,
   updateStaffOrderOperationalStatus,
 } from "./repository";
@@ -79,10 +80,18 @@ test("consulta el detalle y registra transiciones secuenciales del personal", as
   if (!initial) throw new Error("STAFF_ORDER_DETAIL_MISSING");
   assert.equal(initial.customerName, "Cliente invitado");
   assert.equal(initial.operationalStatus, "recibido");
+  assert.equal(initial.lines[0]?.imagePath, "/images/products/la_bendita.png");
   assert.equal(initial.lines[0]?.options[0]?.optionName, "Cheddar extra");
   assert.deepEqual(
     initial.history.map((entry) => entry.newStatus),
     ["recibido"],
+  );
+
+  const inbox = await getStaffOrderInboxSnapshot();
+  assert.equal(
+    inbox.orders.find((order) => order.id === created.order.id)
+      ?.firstProductImagePath,
+    "/images/products/la_bendita.png",
   );
 
   const preparing = await updateStaffOrderOperationalStatus({

@@ -1,10 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
 import { Button, Chip, Feedback } from "@/components/ui";
 import type { Category, CategoryId, Product, Promotion } from "@/domain/models";
-import { provisionalCatalogService } from "@/services/provisional";
 import { ClientBottomNav } from "./ClientBottomNav";
 import { ClientDesktopTopbar } from "./ClientDesktopTopbar";
 import { DesktopProductExplorer } from "./DesktopProductExplorer";
@@ -14,8 +13,6 @@ import { ClientHeader } from "./ClientHeader";
 import styles from "./MenuScreen.module.css";
 
 type CategoryFilter = "all" | CategoryId;
-type ResultsStatus = "ready" | "loading" | "error";
-
 export interface MenuScreenProps {
   categories: readonly Category[];
   initialProducts: readonly Product[];
@@ -32,6 +29,14 @@ const categoryLabels: Record<string, string> = {
   papas: "Papas",
 };
 
+function normalizeSearch(value: string): string {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-CO")
+    .trim();
+}
+
 export function MenuScreen({
   categories,
   initialProducts,
@@ -42,17 +47,24 @@ export function MenuScreen({
     initialProducts.some((product) => product.categoryIds.includes(initialCategory))
       ? initialCategory
       : "all";
-  const initialVisibleProducts =
-    resolvedInitialCategory === "all"
-      ? initialProducts
-      : initialProducts.filter((product) =>
-          product.categoryIds.includes(resolvedInitialCategory),
-        );
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<CategoryFilter>(resolvedInitialCategory);
-  const [products, setProducts] = useState<readonly Product[]>(initialVisibleProducts);
-  const [status, setStatus] = useState<ResultsStatus>("ready");
-  const [retryToken, setRetryToken] = useState(0);
+  const normalizedSearch = normalizeSearch(search);
+  const products = useMemo(
+    () =>
+      initialProducts.filter((product) => {
+        if (category !== "all" && !product.categoryIds.includes(category)) {
+          return false;
+        }
+
+        if (!normalizedSearch) return true;
+
+        return normalizeSearch(
+          `${product.name} ${product.summary} ${product.detailDescription ?? ""}`,
+        ).includes(normalizedSearch);
+      }),
+    [category, initialProducts, normalizedSearch],
+  );
   const categoryIsInDefaultFilters =
     category === "all" || categories.some((item) => item.id === category);
   const contextualCategoryLabel =
@@ -60,37 +72,12 @@ export function MenuScreen({
       ? (categoryLabels[category] ?? category)
       : null;
 
-  useEffect(() => {
-    let active = true;
-
-    void provisionalCatalogService
-      .listProducts({
-        categoryId: category === "all" ? undefined : category,
-        search,
-      })
-      .then((results) => {
-        if (!active) return;
-        setProducts(results);
-        setStatus("ready");
-      })
-      .catch(() => {
-        if (!active) return;
-        setStatus("error");
-      });
-
-    return () => {
-      active = false;
-    };
-  }, [category, retryToken, search]);
-
   function resetFilters() {
-    setStatus("loading");
     setSearch("");
     setCategory("all");
   }
 
   function selectCategory(nextCategory: CategoryFilter) {
-    setStatus("loading");
     setCategory(nextCategory);
   }
 
@@ -127,10 +114,7 @@ export function MenuScreen({
             id="buscar-productos"
             type="search"
             value={search}
-            onChange={(event) => {
-              setStatus("loading");
-              setSearch(event.target.value);
-            }}
+            onChange={(event) => setSearch(event.target.value)}
             placeholder="Buscar hamburguesas, combos..."
             autoComplete="off"
             aria-controls="resultados-menu"
@@ -164,34 +148,8 @@ export function MenuScreen({
           id="resultados-menu"
           className={styles.results}
           aria-label="Productos del menú"
-          aria-busy={status === "loading" || undefined}
         >
-          {status === "loading" ? (
-            <Feedback
-              variant="loading"
-              title="Buscando productos"
-              description="Actualizando el menú provisional."
-            />
-          ) : null}
-          {status === "error" ? (
-            <Feedback
-              variant="error"
-              title="No pudimos cargar el menú"
-              description="Intenta consultar nuevamente los datos provisionales."
-              action={
-                <Button
-                  fullWidth
-                  onClick={() => {
-                    setStatus("loading");
-                    setRetryToken((value) => value + 1);
-                  }}
-                >
-                  Reintentar
-                </Button>
-              }
-            />
-          ) : null}
-          {status === "ready" && products.length === 0 ? (
+          {products.length === 0 ? (
             <Feedback
               variant="empty"
               title="No encontramos productos"
@@ -203,7 +161,7 @@ export function MenuScreen({
               }
             />
           ) : null}
-          {status === "ready" && products.length > 0 ? (
+          {products.length > 0 ? (
             <MobileProductCarousel
               products={products}
               ariaLabel="Productos del menú"

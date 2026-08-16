@@ -7,6 +7,9 @@ const requiredMigrations = [
   "004_add_operational_order_status.sql",
   "005_add_financial_read_indexes.sql",
   "006_create_catalog_persistence.sql",
+  "007_add_beverage_products.sql",
+  "008_add_extended_catalog_products.sql",
+  "009_add_burger_product_options.sql",
 ];
 
 const requiredTables = [
