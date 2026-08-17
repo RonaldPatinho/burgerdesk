@@ -436,11 +436,6 @@
 }
 
 @media (min-width: 64rem) {
-  .main {
-    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.85fr);
-    gap: 1.25rem;
-  }
-
   .headingRow,
   .skeletonTop {
     padding-right: 10.5rem;
@@ -469,5 +464,12 @@
 
   .quickAction {
     min-height: 4.25rem;
+  }
+}
+
+@media (min-width: 75rem) {
+  .main {
+    grid-template-columns: minmax(0, 1.5fr) minmax(18rem, 0.85fr);
+    gap: 1.25rem;
   }
 }

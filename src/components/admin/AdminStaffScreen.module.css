@@ -359,10 +359,12 @@
     margin-top: 0.1rem;
   }
 
+}
+
+@media (min-width: 84rem) {
   .main,
   .loadingMain,
   .errorState {
-    padding-top: 1.5rem;
     padding-right: clamp(12rem, 16vw, 14rem);
   }
 

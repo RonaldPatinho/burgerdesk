@@ -313,3 +313,19 @@
     width: min(100%, 28rem);
   }
 }
+
+@media (min-width: 64rem) and (max-width: 74.999rem) {
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .heading,
+  .tabs,
+  .updatedAt,
+  .feedback,
+  .main > button,
+  .main > section:first-of-type,
+  .ranking {
+    grid-column: 1;
+  }
+}
