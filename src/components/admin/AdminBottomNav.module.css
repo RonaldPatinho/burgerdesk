@@ -14,11 +14,12 @@
   backdrop-filter: blur(0.75rem);
 }
 
-.desktopBrand {
+.desktopBrand,
+.desktopList {
   display: none;
 }
 
-.list {
+.mobileList {
   min-height: 4rem;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -26,7 +27,8 @@
   padding: 0.25rem;
 }
 
-.list li {
+.mobileList li,
+.desktopList li {
   min-width: 0;
 }
 
@@ -42,6 +44,12 @@
   padding: 0.2rem;
   font-size: 0.68rem;
   text-align: center;
+}
+
+.itemButton {
+  border: 0;
+  color: inherit;
+  background: transparent;
 }
 
 .item[data-active] {
@@ -61,11 +69,6 @@
   background: var(--color-danger);
 }
 
-.item[data-disabled] {
-  cursor: not-allowed;
-  opacity: 0.82;
-}
-
 .icon {
   width: 1.45rem;
   height: 1.45rem;
@@ -74,6 +77,35 @@
 .icon svg {
   width: 100%;
   height: 100%;
+}
+
+.moreMenu {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.moreLink {
+  min-height: 3.75rem;
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+}
+
+.moreLink[data-active] {
+  color: var(--color-surface);
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+}
+
+.moreLink > span:first-child,
+.moreLink svg {
+  width: 1.4rem;
+  height: 1.4rem;
 }
 
 @media (max-width: 359px) {
@@ -141,12 +173,17 @@
     letter-spacing: -0.025em;
   }
 
-  .list {
+  .mobileList {
+    display: none;
+  }
+
+  .desktopList {
     min-height: 0;
     display: grid;
     grid-template-columns: 1fr;
     align-content: start;
     gap: var(--space-2);
+    list-style: none;
     padding: 0;
   }
 
@@ -158,7 +195,11 @@
     gap: var(--space-3);
     border-radius: var(--radius-lg);
     padding: var(--space-2) var(--space-3);
-    color: color-mix(in srgb, var(--color-surface) 84%, transparent);
+    color: color-mix(
+      in srgb,
+      var(--color-surface) 84%,
+      transparent
+    );
     font-size: var(--font-size-sm);
     text-align: left;
   }

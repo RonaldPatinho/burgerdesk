@@ -1,0 +1,373 @@
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.main {
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4)
+    calc(6.75rem + env(safe-area-inset-bottom));
+}
+
+.heading {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.heading h1 {
+  font-size: clamp(2.2rem, 10vw, 3rem);
+  line-height: var(--line-height-tight);
+  letter-spacing: -0.04em;
+}
+
+.heading p {
+  font-size: var(--font-size-lg);
+}
+
+.toolbar {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.searchField {
+  min-height: 3.5rem;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding-inline: var(--space-4);
+  background: var(--color-surface);
+}
+
+.searchField:focus-within {
+  border-color: var(--color-brand-primary);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.searchField svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.searchField input {
+  min-width: 0;
+  min-height: 3.25rem;
+  border: 0;
+  outline: 0;
+  background: transparent;
+}
+
+.feedback {
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-sm);
+}
+
+.feedback[data-error] {
+  color: var(--color-danger);
+  background: color-mix(
+    in srgb,
+    var(--color-danger) 8%,
+    var(--color-surface)
+  );
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-3);
+  list-style: none;
+}
+
+.grid > li {
+  min-width: 0;
+  display: flex;
+}
+
+.card {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4);
+  background: var(--color-surface);
+}
+
+.card[data-inactive] {
+  background: color-mix(
+    in srgb,
+    var(--color-surface) 94%,
+    var(--color-text)
+  );
+}
+
+.cardTop {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.avatar {
+  width: 3rem;
+  height: 3rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+.identity {
+  min-width: 0;
+}
+
+.identity h2,
+.identity p,
+.details p {
+  overflow-wrap: anywhere;
+}
+
+.identity h2 {
+  font-size: 1.15rem;
+  line-height: 1.12;
+}
+
+.identity p,
+.details p {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-sm);
+}
+
+.status {
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.55rem;
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.status[data-active] {
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.details {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.roleBadge {
+  width: fit-content;
+  max-width: 100%;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  border-radius: var(--radius-pill);
+  padding: 0.35rem 0.65rem;
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
+.roleBadge svg {
+  width: 1rem;
+  height: 1rem;
+  color: var(--color-brand-primary);
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin-top: auto;
+}
+
+.emptyState {
+  min-height: 16rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: var(--space-2);
+  border: 0.0625rem dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+}
+
+.emptyState > svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-brand-primary);
+}
+
+.emptyState p {
+  max-width: 28rem;
+  color: var(--color-text-muted);
+}
+
+.formGrid {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.selectField {
+  display: grid;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+}
+
+.selectField > span {
+  font-weight: 700;
+}
+
+.selectField select {
+  width: 100%;
+  min-height: 3.5rem;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding-inline: var(--space-4);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.selectField select:focus-visible {
+  border-color: var(--color-brand-primary);
+  outline: var(--focus-ring-width) solid var(--focus-ring-color);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.dialogError {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
+
+.confirmText {
+  line-height: var(--line-height-relaxed);
+}
+
+.loadingMain,
+.errorState {
+  width: 100%;
+  min-height: 70vh;
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4)
+    calc(6.75rem + env(safe-area-inset-bottom));
+}
+
+.loadingHeading,
+.loadingToolbar,
+.loadingCards > span {
+  border-radius: var(--radius-lg);
+  background: var(--color-surface-cream);
+}
+
+.loadingHeading {
+  width: 11rem;
+  height: 3rem;
+}
+
+.loadingToolbar {
+  width: 100%;
+  height: 4rem;
+}
+
+.loadingCards {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.loadingCards > span {
+  min-height: 12rem;
+}
+
+.errorState {
+  place-items: center;
+  align-content: center;
+}
+
+.errorCard {
+  width: min(100%, 34rem);
+  display: grid;
+  gap: var(--space-4);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  background: var(--color-surface);
+}
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain,
+  .errorState {
+    max-width: 72rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+
+  .toolbar > button {
+    min-width: 12rem;
+  }
+
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 64rem) {
+  .cardTop {
+    align-items: start;
+  }
+
+  .identity h2 {
+    min-height: 2.58rem;
+    display: -webkit-box;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .status {
+    margin-top: 0.1rem;
+  }
+
+  .main,
+  .loadingMain,
+  .errorState {
+    padding-top: 1.5rem;
+    padding-right: clamp(12rem, 16vw, 14rem);
+  }
+
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

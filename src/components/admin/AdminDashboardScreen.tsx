@@ -39,15 +39,9 @@ export function AdminDashboardScreen({
 
       <header className={styles.headingRow}>
         <div className={styles.heading}>
-          <h1>Administrador</h1>
+          <h1>Inicio</h1>
           <p>Resumen del negocio</p>
         </div>
-        <span
-          className={styles.periodPill}
-          aria-label={`Período del resumen: hoy, ${snapshot.period.key}`}
-        >
-          Hoy
-        </span>
       </header>
 
       <section className={styles.metrics} aria-label="Indicadores de hoy">
