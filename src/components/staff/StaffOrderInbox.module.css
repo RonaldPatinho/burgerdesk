@@ -90,13 +90,11 @@
   display: grid;
   place-items: center;
   border-radius: var(--radius-pill);
-  color: var(--color-text);
-  background: var(--color-brand-secondary);
-}
-
-.avatar svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 1.1rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .filters {
@@ -148,7 +146,9 @@
 
 .content,
 .ordersArea,
-.orderList {
+.orderList,
+.mobileCarousel,
+.desktopCarousel {
   min-width: 0;
 }
 
@@ -181,6 +181,16 @@
   background: transparent;
   text-decoration: underline;
   text-underline-offset: 0.2rem;
+}
+
+.mobileCarousel,
+.desktopCarousel {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.desktopCarousel {
+  display: none;
 }
 
 .orderList {
@@ -326,6 +336,66 @@
   text-overflow: ellipsis;
   font-size: var(--font-size-xs);
   white-space: nowrap;
+}
+
+.carouselControls {
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.carouselArrow,
+.carouselDot {
+  border: 0;
+  background: transparent;
+}
+
+.carouselArrow {
+  width: 2.75rem;
+  height: 2.75rem;
+  display: grid;
+  place-items: center;
+  border: 0.125rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.carouselArrow:disabled {
+  opacity: 0.35;
+}
+
+.carouselArrow svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.carouselDots {
+  max-width: min(14rem, 62vw);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+}
+
+.carouselDot {
+  width: 0.55rem;
+  height: 0.55rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: color-mix(
+    in srgb,
+    var(--color-text) 24%,
+    var(--color-surface)
+  );
+}
+
+.carouselDot[data-active] {
+  width: 1.25rem;
+  background: var(--color-brand-primary);
 }
 
 .emptyStack {
@@ -519,9 +589,10 @@
 @media (min-width: 48rem) {
   .main {
     min-height: 100dvh;
-    max-width: 80rem;
+    max-width: 48rem;
     margin-inline: auto;
-    padding: var(--space-8) var(--space-8) var(--space-12);
+    padding: var(--space-8) var(--space-8)
+      calc(6.75rem + env(safe-area-inset-bottom));
     box-shadow: none;
   }
 
@@ -537,26 +608,9 @@
     font-size: var(--font-size-lg);
   }
 
-  .profileCard {
-    display: flex;
-  }
-
   .filters {
     width: fit-content;
     max-width: 47.125rem;
-  }
-
-  .mobileIndicators {
-    display: none;
-  }
-
-  .summaryPanel {
-    display: grid;
-  }
-
-  .orderList {
-    grid-template-columns: minmax(0, 1fr);
-    align-items: stretch;
   }
 
   .orderCard {
@@ -570,12 +624,7 @@
     row-gap: var(--space-3);
   }
 
-  .orderImageFrame {
-    grid-area: image;
-  }
-
   .orderDetails {
-    grid-area: details;
     align-self: end;
   }
 
@@ -590,7 +639,6 @@
   }
 
   .orderSide {
-    grid-area: side;
     width: 100%;
     min-width: 0;
     align-self: start;
@@ -607,15 +655,53 @@
 }
 
 @media (min-width: 64rem) {
-  .content {
-    grid-template-columns: minmax(0, 1fr) 17.5rem;
-    align-items: start;
+  .main {
+    max-width: 80rem;
+    padding-bottom: var(--space-12);
+  }
+
+  .profileCard {
+    display: flex;
+  }
+
+  .mobileIndicators {
+    display: none;
+  }
+
+  .summaryPanel {
+    display: grid;
+  }
+
+  .mobileCarousel {
+    display: none;
+  }
+
+  .desktopCarousel {
+    display: grid;
+  }
+
+  .orderList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+  }
+
+  .orderSide {
+    align-items: flex-start;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--space-1);
+  }
+
+  .orderSide time {
+    margin-left: 0;
+    text-align: left;
   }
 }
 
 @media (min-width: 80rem) {
-  .orderList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .content {
+    grid-template-columns: minmax(0, 1fr) 17.5rem;
+    align-items: start;
   }
 }
 
@@ -623,5 +709,10 @@
   .orderCard:hover {
     border-color: var(--color-brand-secondary);
     background: var(--color-surface-muted);
+  }
+
+  .carouselArrow:not(:disabled):hover {
+    border-color: var(--color-brand-primary);
+    color: var(--color-brand-primary);
   }
 }

@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { redirect } from "next/navigation";
-import { UserRound } from "lucide-react";
 import type { ReactNode } from "react";
 import { StaffBottomNav } from "@/components/staff/StaffBottomNav";
 import { SkipLink } from "@/components/ui";
@@ -12,6 +11,10 @@ export const dynamic = "force-dynamic";
 
 function firstName(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] || "Personal";
+}
+
+function initialForName(fullName: string): string {
+  return fullName.trim().charAt(0).toUpperCase() || "P";
 }
 
 export default async function StaffProtectedLayout({
@@ -58,7 +61,7 @@ export default async function StaffProtectedLayout({
               </span>
             </div>
             <span className={styles.avatar} aria-hidden="true">
-              <UserRound />
+              {initialForName(session.fullName)}
             </span>
           </div>
         </div>

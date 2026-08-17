@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
+  ArrowRight,
   Check,
   CircleAlert,
   ReceiptText,
@@ -90,6 +91,11 @@ function paymentLabel(order: StaffOrderDetail): string {
   return "Confirmado";
 }
 
+function shortStatusLabel(status: OperationalOrderStatus): string {
+  if (status === "listo_para_retirar") return "Listo";
+  return staffOrderStatusLongLabel(status);
+}
+
 function stepState(
   current: OperationalOrderStatus,
   step: (typeof visibleProgressStatuses)[number],
@@ -104,6 +110,14 @@ function stepState(
   if (stepIndex < currentIndex) return "completed";
   if (stepIndex === currentIndex) return "current";
   return "upcoming";
+}
+
+function stepStateLabel(
+  state: "completed" | "current" | "upcoming",
+): string {
+  if (state === "completed") return "Completado";
+  if (state === "current") return "Actual";
+  return "Pendiente";
 }
 
 export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
@@ -280,31 +294,80 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
       ) : null}
 
       <section className={styles.section} aria-labelledby="estado-pedido">
-        <h2 id="estado-pedido">Estado del pedido</h2>
-        <ol className={styles.statusSteps}>
-          {visibleProgressStatuses.map((status) => {
+        <div className={styles.statusHeading}>
+          <h2 id="estado-pedido">Estado del pedido</h2>
+          <span className={styles.currentStatus}>
+            {terminalMessage ?? `Actual: ${shortStatusLabel(order.operationalStatus)}`}
+          </span>
+        </div>
+
+        <ol
+          className={styles.statusProgress}
+          aria-label={`Progreso del pedido. Estado actual: ${staffOrderStatusLongLabel(
+            order.operationalStatus,
+          )}`}
+        >
+          {visibleProgressStatuses.map((status, index) => {
             const state = stepState(order.operationalStatus, status);
             return (
-              <li key={status} data-state={state}>
-                {status === "listo_para_retirar"
-                  ? "Listo"
-                  : staffOrderStatusLongLabel(status)}
+              <li key={status} className={styles.statusStep} data-state={state}>
+                <span className={styles.progressMarker} aria-hidden="true">
+                  {state === "completed" ? <Check /> : <span>{index + 1}</span>}
+                </span>
+                <strong>{shortStatusLabel(status)}</strong>
+                <small>{stepStateLabel(state)}</small>
               </li>
             );
           })}
         </ol>
       </section>
 
-      <section className={styles.statusNotice} aria-label="Aviso de estado">
-        <CircleAlert aria-hidden="true" />
-        <p>
-          {terminalMessage ?? (
-            <>
-              El cliente verá el estado actualizado. Confirma antes de avanzar a{" "}
-              “{nextStatus ? staffOrderStatusLongLabel(nextStatus) : "—"}”.
-            </>
-          )}
+      {error ? (
+        <p className={styles.error} role="alert">
+          {error}
         </p>
+      ) : null}
+
+      <Button
+        className={styles.updateButton}
+        fullWidth
+        leadingIcon={terminal ? <Check /> : <ArrowRight />}
+        disabled={terminal}
+        onClick={() => {
+          setError(null);
+          setDialogOpen(true);
+        }}
+      >
+        {terminal
+          ? "Estado finalizado"
+          : `Marcar como ${nextStatus ? shortStatusLabel(nextStatus) : "—"}`}
+      </Button>
+
+      <section
+        className={styles.statusAction}
+        aria-labelledby="siguiente-paso-pedido"
+      >
+        <span className={styles.statusActionIcon} aria-hidden="true">
+          <CircleAlert />
+        </span>
+        <div>
+          <h3 id="siguiente-paso-pedido">
+            {terminal ? "Pedido finalizado" : "Siguiente paso"}
+          </h3>
+          <p>
+            {terminalMessage ?? (
+              <>
+                El pedido está en{" "}
+                <strong>{shortStatusLabel(order.operationalStatus)}</strong>.
+                Al confirmar, avanzará a{" "}
+                <strong>
+                  {nextStatus ? shortStatusLabel(nextStatus) : "—"}
+                </strong>{" "}
+                y el cliente verá el cambio inmediatamente.
+              </>
+            )}
+          </p>
+        </div>
       </section>
 
       <details className={styles.history}>
@@ -321,25 +384,6 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
         </ol>
       </details>
 
-      {error ? (
-        <p className={styles.error} role="alert">
-          {error}
-        </p>
-      ) : null}
-
-      <Button
-        className={styles.updateButton}
-        fullWidth
-        leadingIcon={<Check />}
-        disabled={terminal}
-        onClick={() => {
-          setError(null);
-          setDialogOpen(true);
-        }}
-      >
-        {terminal ? "Estado finalizado" : "Actualizar estado"}
-      </Button>
-
       <p className={styles.visuallyHidden} aria-live="polite" aria-atomic="true">
         {announcement}
       </p>
@@ -349,7 +393,7 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
         onClose={() => {
           if (!updating) setDialogOpen(false);
         }}
-        title="Actualizar estado"
+        title="Confirmar cambio de estado"
         description={`Pedido #${order.code}`}
         closeLabel="Cerrar confirmación de estado"
         actions={
@@ -367,7 +411,7 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
               loadingLabel="Actualizando"
               onClick={() => void confirmStatusUpdate()}
             >
-              Confirmar estado
+              Confirmar y avanzar
             </Button>
           </>
         }

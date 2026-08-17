@@ -116,13 +116,11 @@
   display: grid;
   place-items: center;
   border-radius: var(--radius-pill);
-  color: var(--color-text);
-  background: var(--color-brand-secondary);
-}
-
-.avatar svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 @media (max-width: 359px) {
@@ -155,7 +153,13 @@
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 37.5rem) and (max-width: 63.999rem) {
+  .headerInner {
+    max-width: 40rem;
+  }
+}
+
+@media (min-width: 64rem) {
   /* En escritorio el perfil vive en la cabecera de cada página y el
      logo en la barra lateral, por eso se oculta el encabezado. */
   .header {

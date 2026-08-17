@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReceiptText, UserRound } from "lucide-react";
-import { StaffLogoutButton } from "@/components/staff/StaffLogoutButton";
 import styles from "./StaffBottomNav.module.css";
 
 interface StaffBottomNavProps {
@@ -71,11 +70,6 @@ export function StaffBottomNav({ roleLabel }: StaffBottomNavProps) {
             <span className={styles.roleDot} aria-hidden="true" />
             <span>{roleLabel}</span>
           </span>
-          <StaffLogoutButton
-            variant="ghost"
-            inverse
-            className={styles.logoutButton}
-          />
         </div>
       </div>
     </nav>

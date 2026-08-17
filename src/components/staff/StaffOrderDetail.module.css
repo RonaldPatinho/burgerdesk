@@ -110,7 +110,8 @@
   gap: var(--space-4);
 }
 
-.section > h2 {
+.section > h2,
+.statusHeading h2 {
   font-size: clamp(1.45rem, 7vw, 1.75rem);
   line-height: var(--line-height-tight);
 }
@@ -195,8 +196,7 @@
   white-space: nowrap;
 }
 
-.kitchenNote,
-.statusNotice {
+.kitchenNote {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
@@ -206,8 +206,7 @@
   background: var(--color-surface-cream);
 }
 
-.kitchenNote svg,
-.statusNotice svg {
+.kitchenNote svg {
   width: 1.65rem;
   height: 1.65rem;
   color: var(--color-danger);
@@ -217,41 +216,163 @@
   font-size: var(--font-size-lg);
 }
 
-.kitchenNote p,
-.statusNotice p {
+.kitchenNote p {
   margin-top: var(--space-1);
   font-size: var(--font-size-md);
   line-height: var(--line-height-relaxed);
 }
 
-.statusSteps {
+/* Estado: indicador de progreso visual, no botones. */
+.statusHeading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.currentStatus {
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  padding: 0.35rem var(--space-3);
+  color: var(--color-brand-primary);
+  background: var(--color-surface-cream);
+  font-size: var(--font-size-xs);
+  font-weight: 800;
+}
+
+.statusProgress {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-2);
+  align-items: start;
+  gap: 0;
+  margin: 0;
+  padding: var(--space-2) 0 0;
   list-style: none;
 }
 
-.statusSteps li {
-  min-height: 4.5rem;
+.statusStep {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 0.45rem;
+  padding-inline: var(--space-1);
+  text-align: center;
+}
+
+.statusStep:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: 1.25rem;
+  left: 50%;
+  width: 100%;
+  height: 0.25rem;
+  background: var(--color-border);
+}
+
+.statusStep[data-state="completed"]:not(:last-child)::after {
+  background: var(--color-brand-primary);
+}
+
+.progressMarker {
+  position: relative;
+  z-index: 1;
+  width: 2.75rem;
+  height: 2.75rem;
   display: grid;
   place-items: center;
   border: 0.125rem solid var(--color-border);
   border-radius: var(--radius-pill);
-  padding: var(--space-2);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.progressMarker svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.statusStep[data-state="completed"] .progressMarker {
+  border-color: var(--color-brand-primary);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.statusStep[data-state="current"] .progressMarker {
+  border-color: var(--color-brand-primary);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  box-shadow: 0 0 0 0.25rem
+    color-mix(in srgb, var(--color-brand-primary) 18%, transparent);
+}
+
+.statusStep strong {
+  max-width: 8rem;
   font-size: var(--font-size-sm);
   line-height: 1.15;
-  text-align: center;
 }
 
-.statusSteps li[data-state="current"] {
-  border-color: var(--color-text);
-  color: var(--color-surface);
-  background: var(--color-text);
+.statusStep small {
+  color: color-mix(in srgb, var(--color-text) 58%, var(--color-surface));
+  font-size: var(--font-size-xs);
+  line-height: 1.1;
 }
 
-.statusSteps li[data-state="completed"] {
-  border-color: var(--color-brand-primary);
+.statusStep[data-state="current"] small {
   color: var(--color-brand-primary);
+  font-weight: 800;
+}
+
+/* La acción queda separada de la advertencia para que el CTA sea inequívoco. */
+.updateButton {
+  min-height: 4.35rem;
+  font-size: var(--font-size-md);
+}
+
+.statusAction {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  background: var(--color-surface-cream);
+}
+
+.statusActionIcon {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-danger);
+  background: var(--color-surface);
+}
+
+.statusActionIcon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.statusAction h3 {
+  font-size: var(--font-size-lg);
+  line-height: var(--line-height-tight);
+}
+
+.statusAction p {
+  margin-top: var(--space-1);
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+.statusAction p strong {
+  color: var(--color-text);
 }
 
 .history {
@@ -302,11 +423,6 @@
   font-size: var(--font-size-sm);
 }
 
-.updateButton {
-  min-height: 5.25rem;
-  font-size: var(--font-size-lg);
-}
-
 .dialogCopy {
   font-size: var(--font-size-md);
   line-height: var(--line-height-relaxed);
@@ -327,7 +443,8 @@
     padding-inline: var(--space-3);
   }
 
-  .titleRow {
+  .titleRow,
+  .statusHeading {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -352,12 +469,32 @@
     align-items: center;
   }
 
-  .statusSteps {
-    grid-template-columns: 1fr;
+  .statusStep[data-state="current"] .progressMarker {
+    width: 3.2rem;
+    height: 3.2rem;
+    margin-top: -0.225rem;
+    margin-bottom: -0.225rem;
   }
 
-  .statusSteps li {
-    min-height: 3.5rem;
+  .statusStep strong {
+    font-size: 0.72rem;
+  }
+
+  .statusStep small {
+    font-size: 0.65rem;
+  }
+
+  .progressMarker {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .statusStep:not(:last-child)::after {
+    top: 1.125rem;
+  }
+
+  .statusAction {
+    padding: var(--space-4);
   }
 }
 
@@ -369,19 +506,32 @@
 
 @media (min-width: 48rem) {
   .main {
-    max-width: 80rem;
+    max-width: 48rem;
     margin-inline: auto;
-    padding: var(--space-8) var(--space-8) var(--space-12);
+    padding: var(--space-8) var(--space-8)
+      calc(7.5rem + env(safe-area-inset-bottom));
     box-shadow: none;
   }
 
-  .productList {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .statusProgress {
+    width: min(100%, 56rem);
+    justify-self: center;
   }
 
   .updateButton[data-full-width="true"] {
     width: auto;
-    min-width: 16rem;
+    min-width: 18rem;
     justify-self: start;
+  }
+}
+
+@media (min-width: 64rem) {
+  .main {
+    max-width: 80rem;
+    padding-bottom: var(--space-12);
+  }
+
+  .productList {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
