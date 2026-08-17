@@ -4,10 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
+  ChevronLeft,
+  ChevronRight,
   Clock3,
   ReceiptText,
   RefreshCw,
-  UserRound,
 } from "lucide-react";
 import {
   useCallback,
@@ -29,12 +30,21 @@ import {
 import styles from "./StaffOrderInbox.module.css";
 
 const POLL_INTERVAL_MS = 15_000;
+const MOBILE_PAGE_SIZE = 2;
+const DESKTOP_PAGE_SIZE = 4;
 
 interface StaffOrderInboxProps {
   staffName: string;
   initialSnapshot: StaffOrderInboxSnapshot;
   initialError?: string | null;
   automaticRefreshEnabled: boolean;
+}
+
+interface PaginationControlsProps {
+  page: number;
+  pageCount: number;
+  label: string;
+  onPageChange: (page: number) => void;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -91,6 +101,10 @@ function itemSummary(order: StaffOrderInboxItem): string {
   return `${count} ${count === 1 ? "producto" : "productos"} · ${order.fulfillmentLabel}`;
 }
 
+function initialForName(fullName: string): string {
+  return fullName.trim().charAt(0).toUpperCase() || "P";
+}
+
 function emptyCopy(filter: StaffInboxFilter): {
   title: string;
   description: string;
@@ -115,6 +129,107 @@ function emptyCopy(filter: StaffInboxFilter): {
   };
 }
 
+function pageCount(itemCount: number, pageSize: number): number {
+  return Math.max(1, Math.ceil(itemCount / pageSize));
+}
+
+function pageItems(
+  items: readonly StaffOrderInboxItem[],
+  page: number,
+  pageSize: number,
+): readonly StaffOrderInboxItem[] {
+  const start = page * pageSize;
+  return items.slice(start, start + pageSize);
+}
+
+function PaginationControls({
+  page,
+  pageCount: totalPages,
+  label,
+  onPageChange,
+}: PaginationControlsProps) {
+  if (totalPages <= 1) return null;
+
+  return (
+    <nav className={styles.carouselControls} aria-label={label}>
+      <button
+        type="button"
+        className={styles.carouselArrow}
+        aria-label="Página anterior"
+        disabled={page === 0}
+        onClick={() => onPageChange(Math.max(0, page - 1))}
+      >
+        <ChevronLeft aria-hidden="true" />
+      </button>
+
+      <div className={styles.carouselDots} aria-hidden="false">
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            type="button"
+            className={styles.carouselDot}
+            data-active={page === index || undefined}
+            aria-label={`Ir a la página ${index + 1} de ${totalPages}`}
+            aria-current={page === index ? "page" : undefined}
+            onClick={() => onPageChange(index)}
+          />
+        ))}
+      </div>
+
+      <button
+        type="button"
+        className={styles.carouselArrow}
+        aria-label="Página siguiente"
+        disabled={page >= totalPages - 1}
+        onClick={() => onPageChange(Math.min(totalPages - 1, page + 1))}
+      >
+        <ChevronRight aria-hidden="true" />
+      </button>
+    </nav>
+  );
+}
+
+function OrderCard({ order }: { order: StaffOrderInboxItem }) {
+  const imagePath = order.firstProductImagePath;
+  const statusLabel = staffOrderStatusLabel(order.operationalStatus);
+
+  return (
+    <Link
+      className={styles.orderCard}
+      data-status={order.operationalStatus}
+      href={`/personal/pedidos/${order.id}`}
+    >
+      <div className={styles.orderImageFrame}>
+        {imagePath ? (
+          <Image
+            src={imagePath}
+            alt={order.firstProductName ?? "Producto del pedido"}
+            fill
+            sizes="(max-width: 768px) 28vw, 120px"
+            className={styles.orderImage}
+          />
+        ) : (
+          <ReceiptText aria-hidden="true" />
+        )}
+      </div>
+
+      <div className={styles.orderDetails}>
+        <h2>Pedido #{order.code}</h2>
+        <p>{itemSummary(order)}</p>
+        <strong>{formatCop(order.totalCop)}</strong>
+      </div>
+
+      <div className={styles.orderSide}>
+        <span className={styles.statusBadge}>
+          <span className={styles.statusBadgeDot} aria-hidden="true" />
+          <span className={styles.statusBadgeLabel}>{statusLabel}</span>
+        </span>
+        <time dateTime={order.createdAt}>Pedido - {timeLabel(order.createdAt)}</time>
+      </div>
+    </Link>
+  );
+}
+
 const summaryRows = [
   ["nuevos", "Nuevos"],
   ["preparacion", "En preparación"],
@@ -130,6 +245,8 @@ export function StaffOrderInbox({
   const router = useRouter();
   const [snapshot, setSnapshot] = useState(initialSnapshot);
   const [filter, setFilter] = useState<StaffInboxFilter>("todos");
+  const [mobilePage, setMobilePage] = useState(0);
+  const [desktopPage, setDesktopPage] = useState(0);
   const [error, setError] = useState<string | null>(initialError);
   const [syncing, setSyncing] = useState(false);
   const [announcement, setAnnouncement] = useState("");
@@ -247,12 +364,34 @@ export function StaffOrderInbox({
     () => filterStaffOrders(snapshot.orders, filter),
     [filter, snapshot.orders],
   );
+
+  const mobileTotalPages = pageCount(visibleOrders.length, MOBILE_PAGE_SIZE);
+  const desktopTotalPages = pageCount(visibleOrders.length, DESKTOP_PAGE_SIZE);
+  const currentMobilePage = Math.min(mobilePage, mobileTotalPages - 1);
+  const currentDesktopPage = Math.min(desktopPage, desktopTotalPages - 1);
+  const mobileOrders = pageItems(
+    visibleOrders,
+    currentMobilePage,
+    MOBILE_PAGE_SIZE,
+  );
+  const desktopOrders = pageItems(
+    visibleOrders,
+    currentDesktopPage,
+    DESKTOP_PAGE_SIZE,
+  );
+
   const noOrdersCopy = error
     ? {
         title: "No fue posible cargar los pedidos",
         description: error,
       }
     : emptyCopy(filter);
+
+  function selectFilter(value: StaffInboxFilter) {
+    setFilter(value);
+    setMobilePage(0);
+    setDesktopPage(0);
+  }
 
   return (
     <main id="contenido-principal" className={styles.main}>
@@ -275,7 +414,7 @@ export function StaffOrderInbox({
             </span>
           </div>
           <span className={styles.avatar} aria-hidden="true">
-            <UserRound />
+            {initialForName(staffName)}
           </span>
         </div>
       </header>
@@ -294,7 +433,7 @@ export function StaffOrderInbox({
             data-active={filter === value || undefined}
             type="button"
             aria-pressed={filter === value}
-            onClick={() => setFilter(value)}
+            onClick={() => selectFilter(value)}
           >
             {label}
           </button>
@@ -325,55 +464,35 @@ export function StaffOrderInbox({
           ) : null}
 
           {visibleOrders.length > 0 ? (
-            <div className={styles.orderList}>
-              {visibleOrders.map((order) => {
-                const imagePath = order.firstProductImagePath;
-                const statusLabel = staffOrderStatusLabel(
-                  order.operationalStatus,
-                );
+            <>
+              <div className={styles.mobileCarousel}>
+                <div className={styles.orderList}>
+                  {mobileOrders.map((order) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+                <PaginationControls
+                  page={currentMobilePage}
+                  pageCount={mobileTotalPages}
+                  label="Páginas de pedidos"
+                  onPageChange={setMobilePage}
+                />
+              </div>
 
-                return (
-                  <Link
-                    key={order.id}
-                    className={styles.orderCard}
-                    data-status={order.operationalStatus}
-                    href={`/personal/pedidos/${order.id}`}
-                  >
-                    <div className={styles.orderImageFrame}>
-                      {imagePath ? (
-                        <Image
-                          src={imagePath}
-                          alt={order.firstProductName ?? "Producto del pedido"}
-                          fill
-                          sizes="(max-width: 768px) 28vw, 120px"
-                          className={styles.orderImage}
-                        />
-                      ) : (
-                        <ReceiptText aria-hidden="true" />
-                      )}
-                    </div>
-
-                    <div className={styles.orderDetails}>
-                      <h2>Pedido #{order.code}</h2>
-                      <p>{itemSummary(order)}</p>
-                      <strong>{formatCop(order.totalCop)}</strong>
-                    </div>
-
-                    <div className={styles.orderSide}>
-                      <span className={styles.statusBadge}>
-                        <span className={styles.statusBadgeDot} aria-hidden="true" />
-                        <span className={styles.statusBadgeLabel}>
-                          {statusLabel}
-                        </span>
-                      </span>
-                      <time dateTime={order.createdAt}>
-                        Pedido - {timeLabel(order.createdAt)}
-                      </time>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
+              <div className={styles.desktopCarousel}>
+                <div className={styles.orderList}>
+                  {desktopOrders.map((order) => (
+                    <OrderCard key={order.id} order={order} />
+                  ))}
+                </div>
+                <PaginationControls
+                  page={currentDesktopPage}
+                  pageCount={desktopTotalPages}
+                  label="Páginas de pedidos"
+                  onPageChange={setDesktopPage}
+                />
+              </div>
+            </>
           ) : (
             <div className={styles.emptyStack}>
               <section

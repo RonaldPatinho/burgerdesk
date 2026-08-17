@@ -82,7 +82,7 @@
   }
 }
 
-@media (min-width: 48rem) {
+@media (min-width: 64rem) {
   .nav {
     position: static;
     inset: auto;

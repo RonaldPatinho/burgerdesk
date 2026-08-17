@@ -28,162 +28,100 @@
   letter-spacing: -0.035em;
 }
 
-.header p {
-  font-size: var(--font-size-sm);
-  line-height: var(--line-height-relaxed);
-}
-
 .profileCard {
   display: grid;
-  overflow: hidden;
+  gap: var(--space-4);
+}
+
+.profileTop,
+.profileBody {
+  min-width: 0;
   border: 0.125rem solid var(--color-border);
   border-radius: var(--radius-xl);
   background: var(--color-surface);
 }
 
 .profileTop {
-  position: relative;
-  overflow: hidden;
-  min-height: 16rem;
   display: grid;
-  place-content: center;
-  justify-items: center;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-8) var(--space-6);
-  color: var(--color-surface);
-  background:
-    radial-gradient(
-      140% 130% at 50% -25%,
-      color-mix(in srgb, var(--color-brand-primary) 32%, transparent),
-      transparent 62%
-    ),
-    var(--color-text);
-}
-
-.profileTop::before,
-.profileTop::after {
-  content: "";
-  position: absolute;
-  pointer-events: none;
-  border-radius: var(--radius-pill);
-}
-
-.profileTop::before {
-  width: 11rem;
-  height: 11rem;
-  top: -4.5rem;
-  right: -3.5rem;
-  background: color-mix(
-    in srgb,
-    var(--color-brand-secondary) 38%,
-    transparent
-  );
-}
-
-.profileTop::after {
-  width: 8rem;
-  height: 8rem;
-  bottom: -3rem;
-  left: -2.5rem;
-  background: color-mix(
-    in srgb,
-    var(--color-surface-cream) 14%,
-    transparent
-  );
+  padding: var(--space-4);
+  box-shadow: var(--shadow-raised);
 }
 
 .avatar {
-  position: relative;
-  z-index: 1;
-  width: 6rem;
-  height: 6rem;
+  width: 5rem;
+  height: 5rem;
   display: grid;
   place-items: center;
-  border: 0.25rem solid var(--color-brand-primary);
   border-radius: var(--radius-pill);
   color: var(--color-surface);
-  background: color-mix(
-    in srgb,
-    var(--color-brand-primary) 22%,
-    var(--color-text)
-  );
-  box-shadow: 0 0 0 0.25rem
-    color-mix(in srgb, var(--color-brand-primary) 28%, transparent);
-}
-
-.avatar svg {
-  width: 2.75rem;
-  height: 2.75rem;
+  background: var(--color-brand-primary);
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .identity {
-  position: relative;
-  z-index: 1;
   min-width: 0;
   display: grid;
-  justify-items: center;
   gap: var(--space-1);
-  text-align: center;
 }
 
 .identity h2 {
   max-width: 100%;
-  overflow: hidden;
-  font-size: clamp(1.5rem, 7.5vw, 1.9rem);
+  font-size: clamp(1.35rem, 6vw, 1.7rem);
   line-height: var(--line-height-tight);
+  overflow-wrap: anywhere;
+}
+
+.identity p {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--color-text) 68%, var(--color-surface));
+  font-size: var(--font-size-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.identity p {
-  color: color-mix(in srgb, var(--color-surface) 72%, transparent);
-  font-size: var(--font-size-sm);
-}
-
 .turnBadge {
-  position: relative;
-  z-index: 1;
-  margin-top: var(--space-1);
+  grid-column: 2;
+  width: fit-content;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   border-radius: var(--radius-pill);
   padding: 0.3rem var(--space-3);
-  color: var(--color-surface);
-  background: var(--color-brand-secondary);
+  color: var(--color-text);
+  background: var(--color-surface-cream);
   font-size: var(--font-size-xs);
   line-height: 1.2;
 }
 
 .turnBadge > span {
-  width: 0.8rem;
-  height: 0.8rem;
+  width: 0.75rem;
+  height: 0.75rem;
   border-radius: var(--radius-pill);
-  background: var(--color-surface);
-}
-
-.turnBadge[data-active="false"] {
-  color: var(--color-text);
-  background: var(--color-surface-cream);
+  background: var(--color-brand-primary);
 }
 
 .turnBadge[data-active="false"] > span {
-  background: var(--color-text);
+  background: color-mix(in srgb, var(--color-text) 52%, var(--color-surface));
 }
 
 .profileBody {
   display: grid;
   gap: var(--space-6);
-  padding: var(--space-6);
+  padding: var(--space-5);
 }
 
 .section {
   display: grid;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .section > h3 {
-  font-size: clamp(1.35rem, 6.5vw, 1.6rem);
+  font-size: clamp(1.2rem, 5.5vw, 1.45rem);
   line-height: var(--line-height-tight);
 }
 
@@ -297,8 +235,8 @@
 }
 
 .logoutButton {
-  min-height: 4.5rem;
-  font-size: var(--font-size-lg);
+  min-height: 4rem;
+  font-size: var(--font-size-md);
 }
 
 @media (max-width: 359px) {
@@ -307,8 +245,12 @@
   }
 
   .profileTop {
-    min-height: 14.5rem;
-    padding-inline: var(--space-4);
+    padding-inline: var(--space-3);
+  }
+
+  .avatar {
+    width: 4.5rem;
+    height: 4.5rem;
   }
 }
 
@@ -321,9 +263,10 @@
 @media (min-width: 48rem) {
   .main {
     min-height: 100dvh;
-    max-width: 80rem;
+    max-width: 48rem;
     margin-inline: auto;
-    padding: var(--space-8) var(--space-8) var(--space-12);
+    padding: var(--space-8) var(--space-8)
+      calc(6.75rem + env(safe-area-inset-bottom));
     box-shadow: none;
   }
 
@@ -332,12 +275,18 @@
   }
 
   .profileCard {
-    width: min(100%, 38rem);
+    width: min(100%, 54rem);
     justify-self: center;
   }
 
-  .fields {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .profileTop {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    padding: var(--space-5);
+  }
+
+  .turnBadge {
+    grid-column: auto;
+    justify-self: end;
   }
 
   .fields > .field:last-child:nth-child(odd) {
@@ -347,6 +296,7 @@
 
 @media (min-width: 64rem) {
   .main {
+    max-width: 80rem;
     gap: var(--space-4);
     padding-top: var(--space-6);
     padding-bottom: var(--space-6);
@@ -357,22 +307,34 @@
   }
 
   .profileCard {
-    width: min(100%, 58rem);
-    grid-template-columns: minmax(19rem, 0.95fr) minmax(0, 1.6fr);
+    width: min(100%, 60rem);
+    grid-template-columns: minmax(17rem, 0.8fr) minmax(0, 1.6fr);
     align-items: stretch;
   }
 
   .profileTop {
-    min-height: 0;
-    padding: var(--space-6) var(--space-5);
+    grid-template-columns: 1fr;
+    place-content: center;
+    justify-items: center;
+    align-content: center;
+    gap: var(--space-3);
+    padding: var(--space-7) var(--space-5);
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .identity {
+    justify-items: center;
+    text-align: center;
   }
 
   .identity h2 {
-    max-width: none;
-    overflow: visible;
     font-size: 1.65rem;
-    text-overflow: clip;
-    white-space: nowrap;
+  }
+
+  .turnBadge {
+    grid-column: 1;
+    justify-self: center;
   }
 
   .profileBody {
@@ -448,4 +410,3 @@
     font-size: var(--font-size-md);
   }
 }
-

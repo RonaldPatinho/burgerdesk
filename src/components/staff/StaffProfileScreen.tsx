@@ -6,7 +6,6 @@ import {
   CheckCircle2,
   Clock3,
   ShieldCheck,
-  UserRound,
 } from "lucide-react";
 import { StaffLogoutButton } from "@/components/staff/StaffLogoutButton";
 import {
@@ -52,6 +51,10 @@ function formatShiftStart(isoDate: string | null): string {
   }).format(date);
 }
 
+function initialForName(fullName: string): string {
+  return fullName.trim().charAt(0).toUpperCase() || "P";
+}
+
 export function StaffProfileScreen({
   fullName,
   username,
@@ -74,7 +77,7 @@ export function StaffProfileScreen({
       <section className={styles.profileCard} aria-label="Perfil del personal">
         <div className={styles.profileTop}>
           <span className={styles.avatar} aria-hidden="true">
-            <UserRound />
+            {initialForName(fullName)}
           </span>
           <div className={styles.identity}>
             <h2>{fullName}</h2>
