@@ -26,44 +26,37 @@
 
 @media (min-width: 64rem) {
   .shell {
-    height: 100dvh;
+    position: relative;
     min-height: 100dvh;
     display: grid;
-    grid-template-columns: 13.5rem minmax(0, 1fr) 1rem;
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: 13.5rem minmax(0, 1fr);
     align-items: stretch;
-    overflow: hidden;
+    overflow: visible;
     box-shadow: none;
     background: var(--color-surface);
   }
 
   .shell > nav {
     grid-column: 1;
-    grid-row: 1 / -1;
+    grid-row: 1;
   }
 
-  .shell > header {
+  .shell > header,
+  .shell > main {
     grid-column: 2;
     grid-row: 1;
   }
 
   .shell > main {
-    grid-column: 2;
-    grid-row: 2;
     min-width: 0;
-    min-height: 0;
+    min-height: 100dvh;
     width: 100%;
     align-self: stretch;
     justify-self: stretch;
-    overflow-y: auto;
-    scrollbar-gutter: stable;
+    overflow: visible;
   }
 
   .desktopRail {
-    grid-column: 3;
-    grid-row: 1 / -1;
-    display: block;
-    min-height: 100dvh;
-    background: var(--color-text);
+    display: none;
   }
 }

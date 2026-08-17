@@ -231,13 +231,41 @@
 }
 
 @media (min-width: 64rem) {
+  .page {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    align-items: stretch;
+    background: var(--color-surface);
+  }
+
+  .header {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 100dvh;
+    align-self: stretch;
+  }
+
+  .headerInner {
+    min-height: auto;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    align-items: flex-start;
+    padding: var(--space-6) var(--space-5);
+  }
+
   .main {
-    min-height: calc(100dvh - 4.75rem);
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 100dvh;
     max-width: 72rem;
+    margin-inline: auto;
     grid-template-columns: minmax(16rem, 1fr) minmax(24rem, 28rem);
     grid-template-rows: auto auto;
     align-content: center;
     column-gap: clamp(3rem, 7vw, 6rem);
+    padding-inline: clamp(2rem, 4vw, 4rem);
     box-shadow: none;
   }
 

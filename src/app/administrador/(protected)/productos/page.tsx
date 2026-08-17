@@ -23,17 +23,23 @@ export default async function AdministratorProductsPage({
 }: AdministratorProductsPageProps) {
   const params = await searchParams;
   const search = typeof params.q === "string" ? params.q.trim().slice(0, 100) : "";
-  const [products, categories] = await Promise.all([
+  const [products, allProducts, categories] = await Promise.all([
     listAdminProducts({ search, includeArchived: false }),
+    listAdminProducts({ includeArchived: true }),
     listCatalogCategories(),
   ]);
   const categoryNames = Object.fromEntries(
     categories.map((category) => [category.id, category.name]),
   );
 
+  const archivedProducts = allProducts.filter(
+    (product) => product.archivedAt !== null,
+  );
+
   return (
     <AdminProductsScreen
       products={products}
+      archivedProducts={archivedProducts}
       categoryNames={categoryNames}
       search={search}
     />

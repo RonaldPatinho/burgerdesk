@@ -90,19 +90,27 @@
 
 @media (min-width: 64rem) {
   .header {
-    position: relative;
-    z-index: 1;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: var(--layer-sticky);
+    width: auto;
     color: var(--color-text);
-    background: var(--color-surface);
+    background: transparent;
+    pointer-events: none;
   }
 
   .headerInner {
-    min-height: 5.25rem;
+    min-height: 0;
     justify-content: flex-end;
-    padding: var(--space-4) clamp(1.5rem, 4vw, 3rem) 0;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 0 0;
   }
 
   .brand {
     display: none;
+  }
+
+  .roleButton {
+    pointer-events: auto;
   }
 }

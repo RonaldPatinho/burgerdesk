@@ -442,6 +442,11 @@
   }
 
   .headingRow,
+  .skeletonTop {
+    padding-right: 10.5rem;
+  }
+
+  .headingRow,
   .metrics {
     grid-column: 1 / -1;
   }

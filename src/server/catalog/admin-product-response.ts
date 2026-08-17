@@ -12,6 +12,7 @@ import {
   AdminProductRepositoryError,
   archiveAdminProduct,
   createAdminProduct,
+  restoreAdminProduct,
   setAdminProductAvailability,
   updateAdminProduct,
   type AdminProductImageInput,
@@ -288,5 +289,30 @@ export async function archiveAdminProductResponse(
       return repositoryErrorResponse(error);
     }
     return errorResponse(500, "No fue posible archivar el producto.");
+  }
+}
+export async function restoreAdminProductResponse(
+  request: Request,
+  productId: string,
+  session: AdministratorSession,
+): Promise<Response> {
+  if (!session) {
+    return errorResponse(401, "La sesión administrativa no es válida.");
+  }
+  try {
+    const input = normalizeAdminProductArchiveInput(
+      productId,
+      await readActionJson(request),
+    );
+    const product = await restoreAdminProduct(input);
+    return Response.json({ product }, { headers: NO_STORE_HEADERS });
+  } catch (error: unknown) {
+    if (error instanceof AdminProductValidationError) {
+      return errorResponse(400, error.message, { [error.field]: error.message });
+    }
+    if (error instanceof AdminProductRepositoryError) {
+      return repositoryErrorResponse(error);
+    }
+    return errorResponse(500, "No fue posible recuperar el producto.");
   }
 }

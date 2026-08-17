@@ -9,6 +9,7 @@ import {
   getCatalogProductImage,
   getAdminProduct,
   listAdminProducts,
+  restoreAdminProduct,
   setAdminProductAvailability,
   updateAdminProduct,
   AdminProductRepositoryError,
@@ -284,6 +285,31 @@ test("lee y actualiza preservando relaciones y campos omitidos", async () => {
       (product) => product.id === productId,
     ),
   );
+
+  const restored = await restoreAdminProduct({
+    productId,
+    expectedUpdatedAt: archived.updatedAt,
+  });
+  assert.equal(restored.archivedAt, null);
+  assert.equal(restored.available, false);
+  assert.equal(restored.badge, "Badge preservado");
+  assert.deepEqual(restored.categoryIds, ["bebidas", "clasicas"]);
+  assert.deepEqual(restored.options, [
+    { id: "extra-a6a", name: "Extra A6A", priceCop: 1_700, available: true },
+  ]);
+  assert.deepEqual(restored.defaultOptionIds, ["extra-a6a"]);
+  assert.equal((await getCatalogProduct(productId))?.available, false);
+  assert.ok(
+    (await listAdminProducts({ includeArchived: false })).some(
+      (product) => product.id === productId,
+    ),
+  );
+  assert.ok(
+    !(await listCatalogProducts({ availableOnly: true })).some(
+      (product) => product.id === productId,
+    ),
+  );
+
   const [historicalRows] = await pool.execute<HistoricalOrderLineRow[]>(
     `SELECT product_id, product_name, unit_price_cop
      FROM order_lines

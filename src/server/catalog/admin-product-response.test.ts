@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   archiveAdminProductResponse,
   createAdminProductResponse,
+  restoreAdminProductResponse,
   setAdminProductAvailabilityResponse,
   updateAdminProductResponse,
 } from "./admin-product-response";
@@ -36,7 +37,7 @@ test("rechaza creación y edición sin sesión administrativa", async () => {
   assert.equal(updateResponse.status, 401);
 });
 
-test("rechaza disponibilidad y archivo sin sesión administrativa", async () => {
+test("rechaza disponibilidad, archivo y recuperación sin sesión administrativa", async () => {
   const availabilityResponse = await setAdminProductAvailabilityResponse(
     jsonRequest(
       { expectedUpdatedAt: "2026-08-16T12:00:00.000Z", available: false },
@@ -53,8 +54,17 @@ test("rechaza disponibilidad y archivo sin sesión administrativa", async () => 
     "producto-valido",
     null,
   );
+  const restoreResponse = await restoreAdminProductResponse(
+    jsonRequest(
+      { expectedUpdatedAt: "2026-08-16T12:00:00.000Z" },
+      "POST",
+    ),
+    "producto-valido",
+    null,
+  );
   assert.equal(availabilityResponse.status, 401);
   assert.equal(archiveResponse.status, 401);
+  assert.equal(restoreResponse.status, 401);
 });
 
 test("rechaza campos ajenos en acciones administrativas", async () => {

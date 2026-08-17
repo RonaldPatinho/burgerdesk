@@ -500,3 +500,25 @@ export async function archiveAdminProduct(
     return readMutatedProduct(connection, input.productId);
   });
 }
+
+export async function restoreAdminProduct(
+  input: AdminProductArchiveInput,
+): Promise<AdminProduct> {
+  assertAdminProductMutationIdentity(input);
+
+  return withMySqlTransaction(async (connection) => {
+    const current = await lockProduct(connection, input.productId);
+    assertCurrentVersion(current, input.expectedUpdatedAt);
+    if (current.archived_at !== null) {
+      await connection.execute<ResultSetHeader>(
+        `UPDATE catalog_products
+         SET available = FALSE,
+             archived_at = NULL,
+             updated_at = CURRENT_TIMESTAMP(3)
+         WHERE id = ?`,
+        [input.productId],
+      );
+    }
+    return readMutatedProduct(connection, input.productId);
+  });
+}
