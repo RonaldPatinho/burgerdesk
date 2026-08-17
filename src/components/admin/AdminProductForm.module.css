@@ -1,0 +1,329 @@
+.main {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem var(--space-4) 1.5rem;
+  background: var(--color-surface);
+}
+
+.heading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.heading h1 {
+  font-size: clamp(1.85rem, 9vw, 2.25rem);
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.heading p {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.form,
+.imageSection,
+.fieldGroup {
+  display: grid;
+  gap: 0.42rem;
+}
+
+.form {
+  gap: 0.85rem;
+}
+
+.formMessage {
+  border: 0.0625rem solid var(--color-danger);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  color: var(--color-danger);
+  background: color-mix(in srgb, var(--color-danger) 7%, var(--color-surface));
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-base);
+}
+
+.preview {
+  position: relative;
+  min-height: 10rem;
+  border-radius: 1.25rem;
+  background: var(--color-surface-cream);
+  overflow: hidden;
+}
+
+.previewImage {
+  object-fit: contain;
+  padding: 0.75rem;
+}
+
+.previewBadge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 1;
+  border-radius: var(--radius-pill);
+  padding: 0.45rem 0.75rem;
+  color: var(--color-danger);
+  background: var(--color-surface);
+  font-size: 0.68rem;
+}
+
+.emptyPreview {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  font-size: 0.8rem;
+}
+
+.emptyPreview svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-brand-primary);
+}
+
+.fileButton,
+.cancelLink {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.55rem 0.75rem;
+  cursor: pointer;
+}
+
+.fileButton svg {
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.imageSection:focus-within .fileButton {
+  outline: 0.1875rem solid var(--color-brand-primary);
+  outline-offset: 0.125rem;
+}
+
+.helpText,
+.fileName,
+.fieldError {
+  font-size: 0.7rem;
+  line-height: 1.25;
+}
+
+.fileName {
+  overflow-wrap: anywhere;
+}
+
+.fieldError {
+  color: var(--color-danger);
+}
+
+.fieldGroup > label {
+  font-size: var(--font-size-sm);
+}
+
+.fieldGroup textarea,
+.fieldGroup select {
+  width: 100%;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+  outline: 0;
+}
+
+.fieldGroup textarea {
+  min-height: 5.2rem;
+  resize: vertical;
+}
+
+.fieldGroup select {
+  min-height: 3rem;
+}
+
+.fieldGroup textarea:focus,
+.fieldGroup select:focus {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 0.125rem var(--color-surface-cream);
+}
+
+.fieldGroup textarea[aria-invalid="true"],
+.fieldGroup select[aria-invalid="true"] {
+  border-color: var(--color-danger);
+}
+
+.splitFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.switchRow {
+  min-height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.6rem 0.75rem;
+}
+
+.switchControl {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.switchControl input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switchTrack {
+  width: 3rem;
+  height: 1.75rem;
+  display: flex;
+  align-items: center;
+  border-radius: var(--radius-pill);
+  padding: 0.2rem;
+  background: color-mix(in srgb, var(--color-text) 20%, var(--color-surface));
+  transition: background 160ms ease;
+}
+
+.switchTrack > span {
+  width: 1.35rem;
+  height: 1.35rem;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface);
+  transition: transform 160ms ease;
+}
+
+.switchControl input:checked + .switchTrack {
+  background: var(--color-brand-primary);
+}
+
+.switchControl input:checked + .switchTrack > span {
+  transform: translateX(1.25rem);
+}
+
+.switchControl input:focus-visible + .switchTrack {
+  outline: 0.1875rem solid var(--color-text);
+  outline-offset: 0.125rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  gap: 0.75rem;
+  padding-top: 0.35rem;
+}
+
+.saveButton {
+  min-width: 0;
+}
+
+.confirmSummary {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.confirmSummary > div {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 0.75rem;
+  border-bottom: 0.0625rem solid var(--color-border);
+  padding-bottom: 0.55rem;
+}
+
+.confirmSummary dt {
+  color: color-mix(in srgb, var(--color-text) 65%, transparent);
+  font-size: 0.75rem;
+}
+
+.confirmSummary dd {
+  min-width: 0;
+  margin: 0;
+  font-size: 0.8rem;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 359px) {
+  .main {
+    padding-inline: var(--space-3);
+  }
+
+  .splitFields,
+  .actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 37.5rem) {
+  .main {
+    max-width: 72rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.55rem;
+  }
+}
+
+@media (min-width: 48rem) {
+  .form {
+    grid-template-columns: minmax(14rem, 0.8fr) minmax(20rem, 1.2fr);
+    column-gap: clamp(1.5rem, 4vw, 3rem);
+    align-items: start;
+  }
+
+  .imageSection {
+    grid-column: 1;
+    grid-row: 1 / span 5;
+  }
+
+  .form > .fieldGroup,
+  .form > .splitFields,
+  .form > .switchRow,
+  .form > .actions {
+    grid-column: 2;
+  }
+
+  .preview {
+    min-height: 15rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switchTrack,
+  .switchTrack > span {
+    transition: none;
+  }
+}

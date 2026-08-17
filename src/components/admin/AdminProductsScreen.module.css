@@ -1,0 +1,763 @@
+.main {
+  flex: 1;
+  width: 100%;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem var(--space-4) 1.5rem;
+  background: var(--color-surface);
+}
+
+.heading {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.heading h1 {
+  font-size: clamp(2rem, 10vw, 2.4rem);
+  line-height: 1;
+  letter-spacing: -0.045em;
+}
+
+.heading p {
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.searchForm {
+  min-height: 3.65rem;
+  display: grid;
+  grid-template-columns: var(--touch-target-min) minmax(0, 1fr) auto;
+  align-items: center;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.35rem;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.searchButton,
+.clearSearch {
+  min-width: var(--touch-target-min);
+  min-height: var(--touch-target-min);
+  display: grid;
+  place-items: center;
+  border: 0;
+  color: var(--color-text);
+  background: transparent;
+}
+
+.searchButton svg,
+.clearSearch svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.searchForm input {
+  min-width: 0;
+  width: 100%;
+  border: 0;
+  outline: 0;
+  padding: 0.75rem 0.25rem;
+  color: var(--color-text);
+  background: transparent;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.searchForm input::placeholder {
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+  opacity: 1;
+}
+
+.searchForm:focus-within {
+  border-color: var(--color-brand-primary);
+  box-shadow: 0 0 0 0.1875rem color-mix(in srgb, var(--color-brand-primary) 24%, transparent);
+}
+
+.productActions {
+  display: flex;
+  align-items: stretch;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.desktopArchiveButton {
+  display: none;
+}
+
+.mobileArchiveAction {
+  display: grid;
+  width: 100%;
+}
+
+.newProductLink {
+  width: 100%;
+  min-height: 3.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 1.05rem;
+}
+
+.newProductLink svg {
+  width: 1.45rem;
+  height: 1.45rem;
+}
+
+.archiveLibraryButton {
+  width: 100%;
+  min-height: 3.8rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1rem;
+  padding: 0.75rem 1rem;
+  color: var(--color-text);
+  background: var(--color-surface);
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.archiveLibraryButton > svg {
+  width: 1.3rem;
+  height: 1.3rem;
+  flex: 0 0 auto;
+}
+
+.archiveCount {
+  min-width: 1.45rem;
+  height: 1.45rem;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  padding-inline: 0.35rem;
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.actionFeedback {
+  border: 0.0625rem solid color-mix(in srgb, var(--color-brand-secondary) 55%, var(--color-border));
+  border-radius: var(--radius-md);
+  padding: 0.75rem 0.9rem;
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-brand-secondary) 14%, var(--color-surface));
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.actionFeedback[data-error] {
+  border-color: color-mix(in srgb, var(--color-danger) 45%, var(--color-border));
+  background: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
+}
+
+.catalogSection {
+  min-width: 0;
+}
+
+.carousel {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.carouselControls {
+  min-height: var(--touch-target-min);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+}
+
+.carouselArrow {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-pill);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.carouselArrow svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.carouselDots {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.carouselDot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 0;
+  background: color-mix(in srgb, var(--color-text) 24%, transparent);
+}
+
+.carouselDot[data-active] {
+  width: 1.35rem;
+  background: var(--color-brand-primary);
+}
+
+.grid > li {
+  min-width: 0;
+  display: flex;
+}
+
+.card {
+  min-width: 0;
+  width: 100%;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: 1.1rem;
+  padding: 0.48rem;
+  background: var(--color-surface);
+  overflow: hidden;
+}
+
+.imageFrame {
+  position: relative;
+  aspect-ratio: 1.42;
+  border-radius: 0.9rem;
+  background: var(--color-surface-cream);
+  overflow: hidden;
+}
+
+.productImage {
+  object-fit: contain;
+  padding: 0.3rem;
+}
+
+.availability {
+  position: absolute;
+  top: 0.45rem;
+  left: 0.45rem;
+  max-width: calc(100% - 0.9rem);
+  min-height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: var(--radius-pill);
+  padding: 0.3rem 0.55rem;
+  color: var(--color-surface);
+  background: var(--color-danger);
+  font-size: 0.68rem;
+  line-height: 1;
+}
+
+.availability[data-available] {
+  background: var(--color-danger);
+}
+
+.availability:not([data-available]) {
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-text));
+}
+
+.availability > span {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: 0 0 auto;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+}
+
+.cardBody {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: 0.35rem;
+  padding: 0.65rem 0.25rem 0.15rem;
+}
+
+.cardHeading {
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.cardHeading h2 {
+  min-width: 0;
+  font-size: clamp(1rem, 4.9vw, 1.24rem);
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+.commercialBadge,
+.category {
+  width: fit-content;
+  max-width: 100%;
+  border-radius: var(--radius-pill);
+  padding: 0.22rem 0.48rem;
+  font-size: 0.62rem;
+  line-height: 1.15;
+}
+
+.commercialBadge {
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+}
+
+.category {
+  color: color-mix(in srgb, var(--color-text) 78%, transparent);
+  background: var(--color-surface-cream);
+}
+
+.summary {
+  min-height: 2.3em;
+  display: -webkit-box;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--color-text) 82%, transparent);
+  font-size: 0.72rem;
+  font-weight: 500;
+  line-height: 1.15;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cardFooter {
+  min-width: 0;
+  display: grid;
+  gap: 0.55rem;
+  align-self: end;
+  padding-top: 0.35rem;
+}
+
+.cardFooter strong {
+  min-width: 0;
+  font-size: clamp(1rem, 5.4vw, 1.35rem);
+  line-height: 1;
+  letter-spacing: -0.035em;
+  white-space: nowrap;
+}
+
+.editLink {
+  width: var(--touch-target-min);
+  height: var(--touch-target-min);
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  color: var(--color-surface);
+  background: var(--color-text);
+}
+
+.cardActions {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+
+.availabilityButton,
+.archiveButton {
+  min-height: var(--touch-target-min);
+  border: 0.0625rem solid var(--color-border);
+  color: var(--color-text);
+  background: var(--color-surface);
+}
+
+.availabilityButton {
+  grid-column: 1 / -1;
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  border-radius: var(--radius-md);
+  padding-inline: 0.4rem;
+  font: inherit;
+  font-size: 0.62rem;
+  line-height: 1;
+}
+
+.archiveButton {
+  width: 100%;
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+}
+
+.cardActions .editLink {
+  width: 100%;
+}
+
+.availabilityButton:disabled,
+.archiveButton:disabled {
+  opacity: 0.55;
+}
+
+.availabilityButton svg,
+.editLink svg,
+.archiveButton svg {
+  width: 1.15rem;
+  height: 1.15rem;
+  flex: 0 0 auto;
+}
+
+.spinner {
+  animation: spin 800ms linear infinite;
+}
+
+.archiveList {
+  max-height: min(23rem, 52dvh);
+  display: grid;
+  gap: 0.55rem;
+  padding-right: 0.15rem;
+  overflow: auto;
+  list-style: none;
+}
+
+.archiveListItem {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.7rem;
+  background: color-mix(in srgb, var(--color-surface-cream) 45%, var(--color-surface));
+}
+
+.archiveItemInfo {
+  min-width: 0;
+  display: grid;
+  gap: 0.2rem;
+}
+
+.archiveItemInfo strong {
+  overflow: hidden;
+  font-size: 0.92rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archiveItemInfo span {
+  overflow: hidden;
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+  font-size: 0.74rem;
+  line-height: 1.3;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.archiveEmpty {
+  min-height: 11rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.5rem;
+  border: 0.0625rem dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  text-align: center;
+  background: color-mix(in srgb, var(--color-surface-cream) 45%, var(--color-surface));
+}
+
+.archiveEmpty > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--color-brand-primary);
+}
+
+.archiveEmpty strong {
+  font-size: 0.95rem;
+}
+
+.archiveEmpty p {
+  max-width: 24rem;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+  font-size: 0.78rem;
+  line-height: 1.45;
+}
+
+.archiveCopy {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .availabilityButton:not(:disabled):hover,
+  .archiveButton:not(:disabled):hover,
+  .archiveLibraryButton:hover,
+  .carouselArrow:hover {
+    border-color: var(--color-brand-primary);
+    background: var(--color-surface-cream);
+  }
+
+  .carouselDot:hover {
+    background: var(--color-brand-primary);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+.emptyState {
+  min-height: 17rem;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 0.75rem;
+  border: 0.0625rem dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+  background: color-mix(in srgb, var(--color-surface-cream) 50%, var(--color-surface));
+}
+
+.emptyState > svg {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: var(--color-brand-primary);
+}
+
+.emptyState h2 {
+  font-size: 1.3rem;
+}
+
+.emptyState p {
+  font-size: 0.86rem;
+  font-weight: 500;
+  line-height: var(--line-height-relaxed);
+}
+
+.emptyAction {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  padding-inline: var(--space-4);
+  color: var(--color-surface);
+  background: var(--color-brand-primary);
+  font-size: 0.8rem;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.loadingMain {
+  flex: 1;
+  display: grid;
+  align-content: start;
+  gap: 1rem;
+  padding: 1rem var(--space-4) 1.5rem;
+}
+
+.loadingHeading,
+.loadingSearch,
+.loadingAction,
+.loadingCards > span {
+  background: color-mix(in srgb, var(--color-surface-cream) 78%, var(--color-surface));
+}
+
+.loadingHeading {
+  width: 12rem;
+  height: 3.25rem;
+  border-radius: var(--radius-sm);
+}
+
+.loadingSearch,
+.loadingAction {
+  min-height: 3.65rem;
+  border-radius: 1.35rem;
+}
+
+.loadingCards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.loadingCards > span {
+  min-height: 15rem;
+  border-radius: 1.1rem;
+}
+
+.errorState {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6) var(--space-4);
+}
+
+.errorCard {
+  width: 100%;
+  display: grid;
+  gap: var(--space-4);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  text-align: center;
+  background: var(--color-surface);
+}
+
+.errorCard h1 {
+  font-size: var(--font-size-xl);
+}
+
+.errorCard p {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-relaxed);
+}
+
+@media (max-width: 359px) {
+  .main,
+  .loadingMain {
+    padding-inline: var(--space-3);
+  }
+
+  .grid,
+  .loadingCards {
+    gap: 0.5rem;
+  }
+
+  .card {
+    padding: 0.38rem;
+  }
+
+  .availability {
+    left: 0.35rem;
+    top: 0.35rem;
+    padding-inline: 0.42rem;
+    font-size: 0.6rem;
+  }
+
+  .cardHeading h2 {
+    font-size: 0.95rem;
+  }
+
+  .cardFooter strong {
+    font-size: 0.98rem;
+  }
+
+  .availabilityButton {
+    font-size: 0.56rem;
+  }
+
+  .productActions {
+    gap: 0.5rem;
+  }
+
+  .newProductLink,
+  .archiveLibraryButton {
+    min-height: 3.45rem;
+    padding-inline: 0.75rem;
+    font-size: 0.86rem;
+  }
+
+  .archiveListItem {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 37.5rem) {
+  .main,
+  .loadingMain {
+    max-width: 90rem;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 2rem;
+  }
+
+  .heading h1 {
+    font-size: 2.65rem;
+  }
+
+  .searchForm {
+    width: min(100%, 44rem);
+  }
+
+  .productActions {
+    width: fit-content;
+    flex-wrap: nowrap;
+  }
+
+  .desktopArchiveButton {
+    display: inline-flex;
+  }
+
+  .mobileArchiveAction {
+    display: none;
+  }
+
+  .newProductLink,
+  .archiveLibraryButton {
+    width: 13rem;
+    min-width: 13rem;
+  }
+
+  .loadingCards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .cardHeading h2,
+  .cardFooter strong {
+    font-size: 1.2rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .carousel {
+    gap: 1rem;
+  }
+
+  .grid,
+  .loadingCards {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .carouselControls {
+    margin-top: 0.1rem;
+  }
+}
+
+/* Mobile: the archive action belongs only below the product carousel. */
+@media (max-width: 37.499rem) {
+  .productActions .desktopArchiveButton {
+    display: none !important;
+  }
+}

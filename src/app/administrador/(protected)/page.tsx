@@ -25,7 +25,7 @@ export default async function AdministratorDashboardPage() {
     <AdminDashboardScreen
       snapshot={snapshot}
       activeProductCount={activeProducts.length}
-      enabledQuickActions={["transactions"]}
+      enabledQuickActions={["products", "transactions", "reports"]}
     />
   );
 }

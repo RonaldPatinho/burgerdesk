@@ -8,8 +8,55 @@
   background: var(--color-surface);
 }
 
+.desktopRail {
+  display: none;
+}
+
 @media (min-width: 26.876rem) {
   .shell {
     box-shadow: var(--shadow-raised);
+  }
+}
+
+@media (min-width: 37.5rem) {
+  .shell {
+    max-width: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  .shell {
+    position: relative;
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    align-items: stretch;
+    overflow: visible;
+    box-shadow: none;
+    background: var(--color-surface);
+  }
+
+  .shell > nav {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .shell > header,
+  .shell > main {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .shell > main {
+    min-width: 0;
+    min-height: 100dvh;
+    width: 100%;
+    align-self: stretch;
+    justify-self: stretch;
+    overflow: visible;
+  }
+
+  .desktopRail {
+    display: none;
   }
 }

@@ -21,8 +21,9 @@ import {
   WalletCards,
 } from "lucide-react";
 import { type FormEvent, useMemo, useRef, useState } from "react";
-import { MAX_QUANTITY_PER_CART_LINE, products } from "@/data/provisional";
+import { MAX_QUANTITY_PER_CART_LINE } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
+import type { Product, StoreLocation } from "@/domain/models";
 import { buildProfileReorder } from "@/domain/profile-reorder";
 import type {
   ClientOrderDetailView,
@@ -32,7 +33,6 @@ import type {
   ClientProfileView,
 } from "@/domain/profile";
 import { MAX_AVATAR_BYTES, acceptedAvatarMimeTypes } from "@/domain/profile";
-import type { StoreLocation } from "@/domain/models";
 import { browserSessionService } from "@/services/browser-session";
 import { Button, Checkbox, Dialog, Field } from "@/components/ui";
 import { ClientBottomNav } from "./ClientBottomNav";
@@ -43,6 +43,7 @@ import styles from "./ProfileScreen.module.css";
 interface ProfileScreenProps {
   initialDashboard: ClientProfileDashboard;
   stores: readonly StoreLocation[];
+  catalogProducts: readonly Product[];
 }
 
 type DialogName = "edit" | "order" | "logout" | null;
@@ -123,7 +124,11 @@ function OrderRow({
   );
 }
 
-export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) {
+export function ProfileScreen({
+  initialDashboard,
+  stores,
+  catalogProducts,
+}: ProfileScreenProps) {
   const router = useRouter();
   const { addItems } = useClientCart();
   const [profile, setProfile] = useState(initialDashboard.profile);
@@ -318,7 +323,11 @@ export function ProfileScreen({ initialDashboard, stores }: ProfileScreenProps) 
 
   async function reorder() {
     if (!detail) return;
-    const result = buildProfileReorder(detail, products, MAX_QUANTITY_PER_CART_LINE);
+    const result = buildProfileReorder(
+      detail,
+      catalogProducts,
+      MAX_QUANTITY_PER_CART_LINE,
+    );
     if (result.items.length === 0) {
       setDetailMessage("Ningún producto de este pedido está disponible actualmente.");
       return;

@@ -59,12 +59,20 @@
   white-space: nowrap;
 }
 
-.roleButton > span {
+.statusDot {
   width: 0.7rem;
   height: 0.7rem;
   flex: 0 0 auto;
   border-radius: var(--radius-pill);
   background: var(--color-surface);
+}
+
+.accountName {
+  min-width: 0;
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (max-width: 359px) {
@@ -77,7 +85,45 @@
   }
 
   .roleButton {
+    max-width: 10.5rem;
     padding-inline: var(--space-3);
     font-size: var(--font-size-xs);
+  }
+
+  .accountName {
+    max-width: 7.5rem;
+  }
+}
+
+@media (min-width: 37.5rem) {
+  .headerInner {
+    padding-inline: clamp(1.5rem, 4vw, 3rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  .header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: var(--layer-sticky);
+    width: auto;
+    color: var(--color-text);
+    background: transparent;
+    pointer-events: none;
+  }
+
+  .headerInner {
+    min-height: 0;
+    justify-content: flex-end;
+    padding: 1.5rem clamp(1.5rem, 4vw, 3rem) 0 0;
+  }
+
+  .brand {
+    display: none;
+  }
+
+  .roleButton {
+    pointer-events: auto;
   }
 }

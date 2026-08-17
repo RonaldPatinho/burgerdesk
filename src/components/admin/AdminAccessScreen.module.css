@@ -217,3 +217,72 @@
     box-shadow: var(--shadow-raised);
   }
 }
+
+@media (min-width: 37.5rem) {
+  .headerInner {
+    max-width: 72rem;
+    padding-inline: clamp(1.5rem, 4vw, 3rem);
+  }
+
+  .main {
+    max-width: 38rem;
+    padding-inline: clamp(1.5rem, 4vw, 3rem);
+  }
+}
+
+@media (min-width: 64rem) {
+  .page {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 13.5rem minmax(0, 1fr);
+    align-items: stretch;
+    background: var(--color-surface);
+  }
+
+  .header {
+    grid-column: 1;
+    grid-row: 1;
+    min-height: 100dvh;
+    align-self: stretch;
+  }
+
+  .headerInner {
+    min-height: auto;
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    align-items: flex-start;
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .main {
+    grid-column: 2;
+    grid-row: 1;
+    min-height: 100dvh;
+    max-width: 72rem;
+    margin-inline: auto;
+    grid-template-columns: minmax(16rem, 1fr) minmax(24rem, 28rem);
+    grid-template-rows: auto auto;
+    align-content: center;
+    column-gap: clamp(3rem, 7vw, 6rem);
+    padding-inline: clamp(2rem, 4vw, 4rem);
+    box-shadow: none;
+  }
+
+  .heading {
+    align-self: end;
+  }
+
+  .heading h1 {
+    font-size: 3.25rem;
+  }
+
+  .accessCard {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+  }
+
+  .securityNotice {
+    grid-column: 1;
+  }
+}

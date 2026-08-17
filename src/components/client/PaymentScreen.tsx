@@ -41,6 +41,10 @@ export interface PaymentScreenProps {
   products: readonly Product[];
   pickupStore: StoreLocation | null;
   returnState: "cancelado" | "expirado" | "fallido" | null;
+  checkoutAvailability: {
+    state: "available" | "closed" | "unavailable";
+    onlinePaymentsEnabled: boolean;
+  };
 }
 
 type CashChoice = "exact" | "change" | null;
@@ -95,11 +99,14 @@ export function PaymentScreen({
   products,
   pickupStore,
   returnState,
+  checkoutAvailability,
 }: PaymentScreenProps) {
   const { cart, status } = useClientCart();
   const [session, setSession] = useState<ClientSession | null | undefined>();
   const [paymentMethod, setPaymentMethod] =
-    useState<BrowserCheckoutPaymentMethod>("stripe");
+    useState<BrowserCheckoutPaymentMethod>(() =>
+      checkoutAvailability.onlinePaymentsEnabled ? "stripe" : "efectivo",
+    );
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [cashDialogOpen, setCashDialogOpen] = useState(false);
   const [cashChoice, setCashChoice] = useState<CashChoice>(null);
@@ -160,6 +167,18 @@ export function PaymentScreen({
 
   async function createOrder(method: BrowserCheckoutPaymentMethod) {
     if (submittingRef.current || !pricingResult.pricing || !pickupStore) return;
+    if (checkoutAvailability.state !== "available") {
+      setError(
+        checkoutAvailability.state === "closed"
+          ? "El local no está recibiendo pedidos en este momento."
+          : "No pudimos confirmar la disponibilidad del local.",
+      );
+      return;
+    }
+    if (method === "stripe" && !checkoutAvailability.onlinePaymentsEnabled) {
+      setError("El pago en línea no está disponible. Puedes pagar en efectivo.");
+      return;
+    }
     if (!termsAccepted) {
       setError("Debes aceptar los términos antes de continuar.");
       termsRef.current?.focus();
@@ -311,6 +330,31 @@ export function PaymentScreen({
           />
         ) : null}
 
+        {checkoutAvailability.state !== "available" ? (
+          <Feedback
+            variant="warning"
+            title={
+              checkoutAvailability.state === "closed"
+                ? "Servicio cerrado"
+                : "Pedidos temporalmente no disponibles"
+            }
+            description={
+              checkoutAvailability.state === "closed"
+                ? "Puedes consultar tu pedido, pero el local no está recibiendo pedidos nuevos."
+                : "No pudimos confirmar la configuración del local. Intenta nuevamente más tarde."
+            }
+          />
+        ) : null}
+
+        {checkoutAvailability.state === "available" &&
+        !checkoutAvailability.onlinePaymentsEnabled ? (
+          <Feedback
+            variant="warning"
+            title="Pago en línea no disponible"
+            description="Puedes completar este pedido pagando en efectivo al retirar."
+          />
+        ) : null}
+
         {status === "loading" || session === undefined ? (
           <Feedback
             variant="loading"
@@ -428,12 +472,17 @@ export function PaymentScreen({
 
               <fieldset className={styles.methods} disabled={submitting}>
                 <legend>Método de pago</legend>
-                <label className={styles.method} data-selected={paymentMethod === "stripe"}>
+                <label
+                  className={styles.method}
+                  data-selected={paymentMethod === "stripe"}
+                  data-disabled={!checkoutAvailability.onlinePaymentsEnabled || undefined}
+                >
                   <input
                     type="radio"
                     name="payment-method"
                     value="stripe"
                     checked={paymentMethod === "stripe"}
+                    disabled={!checkoutAvailability.onlinePaymentsEnabled}
                     onChange={() => setPaymentMethod("stripe")}
                   />
                   <span className={styles.methodIcon}>
@@ -546,6 +595,7 @@ export function PaymentScreen({
                 loadingLabel="Preparando pedido"
                 disabled={
                   !pricingResult.pricing || !pickupStore || session === null
+                  || checkoutAvailability.state !== "available"
                 }
                 leadingIcon={paymentMethod === "stripe" ? <LockKeyhole /> : <Banknote />}
                 onClick={handlePrimaryAction}

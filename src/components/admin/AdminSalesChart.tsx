@@ -72,9 +72,21 @@ function xLabelIndexes(length: number): number[] {
 export function AdminSalesChart({
   series,
   variationPercent,
+  heading = "Ventas de hoy",
+  headerValue,
+  accessibleTitle = "Ventas pagadas de hoy",
+  description = "Serie horaria de ventas pagadas. Los pedidos en efectivo pendientes no se suman.",
+  emptyMessage = "Aún no hay ventas pagadas hoy.",
+  xAxisKind = "hour",
 }: {
   series: readonly AdministratorSalesSeriesPoint[];
   variationPercent: number | null;
+  heading?: string;
+  headerValue?: string;
+  accessibleTitle?: string;
+  description?: string;
+  emptyMessage?: string;
+  xAxisKind?: "hour" | "day";
 }) {
   const { points, maximum } = chartPoints(series);
   const linePath = smoothPath(points);
@@ -85,8 +97,9 @@ export function AdminSalesChart({
     : "";
   const lastPaidPoint = [...points].reverse().find((point) => point.source.salesCop > 0);
   const variationLabel = administratorDashboardVariationLabel(variationPercent);
-  const variationTone =
-    variationPercent === null
+  const variationTone = headerValue
+    ? "value"
+    : variationPercent === null
       ? "neutral"
       : variationPercent < 0
         ? "negative"
@@ -97,9 +110,9 @@ export function AdminSalesChart({
   return (
     <section className={styles.chartCard} aria-labelledby="admin-sales-chart-heading">
       <header className={styles.chartHeader}>
-        <h2 id="admin-sales-chart-heading">Ventas de hoy</h2>
+        <h2 id="admin-sales-chart-heading">{heading}</h2>
         <span className={styles.variation} data-tone={variationTone}>
-          {variationLabel}
+          {headerValue ?? variationLabel}
         </span>
       </header>
 
@@ -111,10 +124,8 @@ export function AdminSalesChart({
           aria-labelledby="admin-sales-chart-title admin-sales-chart-description"
           preserveAspectRatio="none"
         >
-          <title id="admin-sales-chart-title">Ventas pagadas de hoy</title>
-          <desc id="admin-sales-chart-description">
-            Serie horaria de ventas pagadas. Los pedidos en efectivo pendientes no se suman.
-          </desc>
+          <title id="admin-sales-chart-title">{accessibleTitle}</title>
+          <desc id="admin-sales-chart-description">{description}</desc>
 
           {yLevels.map((ratio) => {
             const y = PLOT_BOTTOM - (PLOT_BOTTOM - PLOT_TOP) * ratio;
@@ -161,10 +172,11 @@ export function AdminSalesChart({
           {labelIndexes.map((index) => {
             const point = points[index];
             if (!point) return null;
-            const hour = Number(point.source.label.slice(0, 2));
-            const label = Number.isFinite(hour)
-              ? `${String(hour).padStart(2, "0")}h`
-              : point.source.label;
+            const numericLabel = Number(point.source.label.slice(0, 2));
+            const label =
+              xAxisKind === "hour" && Number.isFinite(numericLabel)
+                ? `${String(numericLabel).padStart(2, "0")}h`
+                : point.source.label;
             return (
               <text
                 key={`label-${point.source.key}`}
@@ -201,7 +213,7 @@ export function AdminSalesChart({
         </svg>
 
         {maximum === 0 ? (
-          <p className={styles.emptyChartMessage}>Aún no hay ventas pagadas hoy.</p>
+          <p className={styles.emptyChartMessage}>{emptyMessage}</p>
         ) : null}
       </div>
 

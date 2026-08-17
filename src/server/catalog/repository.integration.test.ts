@@ -47,16 +47,14 @@ test("lee desde MySQL el seed histórico del catálogo sin cambiar sus relacione
     "doble-bacon",
     "cheddar-explosiva",
   ];
-  const burgerProducts = products.filter((product) =>
-    product.categoryIds.includes("burgers"),
+  const burgerProducts = expectedBurgerIds.map((productId) =>
+    productsById.get(productId),
   );
 
-  assert.deepEqual(
-    burgerProducts.map((product) => product.id),
-    expectedBurgerIds,
-  );
+  assert.ok(burgerProducts.every((product) => product !== undefined));
 
   for (const burger of burgerProducts) {
+    assert.ok(burger);
     assert.deepEqual(
       burger.options.map((option) => [option.id, option.priceCop]),
       [

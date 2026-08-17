@@ -14,7 +14,12 @@
   backdrop-filter: blur(0.75rem);
 }
 
-.list {
+.desktopBrand,
+.desktopList {
+  display: none;
+}
+
+.mobileList {
   min-height: 4rem;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -22,7 +27,8 @@
   padding: 0.25rem;
 }
 
-.list li {
+.mobileList li,
+.desktopList li {
   min-width: 0;
 }
 
@@ -38,6 +44,12 @@
   padding: 0.2rem;
   font-size: 0.68rem;
   text-align: center;
+}
+
+.itemButton {
+  border: 0;
+  color: inherit;
+  background: transparent;
 }
 
 .item[data-active] {
@@ -57,11 +69,6 @@
   background: var(--color-danger);
 }
 
-.item[data-disabled] {
-  cursor: not-allowed;
-  opacity: 0.82;
-}
-
 .icon {
   width: 1.45rem;
   height: 1.45rem;
@@ -72,6 +79,35 @@
   height: 100%;
 }
 
+.moreMenu {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.moreLink {
+  min-height: 3.75rem;
+  display: grid;
+  grid-template-columns: 1.5rem minmax(0, 1fr);
+  align-items: center;
+  gap: var(--space-3);
+  border: 0.0625rem solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  font-weight: 700;
+}
+
+.moreLink[data-active] {
+  color: var(--color-surface);
+  border-color: var(--color-brand-primary);
+  background: var(--color-brand-primary);
+}
+
+.moreLink > span:first-child,
+.moreLink svg {
+  width: 1.4rem;
+  height: 1.4rem;
+}
+
 @media (max-width: 359px) {
   .item {
     font-size: 0.6rem;
@@ -80,5 +116,104 @@
   .icon {
     width: 1.3rem;
     height: 1.3rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  .nav {
+    position: sticky;
+    top: 0;
+    bottom: auto;
+    align-self: stretch;
+    height: 100dvh;
+    min-height: 100dvh;
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    border-top: 0;
+    border-right: 0.0625rem solid
+      color-mix(in srgb, var(--color-surface) 12%, transparent);
+    padding: var(--space-6) var(--space-3);
+    color: var(--color-surface);
+    background: var(--color-text);
+    backdrop-filter: none;
+  }
+
+  .desktopBrand {
+    min-height: 3.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3);
+    align-self: flex-start;
+    border-radius: var(--radius-md);
+    padding-inline: var(--space-2);
+  }
+
+  .logoFrame {
+    width: 3rem;
+    height: 3rem;
+    flex: 0 0 auto;
+    display: grid;
+    place-items: center;
+    border-radius: var(--radius-pill);
+    padding: 0.1875rem;
+    background: var(--color-surface);
+  }
+
+  .logoFrame img {
+    width: 100%;
+    height: auto;
+  }
+
+  .wordmark {
+    display: grid;
+    font-size: 1.25rem;
+    line-height: 0.82;
+    letter-spacing: -0.025em;
+  }
+
+  .mobileList {
+    display: none;
+  }
+
+  .desktopList {
+    min-height: 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-content: start;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+  }
+
+  .item {
+    min-height: 3.25rem;
+    grid-template-columns: 1.45rem minmax(0, 1fr);
+    place-items: center start;
+    align-content: center;
+    gap: var(--space-3);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2) var(--space-3);
+    color: color-mix(
+      in srgb,
+      var(--color-surface) 84%,
+      transparent
+    );
+    font-size: var(--font-size-sm);
+    text-align: left;
+  }
+
+  .item[data-active] {
+    color: var(--color-surface);
+    background: var(--color-brand-primary);
+  }
+
+  .item[data-active]::after {
+    left: -0.45rem;
+    bottom: 50%;
+    width: 0.35rem;
+    height: 1.5rem;
+    transform: translateY(50%);
   }
 }

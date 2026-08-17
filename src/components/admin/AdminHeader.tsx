@@ -37,8 +37,8 @@ export function AdminHeader({ fullName }: { fullName: string }) {
             title={fullName}
             onClick={() => setLogoutOpen(true)}
           >
-            <span aria-hidden="true" />
-            Administrador
+            <span className={styles.statusDot} aria-hidden="true" />
+            <span className={styles.accountName}>{fullName}</span>
           </button>
         </div>
       </header>

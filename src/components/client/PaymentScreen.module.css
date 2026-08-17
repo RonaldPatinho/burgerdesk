@@ -83,6 +83,11 @@
   background: var(--color-surface-cream);
 }
 
+.method[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
 .method input {
   position: absolute;
   width: 1px;

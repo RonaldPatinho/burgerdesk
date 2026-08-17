@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Button, Dialog } from "@/components/ui";
-import { products } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
 import {
   isOperationalOrderStatus,
@@ -75,10 +74,6 @@ function historyTimeLabel(isoDate: string): string {
     minute: "2-digit",
     timeZone: "America/Bogota",
   }).format(date);
-}
-
-function productImagePath(productId: string): string | null {
-  return products.find((product) => product.id === productId)?.imagePath ?? null;
 }
 
 function optionsLabel(
@@ -244,7 +239,7 @@ export function StaffOrderDetail({ initialOrder }: StaffOrderDetailProps) {
         <h2 id="productos-pedido">Productos</h2>
         <div className={styles.productList}>
           {order.lines.map((line) => {
-            const imagePath = productImagePath(line.productId);
+            const imagePath = line.imagePath;
             return (
               <article key={line.id} className={styles.productCard}>
                 <div className={styles.productImageFrame}>

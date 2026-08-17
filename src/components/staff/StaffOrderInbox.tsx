@@ -17,7 +17,6 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui";
-import { products } from "@/data/provisional";
 import { formatCop } from "@/domain/currency";
 import {
   filterStaffOrders,
@@ -35,6 +34,7 @@ interface StaffOrderInboxProps {
   staffName: string;
   initialSnapshot: StaffOrderInboxSnapshot;
   initialError?: string | null;
+  automaticRefreshEnabled: boolean;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -56,6 +56,8 @@ function isInboxItem(value: unknown): value is StaffOrderInboxItem {
     (typeof value.firstProductId === "string" || value.firstProductId === null) &&
     (typeof value.firstProductName === "string" ||
       value.firstProductName === null) &&
+    (typeof value.firstProductImagePath === "string" ||
+      value.firstProductImagePath === null) &&
     value.fulfillmentLabel === "Retiro"
   );
 }
@@ -87,11 +89,6 @@ function timeLabel(isoDate: string): string {
 function itemSummary(order: StaffOrderInboxItem): string {
   const count = order.itemCount;
   return `${count} ${count === 1 ? "producto" : "productos"} · ${order.fulfillmentLabel}`;
-}
-
-function productImagePath(productId: string | null): string | null {
-  if (!productId) return null;
-  return products.find((product) => product.id === productId)?.imagePath ?? null;
 }
 
 function emptyCopy(filter: StaffInboxFilter): {
@@ -128,6 +125,7 @@ export function StaffOrderInbox({
   staffName,
   initialSnapshot,
   initialError = null,
+  automaticRefreshEnabled,
 }: StaffOrderInboxProps) {
   const router = useRouter();
   const [snapshot, setSnapshot] = useState(initialSnapshot);
@@ -213,6 +211,11 @@ export function StaffOrderInbox({
   );
 
   useEffect(() => {
+    if (!automaticRefreshEnabled) {
+      requestControllerRef.current?.abort();
+      return;
+    }
+
     function refreshWhenVisible() {
       if (document.visibilityState === "visible") {
         void refresh();
@@ -238,7 +241,7 @@ export function StaffOrderInbox({
       window.removeEventListener("focus", refreshOnFocus);
       requestControllerRef.current?.abort();
     };
-  }, [refresh]);
+  }, [automaticRefreshEnabled, refresh]);
 
   const visibleOrders = useMemo(
     () => filterStaffOrders(snapshot.orders, filter),
@@ -256,7 +259,11 @@ export function StaffOrderInbox({
       <header className={styles.header}>
         <div className={styles.heading}>
           <h1>Bandeja de pedidos</h1>
-          <p>Panel en tiempo real</p>
+          <p>
+            {automaticRefreshEnabled
+              ? "Panel en tiempo real"
+              : "Actualización manual"}
+          </p>
         </div>
 
         <div className={styles.profileCard}>
@@ -320,7 +327,7 @@ export function StaffOrderInbox({
           {visibleOrders.length > 0 ? (
             <div className={styles.orderList}>
               {visibleOrders.map((order) => {
-                const imagePath = productImagePath(order.firstProductId);
+                const imagePath = order.firstProductImagePath;
                 const statusLabel = staffOrderStatusLabel(
                   order.operationalStatus,
                 );
@@ -406,7 +413,9 @@ export function StaffOrderInbox({
                   <p>
                     {syncing
                       ? "Sincronizando la bandeja…"
-                      : "La bandeja se mantiene sincronizada."}
+                      : automaticRefreshEnabled
+                        ? "La bandeja se mantiene sincronizada."
+                        : "Los avisos automáticos están desactivados. Usa Actualizar bandeja."}
                   </p>
                 </div>
               </section>

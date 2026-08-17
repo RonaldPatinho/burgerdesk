@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { PaymentScreen } from "@/components/client/PaymentScreen";
+import { getBusinessSettings } from "@/server/business-settings/repository";
 import { catalogService } from "@/services/catalog";
 
 export const metadata: Metadata = {
@@ -13,10 +14,11 @@ export interface PaymentPageProps {
 }
 
 export default async function PaymentPage({ searchParams }: PaymentPageProps) {
-  const [{ estado }, products, stores] = await Promise.all([
+  const [{ estado }, products, stores, businessSettings] = await Promise.all([
     searchParams,
     catalogService.listProducts(),
     catalogService.listStores(),
+    getBusinessSettings().catch(() => null),
   ]);
   const returnState =
     estado === "cancelado" || estado === "expirado" || estado === "fallido"
@@ -28,6 +30,22 @@ export default async function PaymentPage({ searchParams }: PaymentPageProps) {
       products={products}
       pickupStore={stores[0] ?? null}
       returnState={returnState}
+      checkoutAvailability={
+        !businessSettings || !businessSettings.digitalMenuEnabled
+          ? {
+              state: "unavailable",
+              onlinePaymentsEnabled: false,
+            }
+          : businessSettings.serviceStatus === "closed"
+            ? {
+                state: "closed",
+                onlinePaymentsEnabled: businessSettings.onlinePaymentsEnabled,
+              }
+            : {
+                state: "available",
+                onlinePaymentsEnabled: businessSettings.onlinePaymentsEnabled,
+              }
+      }
     />
   );
 }

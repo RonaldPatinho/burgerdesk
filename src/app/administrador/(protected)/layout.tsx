@@ -22,6 +22,7 @@ export default async function AdministratorProtectedLayout({
       <AdminHeader fullName={session.fullName} />
       {children}
       <AdminBottomNav />
+      <div className={styles.desktopRail} aria-hidden="true" />
     </div>
   );
 }

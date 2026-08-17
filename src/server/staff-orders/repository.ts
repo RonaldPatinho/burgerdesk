@@ -32,6 +32,7 @@ interface StaffInboxRow extends RowDataPacket {
   item_count: number | string;
   first_product_id: string | null;
   first_product_name: string | null;
+  first_product_image_path: string | null;
 }
 
 interface StaffOrderDetailRow extends RowDataPacket {
@@ -58,6 +59,7 @@ interface StaffOrderLineRow extends RowDataPacket {
   id: string;
   product_id: string;
   product_name: string;
+  image_path: string | null;
   quantity: number | string;
   unit_price_cop: number | string;
   line_total_cop: number | string;
@@ -126,6 +128,7 @@ function mapInboxRow(row: StaffInboxRow): StaffOrderInboxItem {
     itemCount: safeNonNegativeInteger(row.item_count, "item_count"),
     firstProductId: row.first_product_id,
     firstProductName: row.first_product_name,
+    firstProductImagePath: row.first_product_image_path,
     fulfillmentLabel: "Retiro",
   };
 }
@@ -184,11 +187,17 @@ async function loadStaffOrderDetail(
 
   const [lineRows] = await executor.execute<StaffOrderLineRow[]>(
     `SELECT
-       id, product_id, product_name, quantity,
-       unit_price_cop, line_total_cop
-     FROM order_lines
-     WHERE order_id = ?
-     ORDER BY line_position`,
+       order_line.id,
+       order_line.product_id,
+       order_line.product_name,
+       product.image_path,
+       order_line.quantity,
+       order_line.unit_price_cop,
+       order_line.line_total_cop
+     FROM order_lines order_line
+     LEFT JOIN catalog_products product ON product.id = order_line.product_id
+     WHERE order_line.order_id = ?
+     ORDER BY order_line.line_position`,
     [orderId],
   );
 
@@ -232,6 +241,7 @@ async function loadStaffOrderDetail(
     id: line.id,
     productId: line.product_id,
     productName: line.product_name,
+    imagePath: line.image_path,
     quantity: safeNonNegativeInteger(line.quantity, "quantity"),
     unitPriceCop: safeNonNegativeInteger(
       line.unit_price_cop,
@@ -288,7 +298,13 @@ export async function getStaffOrderInboxSnapshot(): Promise<StaffOrderInboxSnaps
         FROM order_lines first_line
         WHERE first_line.order_id = o.id
         ORDER BY first_line.line_position
-        LIMIT 1) AS first_product_name
+        LIMIT 1) AS first_product_name,
+       (SELECT product.image_path
+        FROM order_lines first_line
+        LEFT JOIN catalog_products product ON product.id = first_line.product_id
+        WHERE first_line.order_id = o.id
+        ORDER BY first_line.line_position
+        LIMIT 1) AS first_product_image_path
      FROM orders o
      WHERE o.order_status = 'confirmado'
        AND o.operational_status IN (
